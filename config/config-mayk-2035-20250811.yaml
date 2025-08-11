@@ -2,191 +2,301 @@
 # High-performance settings: 32 threads, 70GB RAM, HiGHS solver
 
 # Enable transmission projects for complete simulation
-transmission_projects:
-  enable: true
-  include:
-    tyndp2020: true
-    nep: true
-    manual: true
-  status:
-  - under_construction
-  - in_permitting
-  - confirmed
+transmission_projects:  # Section for configuring transmission network expansion projects
+  enable: true          # Master switch to enable/disable transmission project processing
+  include:              # Specify which types of transmission projects to include
+    tyndp2020: true     # Tyndp2020 is the transmission network expansion plan for 2020
+    nep: true           # NEP is the new energy plan for 2035
+    manual: true        # Manual is the manual transmission network expansion plan for 2035
+  status:               # List of project statuses to include in the simulation
+  - under_construction  # Include projects currently being built
+  - in_permitting      # Include projects in the permitting phase
+  - confirmed          # Include projects that are confirmed but not yet started
 
 # High-performance solver settings using HiGHS
-solving:
-  solver:
-    name: highs
-    options: highs-highperf
+solving:                # Configuration for the optimization solver
+  solver:               # Solver selection and configuration
+    name: highs         # Use HiGHS solver (high-performance open-source solver)
+    options: highs-highperf  # Reference to custom solver options defined below
   
-  solver_options:
-    highs-highperf:
-      threads: 32
-      solver: "ipm"
-      run_crossover: "off"
-      small_matrix_value: 1e-6
-      large_matrix_value: 1e9
-      primal_feasibility_tolerance: 1e-5
-      dual_feasibility_tolerance: 1e-5
-      ipm_optimality_tolerance: 1e-4
-      parallel: "on"
-      random_seed: 123    # this makes sure to use same random numbers every time script is run
+  solver_options:       # Custom solver parameter configurations
+    highs-highperf:     # Named configuration set for high-performance settings
+      threads: 16       # Number of parallel threads for the solver
+      solver: "ipm"     # Use Interior Point Method (IPM) algorithm
+      run_crossover: "off"  # Disable crossover for faster solving
+      small_matrix_value: 1e-6  # Minimum threshold for matrix values
+      large_matrix_value: 1e9   # Maximum threshold for matrix values
+      primal_feasibility_tolerance: 1e-5  # Tolerance for primal feasibility
+      dual_feasibility_tolerance: 1e-5    # Tolerance for dual feasibility
+      ipm_optimality_tolerance: 1e-4      # Tolerance for optimality in IPM
+      parallel: "on"    # Enable parallel processing
+      random_seed: 123  # this makes sure to use same random numbers every time script is run
   
-  # Set memory limit to 70GB (in MB)
-  mem_mb: 71680
+  # Set memory limit to
+  mem_mb: 65000         # Memory limit in megabytes
   
   # Additional solving options for full simulation
-  options:
+  options:               # General solving behavior options
     clip_p_max_pu: 1.e-2   # Ensures that any per-unit generation capacity values (p_max_pu) smaller than 1×10⁻² are clipped (set to that minimum).
-    load_shedding: false # If true, PyPSA would allow demand to be unmet at a high penalty cost; here, the model must meet all demand.
+    load_shedding: false    # If true, PyPSA would allow demand to be unmet at a high penalty cost; here, the model must meet all demand.
     curtailment_mode: false # If true, the simulation focuses on curtailment analysis rather than cost-optimal dispatch.
-    noisy_costs: true # Adds small random noise to technology costs to break symmetry. Useful to prevent the solver from splitting capacity equally among identical assets in different buses just because they have exactly equal costs.
-    skip_iterations: true # PyPSA-Eur often solves iteratively (e.g., adjusting transmission expansion, capacity factors, or other variables between runs).
-    rolling_horizon: false # If true, the model would solve smaller time windows sequentially (mimicking operational foresight limits).
-    seed: 123 # Random number seed for reproducibility when using stochastic elements (e.g., noisy_costs).
+    noisy_costs: true       # Adds small random noise to technology costs to break symmetry. Useful to prevent the solver from splitting capacity equally among identical assets in different buses just because they have exactly equal costs.
+    skip_iterations: true   # PyPSA-Eur often solves iteratively (e.g., adjusting transmission expansion, capacity factors, or other variables between runs).
+    rolling_horizon: false  # If true, the model would solve smaller time windows sequentially (mimicking operational foresight limits).
+    seed: 123               # Random number seed for reproducibility when using stochastic elements (e.g., noisy_costs).
     track_iterations: false # If true, stores intermediate results from iterative solves.
-    min_iterations: 2
-    max_iterations: 6
-    transmission_losses: 2 # 2 means each transmission line has a 2% loss factor applied to power flow.
-    linearized_unit_commitment: true # Uses a linear approximation to unit commitment (on/off behaviour of generators) instead of full MILP.
-    horizon: 365 # Number of days in the optimisation horizon.
+    min_iterations: 2       # Minimum number of iterations to perform
+    max_iterations: 6       # Maximum number of iterations to perform
+    transmission_losses: 2  # 2 means each transmission line has a 2% loss factor applied to High voltage grid power flow.
+    linearized_unit_commitment: true  # Uses a linear approximation to unit commitment (on/off behaviour of generators) instead of full MILP.
+    horizon: 365            # Number of days in the optimisation horizon.
 
 # High-performance Atlite settings for 2019 weather data
-atlite:
-  nprocesses: 32
-  cutout_directory: cutouts
-  default_cutout: europe-2019-sarah3-era5
-  show_progress: true # Suppresses progress bars when generating cutouts — useful in batch runs or when running in logging environments.
-  cutouts:
-    europe-2019-sarah3-era5:
-      module: [sarah, era5]
-      x: [5., 16.]  # Focus on Germany coordinates
-      y: [47., 56.]
-      dx: 0.3
-      dy: 0.3
-      time: ['2019', '2019']
+atlite:                  # Configuration for weather data processing library
+  nprocesses: 16         # Number of parallel processes for data processing
+  cutout_directory: cutouts  # Directory to store processed weather data
+  default_cutout: europe-2019-sarah3-era5  # Default weather dataset to use
+  show_progress: true    # Suppresses progress bars when generating cutouts — useful in batch runs or when running in logging environments.
+  cutouts:               # Specific weather dataset configurations
+    europe-2019-sarah3-era5:  # Named dataset configuration
+      module: [sarah, era5]   # Use SARAH3 and ERA5 data sources
+      x: [5., 16.]            # Focus on Germany coordinates (longitude range)
+      y: [47., 56.]           # Focus on Germany coordinates (latitude range)
+      dx: 0.3                 # Grid resolution in longitude (degrees)
+      dy: 0.3                 # Grid resolution in latitude (degrees)
+      time: ['2019', '2019']  # Time period for weather data
 
 # Complete scenario setup
-scenario:
-  clusters:
-  - 25  # Reduced resolution to fit memory constraints
-  opts:
-  - ''  # Empty string here means “no extra power-sector options” — basically a baseline ru
-  sector_opts:
-  - ''  # Empty means pure electricity-only model with no additional sector coupling.
-  planning_horizons:
-  - 2035
+scenario:                # Configuration for different simulation scenarios
+  clusters:              # List of clustering resolutions to test
+  - 10                   # Reduced resolution to fit memory constraints
+  opts:                  # Power sector options for each scenario
+  - ''                   # Empty string here means "no extra power-sector options" — basically a baseline run
+  sector_opts:           # Sector coupling options for each scenario
+  - ''                   # Empty means pure electricity-only model with no additional sector coupling.
+  planning_horizons:     # Future years to simulate
+  - 2035                 # Target year for the energy transition
 
 # Germany only
-countries:
-- DE
+countries:               # List of countries to include in the simulation
+- DE                     # Germany country code
 
 # Representative periods instead of full year to reduce memory usage
-snapshots:
-  start: "2019-01-01"
-  end: "2019-02-01"
-  inclusive: 'left'
+snapshots:               # Time period configuration for the simulation
+  start: "2019-01-01"    # Start date for the simulation period
+  end: "2019-12-31"      # End date for the simulation period
+  inclusive: 'left'      # Whether to include the end date in the simulation
 
 # Enable necessary data retrieval for complete simulation
-enable:
-  retrieve: auto
-  retrieve_databundle: true
-  retrieve_cost_data: false   # This ensures you have the most recent cost assumptions for generators, storage, and transmission.
-  build_cutout: false
-  retrieve_cutout: true
-  drop_leap_day: true         # Removes February 29 from the time series.
+enable:                  # Master switches for different data processing steps
+  retrieve: auto         # Automatically determine what data to retrieve
+  retrieve_databundle: true    # Download the main data bundle
+  retrieve_cost_data: false    # This ensures you have the most recent cost assumptions for generators, storage, and transmission.
+  build_cutout: false          # Don't build weather data from scratch
+  retrieve_cutout: true        # Download pre-built weather data
+  drop_leap_day: true          # Removes February 29 from the time series.
+
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#co2-budget
+co2_budget:
+  2020: 0.701
+  2025: 0.524
+  2030: 0.297
+  2035: 0.000 # set to 0 in 2035 for analyzing purposes, original target was: 0.150 
+  2040: 0.000 # 0.071
+  2045: 0.000 # 0.032
+  2050: 0.000
+
+
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#electricity
+electricity:
+  voltages: [220., 300., 330., 380., 400., 500., 750.]
+  base_network: osm-prebuilt
+  osm-prebuilt-version: 0.6
+  gaslimit_enable: false
+  gaslimit: false
+  co2limit_enable: false
+  co2limit: 7.75e+7
+  co2base: 1.487e+9
+
+  operational_reserve:
+    activate: false
+    epsilon_load: 0.02
+    epsilon_vres: 0.02
+    contingency: 4000
+
+  min_hours:
+    iron-air battery: [24] # 24 hours is the minimum storage duration for iron-air battery, preferably 100 hours standard product. longer is always possible due to easier power requirements.
+
+  extendable_carriers:    # Technologies that can be expanded in the optimization
+    Generator: [solar, solar-hsat, onwind, offwind-ac, offwind-dc, offwind-float, OCGT, CCGT]  # Generators that can be built
+    StorageUnit: [LFP, H2, Iron-Air]  # Storage units that can be built
+    Store: [LFP, H2, Iron-Air]        # Energy stores that can be built
+    Link: [H2 pipeline]         # Transmission links that can be built
+
+  powerplants_filter: (DateOut >= 2023 or DateOut != DateOut) and not (Country == 'Germany' and Fueltype == 'Nuclear')
+  custom_powerplants: false
+  everywhere_powerplants: []
+
+  conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
+  renewable_carriers: [solar, solar-hsat, onwind, offwind-ac, offwind-dc, offwind-float, hydro]
+
+
+  estimate_renewable_capacities:
+    enable: true
+    from_opsd: true
+    year: 2020
+    expansion_limit: false
+    technology_mapping:
+      Offshore: [offwind-ac, offwind-dc, offwind-float]
+      Onshore: [onwind]
+      PV: [solar]
+
+  autarky:
+    enable: false
+    by_country: false
+
+
+
 
 # Enable all major sectors for complete simulation
-sector:
+sector:                  # Configuration for different energy sectors
   transport: true
   heating: true
-  biomass: true
-  industry: true
-  shipping: true
-  aviation: true
-  agriculture: true
+  biomass: false
+  industry: false
+  shipping: false
+  aviation: false
+  agriculture: false
   fossil_fuels: true
   
   # District heating settings
-  district_heating:
-    potential: 0.6
-    progress:
-      2020: 0.0
-      2025: 0.1
-      2030: 0.25
-      2035: 0.4
-      2040: 0.55
-      2045: 0.75
-      2050: 1.0
-    district_heating_loss: 0.15
+  district_heating:      # Configuration for district heating systems
+    potential: 0.6       # Maximum potential share of district heating
+    progress:             # Yearly progress targets for district heating deployment
+      2020: 0.0          # Starting point in 2020
+      2025: 0.1          # 10% target by 2025
+      2030: 0.25         # 25% target by 2030
+      2035: 0.4          # 40% target by 2035
+      2040: 0.55         # 55% target by 2040
+      2045: 0.75         # 75% target by 2045
+      2050: 1.0          # Full potential by 2050
+    district_heating_loss: 0.15  # 15% loss in district heating networks
   
   # Enable key technologies
-  hydrogen_fuel_cell: true
-  hydrogen_turbine: true
-  SMR: true
-  SMR_cc: true
-  dac: true
-  co2_network: true
-  H2_network: true
-  gas_network: true
+  hydrogen_fuel_cell: true   # Enable hydrogen fuel cell technology
+  hydrogen_turbine: true     # Enable hydrogen turbine technology
+  SMR: true                  # Enable Steam Methane Reforming
+  SMR_cc: true              # Enable Steam Methane Reforming with Carbon Capture
+  dac: true                  # Enable Direct Air Capture of CO2
+  co2_network: true          # Enable CO2 transport network
+  H2_network: true           # Enable hydrogen transport network
+  gas_network: true          # Enable natural gas transport network
 
 # Complete biomass configuration
-biomass:
-  year: 2035
-  scenario: ENS_Med
-  classes:
-    solid biomass:
-    - Agricultural waste
-    - Fuelwood residues
-    - Secondary Forestry residues - woodchips
-    - Sawdust
-    - Residues from landscape care
-    biogas:
-    - Manure solid, liquid
-    - Sludge
-    municipal solid waste:
-    - Municipal waste
+biomass:                  # Configuration for biomass resources
+  year: 2035              # Target year for biomass availability
+  scenario: ENS_Med        # Medium scenario for biomass estimates
+  classes:                 # Different categories of biomass resources
+    solid biomass:         # Solid biomass resources
+    - Agricultural waste   # Waste from agricultural activities
+    - Fuelwood residues    # Residues from fuelwood production
+    - Secondary Forestry residues - woodchips  # Forestry processing residues
+    - Sawdust             # Sawmill waste products
+    - Residues from landscape care  # Maintenance residues
+    biogas:                # Biogas resources
+    - Manure solid, liquid # Animal waste products
+    - Sludge               # Wastewater treatment sludge
+    municipal solid waste: # Urban waste resources
+    - Municipal waste      # General urban waste
 
 # Enable renewable energy sources
-renewable:
-  onwind:
-    capacity_per_sqkm: 3
-  offwind-ac:
-    capacity_per_sqkm: 2
-  offwind-dc:
-    capacity_per_sqkm: 2
-  solar:
-    capacity_per_sqkm: 5.1
-  hydro:
-    carriers: [ror, PHS, hydro]
+renewable:                # Configuration for renewable energy technologies
+  onwind:                 # Onshore wind power
+    capacity_per_sqkm: 3  # Maximum capacity per square kilometer
+  offwind-ac:             # Offshore wind power (AC connection)
+    capacity_per_sqkm: 2  # Maximum capacity per square kilometer
+  offwind-dc:             # Offshore wind power (DC connection)
+    capacity_per_sqkm: 2  # Maximum capacity per square kilometer
+  solar:                  # Solar photovoltaic power
+    capacity_per_sqkm: 5.1  # Maximum capacity per square kilometer
+  hydro:                  # Hydropower resources
+    carriers: [ror, PHS, hydro]  # Types: run-of-river, pumped hydro storage, conventional hydro
 
-# Enable storage technologies
-electricity:
-  #max_hours:       # This sets the energy-to-power ratio (in hours) for storage units:
-    #battery: 6
-    #H2: 168
-  extendable_carriers:
-    Generator: [solar, solar-hsat, onwind, offwind-ac, offwind-dc, offwind-float, OCGT, CCGT]
-    StorageUnit: [battery, H2]
-    Store: [battery, H2]
-    Link: [H2 pipeline]
+
+
 
 # Use 2019 energy data and consumption profiles
-energy:
-  energy_totals_year: 2019
-  base_emissions_year: 1990
-  emissions: CO2
+energy:                   # Energy system configuration
+  energy_totals_year: 2019  # Base year for energy consumption data
+  base_emissions_year: 1990  # Base year for emissions calculations
+  emissions: CO2            # Greenhouse gas to track
 
 # Load profiles based on 2019
-load:
-  fill_gaps:
-    enable: true
-    interpolate_limit: 3
-    time_shift_for_large_gaps: 1w
-  manual_adjustments: true
+load:                     # Electricity demand configuration
+  fill_gaps:              # How to handle missing data in load profiles
+    enable: true          # Enable gap filling
+    interpolate_limit: 3  # Maximum gap size to interpolate
+    time_shift_for_large_gaps: 1w  # Time shift for large data gaps
+  manual_adjustments: true  # Allow manual adjustments to load data
   scaling_factor: 1.0     # Multiplies the entire load time series by this factor.
   fixed_year: 2019        # Use 2019 consumption patterns
-  supplement_synthetic: true
+  supplement_synthetic: true  # Generate synthetic data when real data is missing
   distribution_key:       # This means richer, more populated regions get proportionally more demand assigned.
-    gdp: 0.6
-    population: 0.4
+    gdp: 0.6              # 60% weight for GDP-based distribution
+    population: 0.4       # 40% weight for population-based distribution
+
+
+
+
+
+
+
+
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#costs
+costs:
+  year: 2035
+  version: 67a5830
+  social_discountrate: 0.02
+  fill_values:
+    FOM: 0
+    VOM: 0
+    efficiency: 1
+    fuel: 0
+    investment: 0
+    lifetime: 25
+    "CO2 intensity": 0
+    "discount rate": 0.05
+  # Marginal and capital costs can be overwritten
+  # capital_cost:
+  #   onwind: 500
+  fuel:
+    OCGT: 38.84 # https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:52022SC0230 (Annex)
+    CCGT: 38.84
+    gas: 38.84
+    coal: 24.57 # https://businessanalytiq.com/procurementanalytics/index/subbituminous-coal-price-index/
+    lignite: 22.11 # https://businessanalytiq.com/procurementanalytics/index/lignite-coal-price-index/
+    nuclear: 1.75 # https://markets.businessinsider.com/commodities/uranium-price
+    uranium: 1.75
+  efficiency:
+    Compressed-Air-Adiabatic-bicharger: 0.7745
+  investment:
+    iron-air battery: 21710  # in EUR/MWh (2020) from 23,500 EUR/MWh (2024)
+    Compressed-Air-Adiabatic-store: 28835  # in EUR/MWh (2020) from 30,000 EUR/MWh (2022)
+    Compressed-Air-Adiabatic-bicharger: 1658016  # in EUR/MW (2020) from 1,725,000 EUR/MW (2022)
+  lifetime:
+    Compressed-Air-Adiabatic-store: 40  # years
+    Compressed-Air-Adiabatic-bicharger: 40  # years
+  marginal_cost:
+    solar: 0.01
+    onwind: 0.015
+    offwind: 0.015
+    hydro: 0.
+    H2: 0.
+    electrolysis: 0.
+    fuel cell: 0.
+    li-ion battery: 0.
+    battery inverter: 0.
+  emission_prices:
+    enable: false
+    co2: 0.
+    co2_monthly_prices: false
