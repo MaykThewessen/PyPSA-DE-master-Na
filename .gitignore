@@ -58,6 +58,10 @@ d1gam3xoknrgr2.cloudfront.net/
 
 *.nc
 
+# Large optimization problem files
+*.lp
+*.sol
+
 *~
 
 *.pyc
