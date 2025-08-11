@@ -1018,12 +1018,24 @@ def attach_storageunits(
 
     buses_i = n.buses.index
 
-    lookup_store = {"H2": "electrolysis", "battery": "battery inverter", "Iron-Air": "Iron-Air-charge"}
-    lookup_dispatch = {"H2": "fuel cell", "battery": "battery inverter", "Iron-Air": "Iron-Air-discharge"}
+    lookup_store = {
+        "H2": "electrolysis", 
+        "battery": "battery inverter", 
+        "Iron-Air": "Iron-Air-charge",
+        "Li-Ion": "Li-Ion",
+        "Vanadium-Redox-Flow": "vanadium",
+        "Compressed-Air-Adiabatic": "CAES"
+    }
+    lookup_dispatch = {
+        "H2": "fuel cell", 
+        "battery": "battery inverter", 
+        "Iron-Air": "Iron-Air-discharge",
+        "Li-Ion": "Li-Ion",
+        "Vanadium-Redox-Flow": "vanadium",
+        "Compressed-Air-Adiabatic": "CAES"
+    }
 
     for carrier in carriers:
-        roundtrip_correction = 0.5 if carrier == "battery" else 1
-
         # For Iron-Air, use separate charge and discharge efficiencies
         if carrier == "Iron-Air":
             efficiency_store = costs.at["Iron-Air-charge", "efficiency"]
