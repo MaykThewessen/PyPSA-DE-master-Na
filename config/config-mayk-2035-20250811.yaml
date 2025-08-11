@@ -1,0 +1,192 @@
+# Complete full-year Germany-only PyPSA simulation
+# High-performance settings: 32 threads, 70GB RAM, HiGHS solver
+
+# Enable transmission projects for complete simulation
+transmission_projects:
+  enable: true
+  include:
+    tyndp2020: true
+    nep: true
+    manual: true
+  status:
+  - under_construction
+  - in_permitting
+  - confirmed
+
+# High-performance solver settings using HiGHS
+solving:
+  solver:
+    name: highs
+    options: highs-highperf
+  
+  solver_options:
+    highs-highperf:
+      threads: 32
+      solver: "ipm"
+      run_crossover: "off"
+      small_matrix_value: 1e-6
+      large_matrix_value: 1e9
+      primal_feasibility_tolerance: 1e-5
+      dual_feasibility_tolerance: 1e-5
+      ipm_optimality_tolerance: 1e-4
+      parallel: "on"
+      random_seed: 123    # this makes sure to use same random numbers every time script is run
+  
+  # Set memory limit to 70GB (in MB)
+  mem_mb: 71680
+  
+  # Additional solving options for full simulation
+  options:
+    clip_p_max_pu: 1.e-2   # Ensures that any per-unit generation capacity values (p_max_pu) smaller than 1×10⁻² are clipped (set to that minimum).
+    load_shedding: false # If true, PyPSA would allow demand to be unmet at a high penalty cost; here, the model must meet all demand.
+    curtailment_mode: false # If true, the simulation focuses on curtailment analysis rather than cost-optimal dispatch.
+    noisy_costs: true # Adds small random noise to technology costs to break symmetry. Useful to prevent the solver from splitting capacity equally among identical assets in different buses just because they have exactly equal costs.
+    skip_iterations: true # PyPSA-Eur often solves iteratively (e.g., adjusting transmission expansion, capacity factors, or other variables between runs).
+    rolling_horizon: false # If true, the model would solve smaller time windows sequentially (mimicking operational foresight limits).
+    seed: 123 # Random number seed for reproducibility when using stochastic elements (e.g., noisy_costs).
+    track_iterations: false # If true, stores intermediate results from iterative solves.
+    min_iterations: 2
+    max_iterations: 6
+    transmission_losses: 2 # 2 means each transmission line has a 2% loss factor applied to power flow.
+    linearized_unit_commitment: true # Uses a linear approximation to unit commitment (on/off behaviour of generators) instead of full MILP.
+    horizon: 365 # Number of days in the optimisation horizon.
+
+# High-performance Atlite settings for 2019 weather data
+atlite:
+  nprocesses: 32
+  cutout_directory: cutouts
+  default_cutout: europe-2019-sarah3-era5
+  show_progress: true # Suppresses progress bars when generating cutouts — useful in batch runs or when running in logging environments.
+  cutouts:
+    europe-2019-sarah3-era5:
+      module: [sarah, era5]
+      x: [5., 16.]  # Focus on Germany coordinates
+      y: [47., 56.]
+      dx: 0.3
+      dy: 0.3
+      time: ['2019', '2019']
+
+# Complete scenario setup
+scenario:
+  clusters:
+  - 25  # Reduced resolution to fit memory constraints
+  opts:
+  - ''  # Empty string here means “no extra power-sector options” — basically a baseline ru
+  sector_opts:
+  - ''  # Empty means pure electricity-only model with no additional sector coupling.
+  planning_horizons:
+  - 2035
+
+# Germany only
+countries:
+- DE
+
+# Representative periods instead of full year to reduce memory usage
+snapshots:
+  start: "2019-01-01"
+  end: "2019-02-01"
+  inclusive: 'left'
+
+# Enable necessary data retrieval for complete simulation
+enable:
+  retrieve: auto
+  retrieve_databundle: true
+  retrieve_cost_data: false   # This ensures you have the most recent cost assumptions for generators, storage, and transmission.
+  build_cutout: false
+  retrieve_cutout: true
+  drop_leap_day: true         # Removes February 29 from the time series.
+
+# Enable all major sectors for complete simulation
+sector:
+  transport: true
+  heating: true
+  biomass: true
+  industry: true
+  shipping: true
+  aviation: true
+  agriculture: true
+  fossil_fuels: true
+  
+  # District heating settings
+  district_heating:
+    potential: 0.6
+    progress:
+      2020: 0.0
+      2025: 0.1
+      2030: 0.25
+      2035: 0.4
+      2040: 0.55
+      2045: 0.75
+      2050: 1.0
+    district_heating_loss: 0.15
+  
+  # Enable key technologies
+  hydrogen_fuel_cell: true
+  hydrogen_turbine: true
+  SMR: true
+  SMR_cc: true
+  dac: true
+  co2_network: true
+  H2_network: true
+  gas_network: true
+
+# Complete biomass configuration
+biomass:
+  year: 2035
+  scenario: ENS_Med
+  classes:
+    solid biomass:
+    - Agricultural waste
+    - Fuelwood residues
+    - Secondary Forestry residues - woodchips
+    - Sawdust
+    - Residues from landscape care
+    biogas:
+    - Manure solid, liquid
+    - Sludge
+    municipal solid waste:
+    - Municipal waste
+
+# Enable renewable energy sources
+renewable:
+  onwind:
+    capacity_per_sqkm: 3
+  offwind-ac:
+    capacity_per_sqkm: 2
+  offwind-dc:
+    capacity_per_sqkm: 2
+  solar:
+    capacity_per_sqkm: 5.1
+  hydro:
+    carriers: [ror, PHS, hydro]
+
+# Enable storage technologies
+electricity:
+  #max_hours:       # This sets the energy-to-power ratio (in hours) for storage units:
+    #battery: 6
+    #H2: 168
+  extendable_carriers:
+    Generator: [solar, solar-hsat, onwind, offwind-ac, offwind-dc, offwind-float, OCGT, CCGT]
+    StorageUnit: [battery, H2]
+    Store: [battery, H2]
+    Link: [H2 pipeline]
+
+# Use 2019 energy data and consumption profiles
+energy:
+  energy_totals_year: 2019
+  base_emissions_year: 1990
+  emissions: CO2
+
+# Load profiles based on 2019
+load:
+  fill_gaps:
+    enable: true
+    interpolate_limit: 3
+    time_shift_for_large_gaps: 1w
+  manual_adjustments: true
+  scaling_factor: 1.0     # Multiplies the entire load time series by this factor.
+  fixed_year: 2019        # Use 2019 consumption patterns
+  supplement_synthetic: true
+  distribution_key:       # This means richer, more populated regions get proportionally more demand assigned.
+    gdp: 0.6
+    population: 0.4
