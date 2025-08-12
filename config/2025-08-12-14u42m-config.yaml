@@ -48,6 +48,7 @@ transmission_projects:  # Section for configuring transmission network expansion
   - under_construction  # Include projects currently being built
   - in_permitting      # Include projects in the permitting phase
   - confirmed          # Include projects that are confirmed but not yet started
+  skip: []              # List of project IDs to skip
 
 # High-performance solver settings using HiGHS
 solving:                # Configuration for the optimization solver
@@ -58,8 +59,8 @@ solving:                # Configuration for the optimization solver
   solver_options:       # Custom solver parameter configurations
     highs-highperf:     # Named configuration set for high-performance settings
       threads: 10       # Increase number of parallel threads for the solver (use all available cores if possible)
-      solver: "simplex" # Use Simplex algorithm (requested by user)
-      run_crossover: "off"  # Disable crossover for faster solving
+      # solver: auto-selected by HiGHS - let solver choose IPM or Simplex based on problem characteristics
+      # run_crossover: auto-selected by HiGHS - let solver decide crossover strategy
       small_matrix_value: 1e-5  # Minimum threshold for matrix values
       large_matrix_value: 1e9   # Maximum threshold for matrix values
       primal_feasibility_tolerance: 1e-4  # Loosen tolerance for primal feasibility (faster, but may reduce accuracy)
@@ -128,10 +129,6 @@ scenario:                # Configuration for different simulation scenarios
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#countries
 countries:               # List of countries to include in the simulation
 - DE                     # Germany country code
-
-# Configuration for administrative levels
-admin_levels:
-  level: 0  # Use country level administrative boundaries
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#snapshots
 snapshots:
@@ -821,7 +818,7 @@ industry:
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#costs
 costs:
   year: 2035
-  version: v0.13.3
+  version: v0.13.3 # use latest costs-file version: https://github.com/PyPSA/technology-data
   social_discountrate: 0.02
   fill_values:
     FOM:            0
@@ -901,6 +898,9 @@ costs:
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#clustering
 clustering:
+  mode: busmap  # clustering mode
+  administrative:
+    level: 0  # Use country level administrative boundaries (0 = country level)
   focus_weights: false
   simplify_network:
     to_substations: false
