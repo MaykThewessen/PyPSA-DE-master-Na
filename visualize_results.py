@@ -19,7 +19,7 @@ plt.style.use('bmh')
 
 def load_network():
     """Load the solved PyPSA network"""
-    network_path = "../resources/networks/base_s_1_elec_.nc"
+    network_path = "results/networks/base_s_1_elec_Co2L0.001.nc"
     print(f"Loading network from: {network_path}")
     
     try:
