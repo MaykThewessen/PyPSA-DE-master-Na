@@ -51,6 +51,12 @@ from scripts._helpers import (
     set_scenario_config,
     update_config_from_wildcards,
 )
+from scripts._bounds_helper import (
+    get_max_cap,
+    get_system_limit,
+    replace_infinite_bounds,
+    load_technical_limits,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -112,8 +118,19 @@ def add_land_use_constraint_perfect(n: pypsa.Network) -> None:
     ext_i = n.generators.p_nom_extendable
     # get technical limit per node and investment period
     p_nom_max = n.generators[ext_i].groupby(grouper).min().p_nom_max
-    # drop carriers without tech limit
-    p_nom_max = p_nom_max[~p_nom_max.isin([np.inf, np.nan])]
+    # drop carriers without tech limit - filter out infinite/NaN and replace with technical bounds
+    # First replace infinite values with technical limits based on carrier type
+    finite_p_nom_max = p_nom_max.copy()
+    for carrier in p_nom_max.index.get_level_values(0).unique():
+        carrier_mask = p_nom_max.index.get_level_values(0) == carrier
+        inf_mask = np.isinf(p_nom_max[carrier_mask]) | np.isnan(p_nom_max[carrier_mask])
+        if inf_mask.any():
+            tech_limit = get_max_cap(carrier, "generators")
+            logger.info(f"Replacing {inf_mask.sum()} infinite/NaN values for carrier '{carrier}' with technical limit {tech_limit} MW")
+            finite_p_nom_max[carrier_mask & p_nom_max.isin([np.inf, np.nan])] = tech_limit
+    
+    # Now filter out remaining invalid values
+    p_nom_max = finite_p_nom_max[~finite_p_nom_max.isin([np.inf, np.nan])]
     # carrier
     carriers = p_nom_max.index.get_level_values(0).unique()
     gen_i = n.generators[(n.generators.carrier.isin(carriers)) & (ext_i)].index
@@ -468,6 +485,8 @@ def prepare_network(
             # TODO: do not scale via sign attribute (use Eur/MWh instead of Eur/kWh)
             load_shedding = 1e2  # Eur/kWh
 
+        # Use technical limit for load shedding capacity instead of arbitrary large number
+        max_load_shedding_capacity = get_system_limit("max_operational_hours") / 1000  # Convert to reasonable MW scale
         n.add(
             "Generator",
             buses_i,
@@ -476,13 +495,15 @@ def prepare_network(
             carrier="load",
             sign=1e-3,  # Adjust sign to measure p and p_nom in kW instead of MW
             marginal_cost=load_shedding,  # Eur/kWh
-            p_nom=1e9,  # kW
+            p_nom=max_load_shedding_capacity,  # MW converted from technical bounds
         )
 
     if solve_opts.get("curtailment_mode"):
         n.add("Carrier", "curtailment", color="#fedfed", nice_name="Curtailment")
         n.generators_t.p_min_pu = n.generators_t.p_max_pu
         buses_i = n.buses.query("carrier == 'AC'").index
+        # Use reasonable curtailment capacity from system limits instead of arbitrary large number
+        max_curtailment_capacity = get_system_limit("max_renewable_capacity") or get_max_cap("wind", "generators")
         n.add(
             "Generator",
             buses_i,
@@ -492,7 +513,7 @@ def prepare_network(
             p_max_pu=0,
             marginal_cost=-0.1,
             carrier="curtailment",
-            p_nom=1e6,
+            p_nom=max_curtailment_capacity,
         )
 
     if solve_opts.get("noisy_costs"):

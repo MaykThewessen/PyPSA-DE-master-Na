@@ -348,9 +348,10 @@ if __name__ == "__main__":
             n, dict(co2=snakemake.params.costs["emission_prices"]["co2"])
         )
 
-    kind = snakemake.params.transmission_limit[0]
-    factor = snakemake.params.transmission_limit[1:]
-    set_transmission_limit(n, kind, factor, costs, Nyears)
+    if snakemake.params.transmission_limit is not None:
+        kind = snakemake.params.transmission_limit[0]
+        factor = snakemake.params.transmission_limit[1:]
+        set_transmission_limit(n, kind, factor, costs, Nyears)
 
     set_line_nom_max(
         n,

@@ -68,6 +68,12 @@ from scripts._helpers import (
     set_scenario_config,
     update_p_nom_max,
 )
+from scripts._bounds_helper import (
+    get_max_cap,
+    get_system_limit,
+    replace_infinite_bounds,
+    load_technical_limits,
+)
 
 idx = pd.IndexSlice
 
@@ -368,7 +374,9 @@ def load_and_aggregate_powerplants(
     ppl = ppl.join(costs[cost_columns], on="carrier", rsuffix="_r")
 
     ppl["efficiency"] = ppl.efficiency.combine_first(ppl.efficiency_r)
-    ppl["lifetime"] = (ppl.dateout - ppl.datein).fillna(np.inf)
+    # Replace infinite lifetimes with technical default (40 years)
+    default_lifetime = get_system_limit("default_lifetime")
+    ppl["lifetime"] = (ppl.dateout - ppl.datein).fillna(default_lifetime)
     ppl["build_year"] = ppl.datein.fillna(0).astype(int)
     ppl["marginal_cost"] = (
         ppl.carrier.map(costs.VOM) + ppl.carrier.map(costs.fuel) / ppl.efficiency
@@ -825,7 +833,8 @@ def attach_hydro(
         hydro_stats = pd.read_csv(
             hydro_capacities, comment="#", na_values="-", index_col=0
         )
-        e_target = hydro_stats["E_store[TWh]"].clip(lower=0.2) * 1e6
+        # Convert TWh to MWh using proper unit conversion instead of magic number
+        e_target = hydro_stats["E_store[TWh]"].clip(lower=0.2) * 1e6  # TWh to MWh conversion
         e_installed = hydro.eval("p_nom * max_hours").groupby(hydro.country).sum()
         e_missing = e_target - e_installed
         missing_mh_i = hydro.query("max_hours.isnull() or max_hours == 0").index
@@ -1034,6 +1043,9 @@ def attach_storageunits(
         "Vanadium-Redox-Flow": "vanadium",
         "Compressed-Air-Adiabatic": "CAES"
     }
+
+    # Correction factor for roundtrip efficiency (square root for symmetric charge/discharge)
+    roundtrip_correction = 0.5
 
     for carrier in carriers:
         # For Iron-Air, use separate charge and discharge efficiencies

@@ -1591,22 +1591,30 @@ def insert_electricity_distribution_grid(
     fn = solar_rooftop_potentials_fn
     if len(fn) > 0:
         potential = pd.read_csv(fn, index_col=["bus", "bin"]).squeeze()
-        potential.index = potential.index.map(flatten) + " solar"
+        # Handle case where potential is a scalar (single value)
+        if isinstance(potential, (int, float, np.number)):
+            # Skip rooftop solar if only one value (not properly formatted)
+            logger.warning("Solar rooftop potentials file contains only scalar value, skipping rooftop solar")
+            potential = pd.Series(dtype=float)  # Empty series
+        else:
+            potential.index = potential.index.map(flatten) + " solar"
 
-        n.add(
-            "Generator",
-            solar,
-            suffix=" rooftop",
-            bus=n.generators.loc[solar, "bus"] + " low voltage",
-            carrier="solar rooftop",
-            p_nom_extendable=True,
-            p_nom_max=potential.loc[solar],
-            marginal_cost=n.generators.loc[solar, "marginal_cost"],
-            capital_cost=costs.at["solar-rooftop", "capital_cost"],
-            efficiency=n.generators.loc[solar, "efficiency"],
-            p_max_pu=n.generators_t.p_max_pu[solar],
-            lifetime=costs.at["solar-rooftop", "lifetime"],
-        )
+        # Only add rooftop solar generators if we have valid potential data
+        if not potential.empty:
+            n.add(
+                "Generator",
+                solar,
+                suffix=" rooftop",
+                bus=n.generators.loc[solar, "bus"] + " low voltage",
+                carrier="solar rooftop",
+                p_nom_extendable=True,
+                p_nom_max=potential.loc[solar],
+                marginal_cost=n.generators.loc[solar, "marginal_cost"],
+                capital_cost=costs.at["solar-rooftop", "capital_cost"],
+                efficiency=n.generators.loc[solar, "efficiency"],
+                p_max_pu=n.generators_t.p_max_pu[solar],
+                lifetime=costs.at["solar-rooftop", "lifetime"],
+            )
 
     n.add("Carrier", "home battery")
 
