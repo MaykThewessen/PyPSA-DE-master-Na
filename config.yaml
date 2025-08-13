@@ -2,8 +2,15 @@ run:
   name: "de-custom-run-2035"
 
 solving:
+  mem_mb: 60000
   solver:
     name: highs
+    options: default
+  solver_options:
+    default:
+      threads: 4
+      presolve: 'on'
+      parallel: 'on'
     
 scenario:
   clusters:
@@ -11,3 +18,16 @@ scenario:
 
 enable:
   retrieve_cost_data: true
+
+electricity:
+  co2limit_enable: false  # Disable hard constraint (use pricing instead)
+  co2limit: 0.02  # Limit CO2 emissions to 2% of 1990 emissions
+
+costs:
+  emission_prices:
+    enable: true
+    co2: 300  # EUR/tCO2 - Higher carbon price for scenario 2
+  
+sector:
+  heating: false
+  enable_sector: false
