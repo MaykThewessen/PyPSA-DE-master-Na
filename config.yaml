@@ -1,0 +1,13 @@
+run:
+  name: "de-custom-run-2035"
+
+solving:
+  solver:
+    name: highs
+    
+scenario:
+  clusters:
+  - 1
+
+enable:
+  retrieve_cost_data: true
