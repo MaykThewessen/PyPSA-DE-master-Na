@@ -93,6 +93,119 @@ to 50-200 nodes.
 Already-built versions of the model can be found in the accompanying [Zenodo
 repository](https://doi.org/10.5281/zenodo.3601881).
 
+# Technical Bounds Policy
+
+PyPSA-Eur has been updated with realistic technical bounds for all major components to improve model stability, engineering realism, and policy relevance. This policy replaces previous infinite (`.inf`) values with evidence-based upper limits derived from existing infrastructure and technical literature.
+
+## Rationale
+
+**Why realistic bounds matter:**
+- **Numerical Stability**: Prevents unrealistic capacity allocation during optimization
+- **Engineering Realism**: Ensures solutions reflect practical deployment constraints
+- **Policy Relevance**: Results align with real-world infrastructure planning capabilities
+- **Model Validation**: Facilitates comparison with actual energy system development
+
+## Implemented Bounds
+
+### AC Transmission Lines (`lines`)
+- **Capacity Limit**: 4,000 MW per line
+- **Basis**: Double-circuit 380 kV line thermal ratings
+- **Sources**: ENTSO-E TYNDP 2022, German grid development plans
+
+### HVDC Links (`links`)
+- **Capacity Limit**: 6,000 MW per link
+- **Basis**: Bipolar HVDC technology limits (NordLink/SuedOstLink scale)
+- **Sources**: ENTSO-E infrastructure data, major European HVDC projects
+
+### Generator Capacity Limits
+| Technology | Limit (MW) | Basis |
+|------------|------------|-------|
+| Nuclear | 1,650 | EPR reactor scale (Flamanville-3) |
+| Coal/Lignite | 1,100 | Largest German units (Neurath, Niederaussem) |
+| CCGT | 850 | Large European combined-cycle units |
+| Onshore Wind | 500 | Large wind farm projects (Markbygden scale) |
+| Offshore Wind AC | 1,200 | Large offshore projects with AC transmission |
+| Offshore Wind DC | 1,400 | Future large projects with HVDC |
+| Solar PV | 800 | Largest European utility-scale projects |
+| Pumped Hydro | 1,800 | Largest European installations |
+
+### Storage System Limits
+| Technology | Power (MW) | Energy (MWh) | Duration |
+|------------|------------|--------------|----------|
+| Battery | 2,000 | 10,000 | ~5 hours |
+| Pumped Hydro | 1,800 | 25,000 | ~14 hours |
+| Compressed Air | 500 | 12,000 | ~24 hours |
+| Hydrogen | 500 | 2,000,000 | ~4,000 hours |
+| Iron-Air | 200 | 2,000 | ~10 hours |
+| Vanadium Redox | 100 | 1,000 | ~10 hours |
+
+## Configuration Management
+
+The bounds are managed through YAML anchors in `config/config.default.yaml` for maintainability:
+
+```yaml
+lines:
+  s_nom_max: &line_capacity_limit 4000  # MW
+  max_extension: *line_capacity_limit
+
+links:
+  p_nom_max: &link_capacity_limit 6000  # MW  
+  max_extension: *link_capacity_limit
+```
+
+## Adjusting Bounds for Future Studies
+
+### 1. Technology Evolution
+Update bounds as technologies advance:
+- Monitor largest operational units globally
+- Track technology vendor specifications
+- Consider demonstration project outcomes
+
+### 2. Regional Adaptation
+Adjust for different study regions:
+- Account for local grid codes and standards
+- Consider geographical constraints
+- Reflect regulatory frameworks
+
+### 3. Scenario Analysis
+Use different bound scenarios:
+- **Conservative**: Current technology limits
+- **Progressive**: Expected near-term advances
+- **Breakthrough**: Theoretical technology potential
+
+### 4. Validation Workflow
+After changing bounds, always run validation:
+```bash
+python sanity_check_bounds.py
+```
+
+This script verifies:
+- No unmet load in solutions
+- Reasonable capacity utilization
+- Components respect technical bounds
+- Solutions remain feasible
+
+## Documentation Files
+
+- **Implementation Summary**: `CONFIGURATION_BOUNDS_UPDATE.md`
+- **Technical Justification**: `technical_limits_summary.md`
+- **Audit Record**: `bounds_audit_table.md`
+- **Validation Script**: `sanity_check_bounds.py`
+
+## References
+
+1. ENTSO-E Ten-Year Network Development Plan 2022
+2. BNetzA Grid Development Plan 2035 (Netzentwicklungsplan)
+3. IAEA Power Reactor Information System (PRIS)
+4. IRENA Global Energy Storage Roadmap 2030
+5. Wind Europe Statistics and Outlook Reports
+6. IEA Energy Storage Monitor
+7. European transmission system operators' transparency data
+
+---
+
+**Note**: These bounds represent technically feasible upper limits for individual components. Actual deployment in optimization results will be constrained by economic factors, policy frameworks, and resource availability.
+
 # Contributing and Support
 We strongly welcome anyone interested in contributing to this project. If you have any ideas, suggestions or encounter problems, feel invited to file issues or make pull requests on GitHub.
 -   To **discuss** with other PyPSA users, organise projects, share news, and get in touch with the community you can use the [Discord server](https://discord.gg/AnuJBk23FU).

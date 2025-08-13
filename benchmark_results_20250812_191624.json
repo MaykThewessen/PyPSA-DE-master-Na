@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-08-12T18:49:26.784166",
+  "week_slice": {
+    "target_name": "Week Slice",
+    "config_file": "config/config.test-week.yaml",
+    "success": false,
+    "time_minutes": 0.09850428899129232,
+    "return_code": 1,
+    "stdout_lines": 1,
+    "stderr_lines": 9,
+    "stdout": "...",
+    "stderr": "..."
+  },
+  "full_year": {
+    "target_name": "Full Year",
+    "config_file": "config/config.default.yaml",
+    "success": false,
+    "time_minutes": 26.613802937666573,
+    "return_code": 1,
+    "stdout_lines": 17,
+    "stderr_lines": 865,
+    "stdout": "...",
+    "stderr": "..."
+  }
+}
