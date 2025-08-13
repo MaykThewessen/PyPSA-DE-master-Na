@@ -69,7 +69,7 @@ class ModelBenchmark:
                 "snakemake", 
                 "--cores", "1",  # Use single core for consistent comparison
                 "--forceall",    # Force rerun to ensure clean comparison
-                "--quiet",       # Reduce output verbosity
+                "--quiet", "all",  # Reduce output verbosity
                 f"results/{run_name}/networks/base_s_37_elec_.nc"  # Target specific output file
             ]
             

@@ -1,0 +1,7 @@
+scenarios:
+  - file: config/de-all-tech-2035.yaml
+    tag: all-tech
+  - file: config/de-no-ironair-2035.yaml
+    tag: no-ironair
+  - file: config/de-no-mds-2035.yaml
+    tag: no-mds

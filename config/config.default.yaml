@@ -1,10 +1,11 @@
+# Complete full-year Germany-only PyPSA simulation
 
 # SPDX-FileCopyrightText: : 2017-2024 The PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: CC0-1.0
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#top-level-configuration
-version: 0.11.0
+version: 0.35.1
 tutorial: false
 
 logging:
@@ -23,7 +24,7 @@ remote:
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
   prefix: ""
-  name: "de-all-tech-2035"
+  name: "de-all-tech-2035-mayk"
   scenarios:
     enable: false
     file: config/scenarios.yaml
@@ -36,29 +37,99 @@ run:
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#foresight
 foresight: overnight
 
-# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario
-# Wildcard docs in https://pypsa-eur.readthedocs.io/en/latest/wildcards.html
-scenario:
+# Enable transmission projects for complete simulation
+transmission_projects:  # Section for configuring transmission network expansion projects
+  enable: true          # Master switch to enable/disable transmission project processing
+  include:              # Specify which types of transmission projects to include
+    tyndp2020: true     # Tyndp2020 is the transmission network expansion plan for 2020
+    nep: true           # NEP is the new energy plan for 2035
+    manual: true        # Manual is the manual transmission network expansion plan for 2035
+  status:               # List of project statuses to include in the simulation
+  - under_construction  # Include projects currently being built
+  - in_permitting      # Include projects in the permitting phase
+  - confirmed          # Include projects that are confirmed but not yet started
+  skip: []              # List of project IDs to skip
+  new_link_capacity: "zero"  # Whether to keep existing link capacity or set to zero (options: "keep" or "zero")
+
+# High-performance solver settings using HiGHS
+solving:                # Configuration for the optimization solver
+  solver:               # Solver selection and configuration
+    name: highs         # Use HiGHS solver (high-performance open-source solver)
+    options: highs-highperf  # Reference to custom solver options defined below
+  
+  solver_options:       # Custom solver parameter configurations
+    highs-highperf:     # Named configuration set for high-performance settings
+      threads: 36       # Increase number of parallel threads for the solver (use all available cores if possible)
+      # solver: auto-selected by HiGHS - let solver choose IPM or Simplex based on problem characteristics
+      # run_crossover: auto-selected by HiGHS - let solver decide crossover strategy
+      small_matrix_value: 1e-5  # Minimum threshold for matrix values
+      large_matrix_value: 1e9   # Maximum threshold for matrix values
+      primal_feasibility_tolerance: 1e-4  # Loosen tolerance for primal feasibility (faster, but may reduce accuracy)
+      dual_feasibility_tolerance: 1e-4    # Loosen tolerance for dual feasibility
+      ipm_optimality_tolerance: 1e-3      # Loosen optimality tolerance for faster convergence
+      parallel: "on"    # Enable parallel processing
+      random_seed: 123  # this makes sure to use same random numbers every time script is run
+      presolve: "on"    # Enable presolve to reduce problem size and speed up solving
+      time_limit: 18000  # Set a time limit (in seconds) for the solver (5 hours)
+  # Set memory limit to
+  mem_mb: 60000         # Memory limit in megabytes (60GB)
+  
+  # Additional solving options for full simulation
+  options:               # General solving behavior options
+    clip_p_max_pu: 1.e-2   # Ensures that any per-unit generation capacity values (p_max_pu) smaller than 1×10⁻² are clipped (set to that minimum).
+    load_shedding: false    # If true, PyPSA would allow demand to be unmet at a high penalty cost; here, the model must meet all demand.
+    curtailment_mode: false # If true, the simulation focuses on curtailment analysis rather than cost-optimal dispatch.
+    noisy_costs: true       # Adds small random noise to technology costs to break symmetry. Useful to prevent the solver from splitting capacity equally among identical assets in different buses just because they have exactly equal costs.
+    skip_iterations: true   # PyPSA-Eur often solves iteratively (e.g., adjusting transmission expansion, capacity factors, or other variables between runs).
+    rolling_horizon: false  # If true, the model would solve smaller time windows sequentially (mimicking operational foresight limits).
+    seed: 123               # Random number seed for reproducibility when using stochastic elements (e.g., noisy_costs).
+    track_iterations: false # If true, stores intermediate results from iterative solves.
+    min_iterations: 2       # Minimum number of iterations to perform
+    max_iterations: 6       # Maximum number of iterations to perform
+    transmission_losses: 2  # 2 means each transmission line has a 2% loss factor applied to High voltage grid power flow.
+    linearized_unit_commitment: true  # Uses a linear approximation to unit commitment (on/off behaviour of generators) instead of full MILP.
+    horizon: 365            # Number of days in the optimisation horizon.
+
+# High-performance Atlite settings for 2023 weather data (consistent with snapshots)
+atlite:                  # Configuration for weather data processing library
+  nprocesses: 10         # Number of parallel processes for data processing
+  cutout_directory: cutouts  # Directory to store processed weather data
+  default_cutout: europe-2023-sarah3-era5  # Default weather dataset to use (matches snapshots year)
+  show_progress: true    # Suppresses progress bars when generating cutouts — useful in batch runs or when running in logging environments.
+  cutouts:               # Specific weather dataset configurations
+    europe-2023-sarah3-era5:  # Named dataset configuration (consistent with snapshots)
+      module: [sarah, era5]   # Use SARAH3 and ERA5 data sources
+      x: [5., 16.]            # Focus on Germany coordinates (longitude range)
+      y: [47., 56.]           # Focus on Germany coordinates (latitude range)
+      dx: 0.3                 # Grid resolution in longitude (degrees)
+      dy: 0.3                 # Grid resolution in latitude (degrees)
+      time: ['2023', '2023']  # Time period for weather data (matches snapshots)
+
+# Complete scenario setup
+scenario:                # Configuration for different simulation scenarios
   simpl:
   - ''
   ll:
   - vopt
-  clusters:
+  clusters:              # List of clustering resolutions to test
+  # - 10                 # 10 spatial nodes for higher resolution
   - 37
-  - 128
-  - 256
-  opts:
-  - ''
-  sector_opts:
-  - ''
-  planning_horizons:
+  #- 128
+  #- 256
+  opts:                  # Power sector options for each scenario
+  - ''    # 'Co2L0.00'       # changed to: CO2 limit of 0.0% of 1990 emissions (very restrictive)''
+  sector_opts:           # Sector coupling options for each scenario
+  - ''                   # Empty means pure electricity-only model with no additional sector coupling.
+  planning_horizons:     # Future years to simulate              
   # - 2020
-  - 2030
+  # - 2030
   # - 2040
+  - 2035                #  Target year for the energy transition
   # - 2050
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#countries
-countries: ['DE']
+countries:               # List of countries to include in the simulation
+- DE                     # Germany country code
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#snapshots
 snapshots:
@@ -66,8 +137,8 @@ snapshots:
   end: "2024-01-01"
   inclusive: 'left'
 
-# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#enable
-enable:
+# Enable necessary data retrieval for complete simulation
+enable:                  # Master switches for different data processing steps
   retrieve: auto
   prepare_links_p_nom: false
   retrieve_databundle: true
@@ -77,27 +148,26 @@ enable:
   custom_busmap: false
   drop_leap_day: true
 
-
-
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#co2-budget
 co2_budget:
   2020: 0.701
   2025: 0.524
   2030: 0.297
-  2035: 0.150
-  2040: 0.071
-  2045: 0.032
-  2050: 0.000
+  2035: 0.150 # total Energy system emissions, electricity + oil, gas, heat, etc
+  2040: 0.071 
+  2045: 0.032  
+  2050: 0.000 
+
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#electricity
 electricity:
-  voltages: [220., 300., 380., 500., 750.]
+  voltages: [220., 300., 330., 380., 400., 500., 750.]
   base_network: osm-prebuilt
   osm-prebuilt-version: 0.6
   gaslimit_enable: false
-  gaslimit: false
+  gaslimit:        false
   co2limit_enable: true
-  co2limit: 0.0 # in the no-limit scenario, the maximum CO2 emission is: 26.821255e+6 ton
+  co2limit: 0.0         # electricity system has CO2-target of 0 emissions in 2035
   co2base: 1.487e+9
 
   operational_reserve:
@@ -106,60 +176,39 @@ electricity:
     epsilon_vres: 0.02
     contingency: 4000
 
+  min_hours:
+    iron-air: [100] # 100 hours is the minimum storage duration for iron-air battery, preferably 100 hours standard product. longer is always possible due to easier power requirements.
+
   max_hours:
-    Ebattery1: 1
-    Ebattery2: 2
-    Ebattery4: 4
-    Ebattery8: 8
-    battery1: 1
-    battery2: 2
-    battery4: 4
-    battery8: 8  
+    battery: 12
     H2: 100
-    vanadium: 12
-    IronAir: 100
-    CAES: 24
+    Vanadium-Redox-Flow: 12
+    Compressed-Air-Adiabatic: 24
+    iron-air: 100
 
-  extendable_carriers:
-    # Generator: []
-    Generator: [solar, solar-hsat, onwind, offwind-ac, offwind-dc, offwind-float]
-    # StorageUnit: [] # battery, H2 , vanadium, 
-    StorageUnit: [Ebattery1, Ebattery2,Ebattery4,Ebattery8, battery1, battery2, battery4, battery8, H2, vanadium, CAES]
-    Store: [IronAir]
-    Link: [] # H2 pipeline
+  extendable_carriers:    # Technologies that can be expanded in the optimization
+    Generator: [solar, solar-hsat, onwind, offwind-ac, offwind-dc, offwind-float]  # Generators that can be built
+    StorageUnit: []  # Storage types with fixed duration set by user
+    Store: [battery, H2, iron-air, Vanadium-Redox-Flow, Compressed-Air-Adiabatic]        # Energy stores that can be built (hydrogen storage)
+    Link: [battery inverter, electrolyser, fuel cell, Hydrogen-charger, Hydrogen-discharger, fuel-cell, iron-air battery charge, iron-air battery discharge]         # H2 pipeline
 
-  
+
+
   storage_units_p_nom:
-    Ebattery1: 750.0
-    Ebattery2: 1875.0
-    Ebattery4: 1125.0
-    Ebattery8: 0.0
-    battery1: 0.0
-    battery2: 0.0
-    battery4: 0.0
-    battery8: 0.0  
-    vanadium: 0.0
+    battery: 0.0
     H2: 0.0
-    IronAir: 0.0
-    CAES: 0.0
+    Vanadium-Redox-Flow: 0.0
+    Compressed-Air-Adiabatic: 0.0
+    iron-air: 0.0
 
   storage_units_p_nom_extendable:
-    Ebattery1: false
-    Ebattery2: false
-    Ebattery4: false
-    Ebattery8: false
-    battery1: true
-    battery2: true
-    battery4: true
-    battery8: true  
-    vanadium: true
-    H2: true
-    IronAir: true
-    CAES: true
+    battery:                  true
+    H2:                       true
+    Vanadium-Redox-Flow:      true
+    Compressed-Air-Adiabatic: true
+    iron-air:                 true
  
 
-
- 
 
   powerplants_filter: (DateOut >= 2023 or DateOut != DateOut) and not (Country == 'Germany' and Fueltype == 'Nuclear')
   custom_powerplants: false
@@ -168,7 +217,6 @@ electricity:
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
   renewable_carriers: [solar, solar-hsat, onwind, offwind-ac, offwind-dc, offwind-float, hydro]
 
-  
 
   estimate_renewable_capacities:
     enable: true
@@ -176,31 +224,17 @@ electricity:
     year: 2023
     expansion_limit: false
     technology_mapping:
-      Offshore: [offwind-ac, offwind-dc, offwind-float]
-      Onshore: [onwind]
-      PV: [solar]
+      Offshore: offwind-ac
+      Onshore: onwind
+      PV: solar
+
 
   autarky:
     enable: false
     by_country: false
 
-# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#atlite
-atlite:
-  default_cutout: europe-2023-sarah3-era5
-  nprocesses: 4
-  show_progress: false
-  cutout_directory: cutouts
-  cutouts:
-    # use 'base' to determine geographical bounds and time span from config
-    # base:
-      # module: era5
-    europe-2023-sarah3-era5:
-      module: [sarah, era5] # in priority order
-      x: [-12., 42.]
-      y: [33., 72.]
-      dx: 0.3
-      dy: 0.3
-      time: ['2023', '2023']
+
+
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#renewable
 renewable:
@@ -279,7 +313,7 @@ renewable:
       method: pv
       panel: CSi
       orientation:
-        slope: 35.
+        slope: 19.
         azimuth: 180.
     capacity_per_sqkm: 5.1
     # correction_factor: 0.854337
@@ -294,7 +328,7 @@ renewable:
       method: pv
       panel: CSi
       orientation:
-        slope: 35.
+        slope: 0.
         azimuth: 180.
       tracking: horizontal
     capacity_per_sqkm: 4.43 # 15% higher land usage acc. to NREL
@@ -306,7 +340,7 @@ renewable:
   hydro:
     cutout: europe-2023-sarah3-era5
     carriers: [ror, PHS, hydro]
-    PHS_max_hours: 6
+    PHS_max_hours: 8
     hydro_max_hours: "energy_capacity_totals_by_country" # one of energy_capacity_totals_by_country, estimate_by_large_installations or a float
     flatten_dispatch: false
     flatten_dispatch_buffer: 0.2
@@ -314,6 +348,11 @@ renewable:
     eia_norm_year: false
     eia_correct_by_capacity: false
     eia_approximate_missing: false
+
+
+
+
+
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#conventional
 conventional:
@@ -336,6 +375,7 @@ lines:
   length_factor: 1.25
   reconnect_crimea: true
   under_construction: 'keep' # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
+  capital_cost: 200000  # EUR/MW*km for transmission lines
   dynamic_line_rating:
     activate: false
     cutout: europe-2023-sarah3-era5
@@ -350,6 +390,7 @@ links:
   max_extension: .inf #MW
   include_tyndp: true
   under_construction: 'zero' # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
+  capital_cost: 400000  # EUR/MW*km for DC links
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#transformers
 transformers:
@@ -358,13 +399,21 @@ transformers:
   type: ''
 
 # docs-load in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#load
-load:
-  interpolate_limit: 3
-  time_shift_for_large_gaps: 1w
-  manual_adjustments: true # false
-  scaling_factor: 1.0
-  fixed_year: false # false or year (e.g. 2013)
-  supplement_synthetic: true
+load:                     # Electricity demand configuration
+  fill_gaps:              # How to handle missing data in load profiles
+    enable: true          # Enable gap filling
+    interpolate_limit: 3  # Maximum gap size to interpolate
+    time_shift_for_large_gaps: 1w  # Time shift for large data gaps
+  manual_adjustments: true  # Allow manual adjustments to load data
+  scaling_factor: 1.0     # Multiplies the entire load time series by this factor.
+  fixed_year: false      # 2019        # Use 2019 consumption patterns
+  supplement_synthetic: true  # Generate synthetic data when real data is missing
+  distribution_key:       # This means richer, more populated regions get proportionally more demand assigned.
+    gdp: 0.6              # 60% weight for GDP-based distribution
+    population: 0.4       # 40% weight for population-based distribution
+
+
+
 
 # docs
 # TODO: PyPSA-Eur merge issue in prepare_sector_network.py
@@ -399,7 +448,7 @@ energy:
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#biomass
 biomass:
-  year: 2030
+  year: 2035
   scenario: ENS_Med
   classes:
     solid biomass:
@@ -422,6 +471,22 @@ biomass:
     biogas:
     - Manure solid, liquid
     - Sludge
+  share_unsustainable_use_retained:
+    2020: 1.0
+    2025: 0.9
+    2030: 0.8
+    2035: 0.7
+    2040: 0.6
+    2045: 0.5
+    2050: 0.4
+  share_sustainable_potential_available:
+    2020: 1.0
+    2025: 1.0
+    2030: 1.0
+    2035: 1.0
+    2040: 1.0
+    2045: 1.0
+    2050: 1.0
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#solar-thermal
 solar_thermal:
@@ -445,22 +510,30 @@ existing_capacities:
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#sector
 sector:
-  transport: true
-  heating: true
-  biomass: true
-  industry: true
-  agriculture: true
+  transport: false
+  heating: false
+  biomass: false
+  industry: false
+  agriculture: false
+  enable_sector: false  # Master switch to disable all sector coupling
   district_heating:
-    potential: 0.6
+    enable: false  # Disable district heating entirely
+    potential: 0.0  # Set to zero to disable district heating potential
     progress:
       2020: 0.0
-      2025: 0.15
-      2030: 0.3
-      2035: 0.45
-      2040: 0.6
-      2045: 0.8
-      2050: 1.0
-    district_heating_loss: 0.15
+      2025: 0.0
+      2030: 0.0
+      2035: 0.0
+      2040: 0.0
+      2045: 0.0
+      2050: 0.0
+    district_heating_loss: 0.0
+    supply_temperature_approximation:
+      relative_annual_temperature_reduction: 0.005  # Add the missing parameter
+  heat_pump_sources:
+    urban central: []  # Empty list for electricity-only
+    urban decentral: []
+    rural: []
   cluster_heat_buses: true
   heat_demand_cutout: default
   bev_dsm_restriction_value: 0.75
@@ -490,17 +563,17 @@ sector:
   land_transport_electric_share:
     2020: 0
     2025: 0.15
-    2030: 0.3
+    2030: 0.30
     2035: 0.45
-    2040: 0.7
+    2040: 0.70
     2045: 0.85
-    2050: 1
+    2050: 1.00
   land_transport_ice_share:
     2020: 1
     2025: 0.85
-    2030: 0.7
+    2030: 0.70
     2035: 0.55
-    2040: 0.3
+    2040: 0.30
     2045: 0.15
     2050: 0
   transport_electric_efficiency: 53.19 # 1 MWh_el = 53.19*100 km
@@ -525,23 +598,23 @@ sector:
   shipping_methanol_share:
     2020: 0
     2025: 0.15
-    2030: 0.3
-    2035: 0.5
-    2040: 0.7
+    2030: 0.30
+    2035: 0.50
+    2040: 0.70
     2045: 0.85
     2050: 1
   shipping_oil_share:
     2020: 1
     2025: 0.85
-    2030: 0.7
-    2035: 0.5
-    2040: 0.3
+    2030: 0.70
+    2035: 0.50
+    2040: 0.30
     2045: 0.15
     2050: 0
   shipping_methanol_efficiency: 0.46
   shipping_oil_efficiency: 0.40
-  aviation_demand_factor: 1.
-  HVC_demand_factor: 1.
+  aviation_demand_factor: 1.00
+  HVC_demand_factor: 1.00
   time_dep_hp_cop: true
   heat_pump_sink_T: 55.
   reduce_space_heat_exogenously: true
@@ -675,31 +748,31 @@ sector:
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#industry
 industry:
   St_primary_fraction:
-    2020: 0.6
+    2020: 0.60
     2025: 0.55
-    2030: 0.5
+    2030: 0.50
     2035: 0.45
-    2040: 0.4
+    2040: 0.40
     2045: 0.35
-    2050: 0.3
+    2050: 0.30
   DRI_fraction:
     2020: 0
     2025: 0
     2030: 0.05
-    2035: 0.2
-    2040: 0.4
-    2045: 0.7
+    2035: 0.20
+    2040: 0.40
+    2045: 0.70
     2050: 1
   H2_DRI: 1.7
   elec_DRI: 0.322
   Al_primary_fraction:
-    2020: 0.4
+    2020: 0.400
     2025: 0.375
-    2030: 0.35
+    2030: 0.350
     2035: 0.325
-    2040: 0.3
-    2045: 0.25
-    2050: 0.2
+    2040: 0.300
+    2045: 0.250
+    2050: 0.200
   MWh_NH3_per_tNH3: 5.166
   MWh_CH4_per_tNH3_SMR: 10.8
   MWh_elec_per_tNH3_SMR: 0.7
@@ -764,54 +837,94 @@ industry:
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#costs
 costs:
-  year: 2030
-  version: v0.9.0
+  year: 2035
+  version: v0.13.3 # use latest costs-file version: https://github.com/PyPSA/technology-data
   social_discountrate: 0.02
   fill_values:
-    FOM: 0
-    VOM: 0
-    efficiency: 1
-    fuel: 0
-    investment: 0
-    lifetime: 25
+    FOM:            0
+    VOM:            0
+    efficiency:     1
+    fuel:           0
+    investment:     0
+    lifetime:       25
     "CO2 intensity": 0
-    "discount rate": 0.07
+    "discount rate": 0.05
   # Marginal and capital costs can be overwritten
+  overwrites:
+    capital_cost: {}
+    marginal_cost: {}
+    efficiency: {}
   # capital_cost:
-  #   onwind: 500
-  marginal_cost:
-    solar: 0.01
-    solar-hsat: 0.01
-    onwind: 1.975
-    offwind-ac: 3.45
-    offwind-dc: 3.45
-    offwind-float: 6.22
-    hydro: 0.
-    H2: 0.
-    
-    hydrogen storage tank type 1 including compressor: 0.
-    electrolysis: 0.
-    fuel cell: 0.
-    Lithium-Ion-LFP-store-1-2030: 0.
-    Lithium-Ion-LFP-store-2-2030: 0.
-    Lithium-Ion-LFP-store-4-2030: 0.
-    Lithium-Ion-LFP-store-8-2030: 0.
-    Lithium-Ion-LFP-bicharger-2030: 0.
-    IronAir-bicharger: 0.
-    IronAir-store: 0.
-    IronAir: 0.
-    Vanadium-Redox-Flow-bicharger-2030: 0.
-    Vanadium-Redox-Flow-store-2030: 0.
-    Liquid-Air-store-2030: 0.
-    Liquid-Air-charger-2030: 0.
-    Liquid-Air-discharger-2030: 0.
+    # onwind: 500
+  fuel:
+    OCGT: 25 # TTF Gas Future year 2030 accesed in Aug 2025 Engie marketprices app
+    CCGT: 25
+    gas:  25
+    coal: 24.57 # https://businessanalytiq.com/procurementanalytics/index/subbituminous-coal-price-index/
+    lignite: 22.11 # https://businessanalytiq.com/procurementanalytics/index/lignite-coal-price-index/
+    nuclear: 1.75 # https://markets.businessinsider.com/commodities/uranium-price
+    uranium: 1.75
+  efficiency:
+    iron-air battery charge:    1.00
+    iron-air battery discharge: 0.48
+    Lithium-Ion-LFP-bicharger: 0.88
+  investment:
+    Lithium-Ion-LFP-store:          134000 # energy costs in EUR/MWh DC (2020)
+    Lithium-Ion-LFP-bicharger:      132000 # power costs in EUR/MW AC(2020)
+    Lithium-Ion-NMC-bicharger:      132000
+    iron-air battery:                27000 # in EUR/MWh stored, which includes power part costs as well, not seperate
+    iron-air battery charge:         84000
+    iron-air battery discharge:      84000
+    Zn-Br-Flow-bicharger:           132000 # in EUR/MWh
+    nuclear:                         10871 # in EUR/kW AC source: EU PINC staff working doc (June 2025)
+    solar:                              380 # EUR/kW_e
+    solar-rooftop:                      650
+    solar-rooftop commercial:           450
+    solar-utility:                      340
+    solar-utility single-axis tracking: 480
+    electrolysis:                    1710
+    Alkaline electrolyzer small size: 2500
+    Alkaline electrolyzer medium size: 1800
+    Alkaline electrolyzer large size: 1800
+    Hydrogen-charger:                 1710
+    Hydrogen-discharger:              1660
+    electrolysis small:               2000
+    PEM electrolyzer small size:      2600
+  lifetime:
+    Lithium-Ion-LFP-bicharger:          16  # years
+    Lithium-Ion-LFP-store:              22
+    iron-air battery:                   25
+    electrolysis:                       21
+    Hydrogen-charger:                   20
+    Hydrogen-discharger:                20
+    Alkaline electrolyzer large size:   30
+
   emission_prices:
     enable: false
     co2: 0.
     co2_monthly_prices: false
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#clustering
 clustering:
+  mode: busmap  # clustering mode
+  administrative:
+    level: 0  # Use country level administrative boundaries (0 = country level)
   focus_weights: false
   simplify_network:
     to_substations: false
@@ -839,39 +952,7 @@ adjustments:
   electricity: false
   sector: false
 
-# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#solving
-solving:
-  #tmpdir: "path/to/tmp"
-  options:
-    clip_p_max_pu: 1.e-2
-    load_shedding: false
-    curtailment_mode: false
-    noisy_costs: true
-    skip_iterations: true
-    rolling_horizon: false
-    seed: 123
-    custom_extra_functionality: "../data/custom_extra_functionality.py"
-    # io_api: "direct"  # Increases performance but only supported for the highs and gurobi solvers
-    # options that go into the optimize function
-    track_iterations: false
-    min_iterations: 2
-    max_iterations: 3
-    transmission_losses: 2
-    linearized_unit_commitment: false  #true
-    horizon: 365
-    post_discretization:
-      enable: false
-      line_unit_size: 1700
-      line_threshold: 0.3
-      link_unit_size:
-        DC: 2000
-        H2 pipeline: 1200
-        gas pipeline: 1500
-      link_threshold:
-        DC: 0.3
-        H2 pipeline: 0.3
-        gas pipeline: 0.3
-
+  # Additional solving configuration
   agg_p_nom_limits:
     agg_offwind: false
     include_existing: false
@@ -883,80 +964,20 @@ solving:
     BAU: false
     SAFE: false
 
-  solver:
-    name: highs
-    options: highs-default
-    # name: gurobi
-    # options: gurobi-default
-
-  solver_options:
-    highs-default:
-      # refer to https://ergo-code.github.io/HiGHS/dev/options/definitions/
-      threads: 8 # before is 22
-      # solver: "mip"
-      solver: "simplex"
-      # simplex 单纯形法，ipm 内点法， mip 混合整数规划，
-      run_crossover: "off"
-      # crossover_method: "simplex"
-      # max_iterations: 1000
-      small_matrix_value: 1e-6 # before is 1e-6
-      large_matrix_value: 1e9 #before is 1e9
-      primal_feasibility_tolerance: 1e-6 # before is 1e-6
-      dual_feasibility_tolerance: 1e-6 #before is 1e-6
-      ipm_optimality_tolerance: 1e-5 #before is 1e-5
-      parallel: "on"
-      random_seed: 123
-    gurobi-default:
-      threads: 8
-      method: 2 # barrier
-      crossover: 0
-      BarConvTol: 1.e-6
-      Seed: 123
-      AggFill: 0
-      PreDual: 0
-      GURO_PAR_BARDENSETHRESH: 200
-    gurobi-numeric-focus:
-      NumericFocus: 3       # Favour numeric stability over speed
-      method: 2             # barrier
-      crossover: 0          # do not use crossover
-      BarHomogeneous: 1     # Use homogeneous barrier if standard does not converge
-      BarConvTol: 1.e-5
-      FeasibilityTol: 1.e-4
-      OptimalityTol: 1.e-4
-      ObjScale: -0.5
-      threads: 8
-      Seed: 123
-    gurobi-fallback:        # Use gurobi defaults
-      crossover: 0
-      method: 2             # barrier
-      BarHomogeneous: 1     # Use homogeneous barrier if standard does not converge
-      BarConvTol: 1.e-5
-      FeasibilityTol: 1.e-5
-      OptimalityTol: 1.e-5
-      Seed: 123
-      threads: 8
-    cplex-default:
-      threads: 4
-      lpmethod: 4 # barrier
-      solutiontype: 2 # non basic solution, ie no crossover
-      barrier.convergetol: 1.e-5
-      feasopt.tolerance: 1.e-6
-    copt-default:
-      Threads: 8
-      LpMethod: 2
-      Crossover: 0
-      RelGap: 1.e-6
-      Dualize: 0
-    copt-gpu:
-      LpMethod: 6
-      GPUMode: 1
-      PDLPTol: 1.e-5
-      Crossover: 0
-    cbc-default: {} # Used in CI
-    glpk-default: {} # Used in CI
-
-  mem_mb: 30000 #memory in MB; 20 GB enough for 50+B+I+H2; 100 GB for 181+B+I+H2
   runtime: 6h #runtime in humanfriendly style https://humanfriendly.readthedocs.io/en/latest/
+  
+  post_discretization:
+    enable: false
+    line_unit_size: 1700
+    line_threshold: 0.3
+    link_unit_size:
+      DC: 2000
+      H2 pipeline: 1200
+      gas pipeline: 1500
+    link_threshold:
+      DC: 0.3
+      H2 pipeline: 0.3
+      gas pipeline: 0.3
 
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#plotting
@@ -992,13 +1013,10 @@ plotting:
     solar: "Solar"
     PHS: "Pumped Hydro Storage"
     hydro: "Reservoir & Dam"
-    battery1: "Battery 1 hour"
-    battery2: "Battery 2 hours"
-    battery4: "Battery 4 hours"
-    battery8: "Battery 8 hours"
+    battery: "LFP Battery Storage"
     H2: "Hydrogen Storage"
-    IronAir: "IronAir storage"
-    vanadium: "Vanadium Redox Flow"
+    iron-air: "iron-air storage"
+    Vanadium-Redox-Flow: "Vanadium Redox Flow"
     CEAS: "Compressed Air Storage"
     lines: "Transmission Lines"
     ror: "Run of River"
@@ -1128,25 +1146,10 @@ plotting:
     # battery charger: '#88a75b'
     # battery discharger: '#5d4e29'
 
-    battery1: '#d4ffcc'  
-    battery1 storage: '#aaff99'  
-    battery1 charger: '#88cc77'  
-    battery1 discharger: '#558855'
-
-    battery2: '#f0c2d7'  
-    battery2 storage: '#e37a9e'  
-    battery2 charger: '#cc5c77'  
-    battery2 discharger: '#993344'
-
-    battery4: '#ffebcc'  
-    battery4 storage: '#ffdd99'  
-    battery4 charger: '#ffbb66'  
-    battery4 discharger: '#cc7733'
-
-    battery8: '#e5f7fa'  
-    battery8 storage: '#b3e0e5'  
-    battery8 charger: '#80c8cf'  
-    battery8 discharger: '#3ea3a7'
+    battery: '#d4ffcc'  
+    battery storage: '#aaff99'  
+    battery charger: '#88cc77'  
+    battery discharger: '#558855'
 
     home battery: '#80c944'
     home battery storage: '#80c944'
@@ -1157,7 +1160,7 @@ plotting:
     V2G: '#e5ffa8'
     land transport EV: '#baf238'
     land transport demand: '#38baf2'
-    Li ion: '#baf238'
+    Li-ion: '#baf238'
     # hot water storage
     water tanks: '#e69487'
     residential rural water tanks: '#f7b7a3'
@@ -1245,11 +1248,11 @@ plotting:
     H2 electrolysis: '#ff29d9'
 
     # Vanadium
-    vanadium: '#46caf0'
-    #Ore Energy
-    # IronAir: '#00ace0'
-    #CAES
-    CAES: '#c251ae'
+    Vanadium-Redox-Flow: '#46caf0'
+    # iron-air storage of Ore Energy
+    iron-air: '#00ace0'
+    # Compressed-Air-Adiabatic
+    Compressed-Air-Adiabatic: '#c251ae'
     # ammonia
     NH3: '#46caf0'
     ammonia: '#46caf0'
@@ -1314,3 +1317,39 @@ plotting:
     waste CHP: '#e3d37d'
     waste CHP CC: '#e3d3ff'
     HVC to air: 'k'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Mayk nog te verwerken:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+

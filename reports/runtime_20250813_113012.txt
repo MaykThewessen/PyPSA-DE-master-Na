@@ -1,0 +1,6 @@
+Scenario: Test Scenario
+Start Time: 2025-08-13T11:30:10.216974
+End Time: 2025-08-13T11:30:12.218546
+Runtime: 0:00:02.001572
+Runtime (seconds): 2.00
+Status: SUCCESS

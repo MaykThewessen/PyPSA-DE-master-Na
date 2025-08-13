@@ -1,0 +1,18 @@
+{
+  "timestamp": "2025-08-13T11:03:24.458469",
+  "week_slice": {
+    "target_name": "Week Slice",
+    "config_file": "config/config.test-week.yaml",
+    "success": false,
+    "time_minutes": 0.03076746463775635,
+    "return_code": 2,
+    "stdout_lines": 2,
+    "stderr_lines": 112,
+    "stdout": "...",
+    "stderr": "...",
+    "local_temp_used": "C:\\Users\\mayk\\AppData\\Local\\Temp\\pypsa_scratch"
+  },
+  "full_year": {
+    "skipped": "week_slice_failed"
+  }
+}

@@ -1,0 +1,11 @@
+Assuming unrestricted shared filesystem usage.
+host: ORE
+Building DAG of jobs...
+MissingInputException in rule add_electricity in file "C:\Users\mayk\PyPSA-DE-master-Na-2\rules/build_electricity.smk", line 715:
+Missing input files for rule add_electricity:
+    output: resources/de-all-tech-2035-test-week/networks/base_s_37_elec.nc
+    wildcards: clusters=37
+    affected files:
+        resources/de-all-tech-2035-test-week/costs_2030.csv
+
+ERROR conda.cli.main_run:execute(127): `conda run snakemake --cores 2 --forceall results/de-all-tech-2035-test-week/networks/base_s_37_elec_.nc` failed. (See above for error)

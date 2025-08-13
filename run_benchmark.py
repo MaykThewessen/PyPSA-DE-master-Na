@@ -36,7 +36,7 @@ def run_with_config(config_file, target_name, timeout_minutes=60):
         # Test what the correct target should be
         log("Finding correct target...")
         dry_result = subprocess.run([
-            "snakemake", "--dry-run", "-q"
+            "snakemake", "--dry-run", "--quiet", "all"
         ], capture_output=True, text=True, timeout=30)
         
         if "solve_network" in dry_result.stdout:

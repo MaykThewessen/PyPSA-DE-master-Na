@@ -1,0 +1,7 @@
+Scenario: Test Scenario
+Start Time: 2025-08-13T11:30:52
+End Time: 2025-08-13T11:30:54
+Runtime: 00:00:02.0216431
+Runtime (seconds): 2.02
+Status: SUCCESS
+Platform: PowerShell
