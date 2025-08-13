@@ -44,16 +44,17 @@ scenario:
   ll:
   - vopt
   clusters:
-  - 37
-  - 128
-  - 256
+  - 8
+  #- 37
+  #- 128
+  #- 256
   opts:
   - ''
   sector_opts:
   - ''
   planning_horizons:
   # - 2020
-  - 2030
+  - 2035
   # - 2040
   # - 2050
 
