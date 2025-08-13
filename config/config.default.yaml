@@ -57,6 +57,14 @@ solving:                # Configuration for the optimization solver
     name: highs         # Use HiGHS solver (high-performance open-source solver)
     options: highs-highperf  # Reference to custom solver options defined below
   
+  # HiGHS Real-time Monitoring Configuration
+  monitoring:             # Live optimization monitoring settings
+    enable: true          # Enable real-time HiGHS monitoring
+    update_interval: 2.0  # Update frequency in seconds
+    auto_start: true      # Automatically start monitoring with solve
+    log_health_alerts: true  # Log health warnings to solver log
+    show_progress: true   # Display progress indicators
+  
   solver_options:       # Custom solver parameter configurations
     highs-highperf:     # Named configuration set for high-performance settings
       threads: 36       # Increase number of parallel threads for the solver (use all available cores if possible)
@@ -111,21 +119,14 @@ scenario:                # Configuration for different simulation scenarios
   - ''
   ll:
   - vopt
-  clusters:              # List of clustering resolutions to test
-  # - 10                 # 10 spatial nodes for higher resolution
-  - 37
-  #- 128
-  #- 256
+  clusters:              # List of clustering resolutions to test (electricity-only)
+  - 37                   # Single cluster resolution for electricity-only model
   opts:                  # Power sector options for each scenario
-  - ''    # 'Co2L0.00'       # changed to: CO2 limit of 0.0% of 1990 emissions (very restrictive)''
+  - ''                   # No additional constraints (electricity-only)
   sector_opts:           # Sector coupling options for each scenario
-  - ''                   # Empty means pure electricity-only model with no additional sector coupling.
+  - ''                   # Empty means pure electricity-only model with no sector coupling
   planning_horizons:     # Future years to simulate              
-  # - 2020
-  # - 2030
-  # - 2040
-  - 2035                #  Target year for the energy transition
-  # - 2050
+  - 2035                 # Single target year for electricity-only model
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#countries
 countries:               # List of countries to include in the simulation
@@ -180,11 +181,11 @@ electricity:
     iron-air: [100] # 100 hours is the minimum storage duration for iron-air battery, preferably 100 hours standard product. longer is always possible due to easier power requirements.
 
   max_hours:
-    battery: 12
+    battery: 48
     H2: 100
-    Vanadium-Redox-Flow: 12
-    Compressed-Air-Adiabatic: 24
-    iron-air: 100
+    Vanadium-Redox-Flow: 150
+    Compressed-Air-Adiabatic: 168
+    iron-air: 300
 
   extendable_carriers:    # Technologies that can be expanded in the optimization
     Generator: [solar, solar-hsat, onwind, offwind-ac, offwind-dc, offwind-float]  # Generators that can be built
@@ -221,6 +222,7 @@ electricity:
   estimate_renewable_capacities:
     enable: true
     from_opsd: true
+    from_gem: false
     year: 2023
     expansion_limit: false
     technology_mapping:
@@ -228,6 +230,82 @@ electricity:
       Onshore: onwind
       PV: solar
 
+
+  # Evidence-based technical limits for generator nominal capacity per unit (MW)
+  # Source: IAEA PRIS, ENTSO-E data, largest European power plants, BNetzA registry
+  generator_p_nom_max:
+    # Nuclear generators - based on largest European reactors
+    nuclear: 1650     # MW - EPR reactor scale (Flamanville-3: 1650 MW)
+    # Source: IAEA Power Reactor Information System, EDF technical specifications
+    
+    # Conventional thermal generators - based on largest European plants
+    coal: 1100        # MW - largest German coal units (Neurath, Niederaussem)
+    lignite: 1100     # MW - largest German lignite units (Neurath, Jänschwalde)
+    CCGT: 850         # MW - largest European CCGT units
+    OCGT: 400         # MW - typical large peaking units
+    oil: 400          # MW - large oil-fired peaking plants
+    biomass: 300      # MW - largest biomass power plants
+    geothermal: 200   # MW - enhanced geothermal systems potential
+    # Source: BNetzA power plant registry, ENTSO-E generation adequacy data
+    
+    # Renewable generators - based on largest operational and planned projects
+    onwind: 500       # MW - large onshore wind farms (Markbygden: 650 MW planned)
+    offwind-ac: 1200  # MW - large offshore wind projects (Horns Rev 3: 407 MW, scaling potential)
+    offwind-dc: 1400  # MW - future large offshore projects with HVDC transmission
+    offwind-float: 500 # MW - floating offshore technology limitations
+    solar: 800        # MW - largest European solar PV plants (Cestas: 300 MW, scaling to utility-scale)
+    solar-hsat: 800   # MW - horizontal single-axis tracking solar
+    # Source: Wind Europe, Solar Power Europe statistics, project databases
+    
+    # Hydro generators - based on European hydro plants
+    ror: 400          # MW - run-of-river size limitations
+    hydro: 1800       # MW - largest European hydro units (Goldisthal 1060 MW, scaling potential)
+    PHS: 1800         # MW - pumped hydro storage (Goldisthal: 1060 MW, Bath County scale)
+    # Source: International Hydropower Association, ENTSO-E hydro registry
+  
+  # Evidence-based technical limits for storage systems (MW power, MWh energy)
+  # Source: Operational projects, technology roadmaps, grid integration studies
+  storage_p_nom_max:
+    # Electrochemical storage
+    battery: 5000     # MW - mega-scale battery installations (Tesla Megafarm scale)
+    # Source: Advanced battery deployment roadmaps, grid-scale projects
+    
+    # Mechanical storage
+    PHS: 1800         # MW - pumped hydro storage (Goldisthal: 1060 MW)
+    Compressed-Air-Adiabatic: 800  # MW - large-scale CAES projects (advanced underground storage)
+    # Source: Advanced CAES technology assessments, large-scale deployment potential
+    
+    # Chemical storage
+    H2: 500           # MW - hydrogen storage system integration limits
+    # Source: Hydrogen Europe roadmap, power-to-gas project database
+    
+    # Advanced long-duration technologies
+    iron-air: 1000    # MW - grid-scale long-duration storage (Form Energy scale)
+    Vanadium-Redox-Flow: 500  # MW - commercial-scale flow batteries (utility projects)
+    # Source: Commercial project announcements, utility-scale deployment plans
+  
+  storage_e_nom_max:
+    # Short-duration storage (daily to multi-day cycling)
+    battery: 240000   # MWh - mega-scale battery installations (48h × 5000 MW)
+    # Source: Grid-scale battery deployment studies with ambitious 2035 targets
+    
+    # Medium-duration storage (weekly cycling)
+    PHS: 25000        # MWh - large pumped storage potential (geographic constraints)
+    Compressed-Air-Adiabatic: 134400  # MWh - underground storage capacity (168h × 800 MW)
+    Vanadium-Redox-Flow: 75000  # MWh - extended duration flow battery systems (150h × 500 MW)
+    # Source: Advanced storage assessments and commercial deployment potential
+    
+    # Long-duration storage (seasonal cycling)
+    H2: 2000000       # MWh - 2 TWh hydrogen storage for national-scale balancing
+    # Source: Hydrogen storage potential studies, salt cavern assessments
+    iron-air: 300000  # MWh - ultra-long duration systems (300h × 1000 MW)
+    # Source: Long-duration storage technology specifications for grid-scale deployment
+
+  # Country-wide storage capacity limits for Germany (MW)
+  # Based on grid integration studies and technology deployment potential - FUTURE CONFIG CHANGE MARKER
+  # Note: This section demonstrates realistic bounds for country-scale storage deployment
+  # storage_units_p_nom:
+  #   battery: &battery_country_limit 100000  # MW country-wide - large-scale battery deployment potential
 
   autarky:
     enable: false
@@ -370,7 +448,7 @@ lines:
     500.: "Al/St 240/40 4-bundle 380.0"
     750.: "Al/St 560/50 4-bundle 750.0"
   s_max_pu: 0.7
-  s_nom_max: .inf
+  s_nom_max: 8000   # Maximum line capacity set to 8 GW
   max_extension: 20000 #MW
   length_factor: 1.25
   reconnect_crimea: true
@@ -388,6 +466,7 @@ links:
   p_max_pu: 1.0
   p_nom_max: .inf
   max_extension: .inf #MW
+  length_factor: 1.25
   include_tyndp: true
   under_construction: 'zero' # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
   capital_cost: 400000  # EUR/MW*km for DC links
@@ -675,6 +754,7 @@ sector:
   co2_sequestration_cost: 10
   co2_sequestration_lifetime: 50
   co2_spatial: false
+  co2_network: false
   co2network: false
   co2_network_cost_factor: 1
   cc_fraction: 0.9
@@ -876,6 +956,8 @@ costs:
     iron-air battery charge:         84000
     iron-air battery discharge:      84000
     Zn-Br-Flow-bicharger:           132000 # in EUR/MWh
+    Vanadium-Redox-Flow-store:       95000 # energy costs in EUR/MWh for electrolyte
+    Vanadium-Redox-Flow-bicharger:   110000 # power costs in EUR/MW for stack and balance of plant
     nuclear:                         10871 # in EUR/kW AC source: EU PINC staff working doc (June 2025)
     solar:                              380 # EUR/kW_e
     solar-rooftop:                      650
@@ -894,6 +976,8 @@ costs:
     Lithium-Ion-LFP-bicharger:          16  # years
     Lithium-Ion-LFP-store:              22
     iron-air battery:                   25
+    Vanadium-Redox-Flow-store:          25  # years - electrolyte lifetime
+    Vanadium-Redox-Flow-bicharger:      20  # years - stack lifetime (shorter than electrolyte)
     electrolysis:                       21
     Hydrogen-charger:                   20
     Hydrogen-discharger:                20
