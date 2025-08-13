@@ -461,6 +461,98 @@ sector:
       2045: 0.8
       2050: 1.0
     district_heating_loss: 0.15
+    supply_temperature_approximation:
+      max_forward_temperature_baseyear:
+        DE: 80.0  # default temperature in Celsius
+        AT: 80.0
+        BE: 80.0
+        BG: 80.0
+        CH: 80.0
+        CZ: 80.0
+        DK: 80.0
+        EE: 80.0
+        ES: 80.0
+        FI: 80.0
+        FR: 80.0
+        GB: 80.0
+        GR: 80.0
+        HR: 80.0
+        HU: 80.0
+        IE: 80.0
+        IT: 80.0
+        LT: 80.0
+        LU: 80.0
+        LV: 80.0
+        NL: 80.0
+        NO: 80.0
+        PL: 80.0
+        PT: 80.0
+        RO: 80.0
+        SE: 80.0
+        SI: 80.0
+        SK: 80.0
+      min_forward_temperature_baseyear:
+        DE: 60.0  # default temperature in Celsius
+        AT: 60.0
+        BE: 60.0
+        BG: 60.0
+        CH: 60.0
+        CZ: 60.0
+        DK: 60.0
+        EE: 60.0
+        ES: 60.0
+        FI: 60.0
+        FR: 60.0
+        GB: 60.0
+        GR: 60.0
+        HR: 60.0
+        HU: 60.0
+        IE: 60.0
+        IT: 60.0
+        LT: 60.0
+        LU: 60.0
+        LV: 60.0
+        NL: 60.0
+        NO: 60.0
+        PL: 60.0
+        PT: 60.0
+        RO: 60.0
+        SE: 60.0
+        SI: 60.0
+        SK: 60.0
+      return_temperature_baseyear:
+        DE: 40.0  # default temperature in Celsius
+        AT: 40.0
+        BE: 40.0
+        BG: 40.0
+        CH: 40.0
+        CZ: 40.0
+        DK: 40.0
+        EE: 40.0
+        ES: 40.0
+        FI: 40.0
+        FR: 40.0
+        GB: 40.0
+        GR: 40.0
+        HR: 40.0
+        HU: 40.0
+        IE: 40.0
+        IT: 40.0
+        LT: 40.0
+        LU: 40.0
+        LV: 40.0
+        NL: 40.0
+        NO: 40.0
+        PL: 40.0
+        PT: 40.0
+        RO: 40.0
+        SE: 40.0
+        SI: 40.0
+        SK: 40.0
+      relative_annual_temperature_reduction: 0.005
+      lower_threshold_ambient_temperature: -10.0
+      upper_threshold_ambient_temperature: 20.0
+      rolling_window_ambient_temperature: 14
   cluster_heat_buses: true
   heat_demand_cutout: default
   bev_dsm_restriction_value: 0.75

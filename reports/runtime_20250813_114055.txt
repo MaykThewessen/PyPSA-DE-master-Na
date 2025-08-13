@@ -1,0 +1,7 @@
+Scenario: Example Python Scenario
+Start Time: 2025-08-13T11:40:39
+End Time: 2025-08-13T11:40:55
+Runtime: 00:00:15.8324561
+Runtime (seconds): 15.83
+Status: SUCCESS
+Platform: PowerShell

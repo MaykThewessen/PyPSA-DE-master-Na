@@ -1,0 +1,6 @@
+Scenario: Example PyPSA Scenario
+Start Time: 2025-08-13T11:40:39.859547
+End Time: 2025-08-13T11:40:46.866328
+Runtime: 0:00:07.006263
+Runtime (seconds): 7.01
+Status: SUCCESS

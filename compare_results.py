@@ -141,16 +141,76 @@ class NetworkAnalyzer:
         return network_files
     
     def load_network(self, filepath):
-        """Load a PyPSA network with error handling"""
+        """Load a PyPSA network with error handling and memory optimization"""
         try:
             logger.info(f"Loading network: {filepath}")
             network = pypsa.Network(filepath)
             logger.info(f"Successfully loaded network with {len(network.buses)} buses, "
                        f"{len(network.generators)} generators")
             return network
+        except MemoryError:
+            logger.warning(f"MemoryError loading {filepath}, attempting with optimized settings...")
+            try:
+                # Attempt to load with memory optimization
+                network = self._load_network_optimized(filepath)
+                if network is not None:
+                    logger.info(f"Successfully loaded optimized network with {len(network.buses)} buses")
+                return network
+            except Exception as e:
+                logger.error(f"Failed to load network even with optimization {filepath}: {str(e)}")
+                return None
         except Exception as e:
             logger.error(f"Failed to load network {filepath}: {str(e)}")
             return None
+    
+    def _load_network_optimized(self, filepath):
+        """Load network with memory optimization techniques"""
+        try:
+            # Load network
+            network = pypsa.Network()
+            network.import_from_netcdf(filepath)
+            
+            # Downcast numeric dtypes to save memory
+            self._downcast_network_dtypes(network)
+            
+            return network
+        except Exception as e:
+            logger.error(f"Optimized loading failed: {e}")
+            return None
+    
+    def _downcast_network_dtypes(self, network):
+        """Downcast numeric dtypes in network to reduce memory usage"""
+        logger.info("Downcasting network dtypes to reduce memory usage...")
+        
+        # Components to optimize
+        components_to_optimize = [
+            'buses', 'generators', 'loads', 'lines', 'links', 'transformers', 'storage_units'
+        ]
+        
+        for component in components_to_optimize:
+            if hasattr(network, component):
+                df = getattr(network, component)
+                if not df.empty:
+                    # Downcast numeric columns
+                    for col in df.columns:
+                        if df[col].dtype == 'float64':
+                            df[col] = pd.to_numeric(df[col], downcast='float')
+                        elif df[col].dtype == 'int64':
+                            df[col] = pd.to_numeric(df[col], downcast='integer')
+        
+        # Also downcast time series data if present
+        time_series_components = [
+            'generators_t', 'loads_t', 'lines_t', 'links_t', 'storage_units_t'
+        ]
+        
+        for ts_component in time_series_components:
+            if hasattr(network, ts_component):
+                ts_obj = getattr(network, ts_component)
+                for attr in ['p', 'q', 'p0', 'p1', 'state_of_charge']:
+                    if hasattr(ts_obj, attr):
+                        ts_df = getattr(ts_obj, attr)
+                        if not ts_df.empty and ts_df.dtype == 'float64':
+                            setattr(ts_obj, attr, pd.to_numeric(ts_df, downcast='float'))
     
     def extract_kpis(self, network, scenario_name):
         """Extract key performance indicators from a network"""

@@ -95,13 +95,27 @@ if __name__ == "__main__":
         snakemake.input.central_heating_forward_temperature_profiles
     )
 
-    xr.concat(
-        [
+    # Handle empty direct_utilisation_heat_sources list
+    if direct_utilisation_heat_sources:
+        # Create profiles for each heat source
+        heat_source_profiles = [
             get_profile(
                 source_temperature=get_source_temperature(heat_source_key),
                 forward_temperature=central_heating_forward_temperature,
             ).assign_coords(heat_source=heat_source_key)
             for heat_source_key in direct_utilisation_heat_sources
-        ],
-        dim="heat_source",
-    ).to_netcdf(snakemake.output.direct_heat_source_utilisation_profiles)
+        ]
+        
+        # Concatenate and save
+        result = xr.concat(heat_source_profiles, dim="heat_source")
+        result.to_netcdf(snakemake.output.direct_heat_source_utilisation_profiles)
+    else:
+        # Create an empty dataset with the correct structure when no heat sources are defined
+        logger.info("No direct utilisation heat sources defined. Creating empty profile.")
+        empty_profile = xr.DataArray(
+            data=[],
+            dims=["heat_source"],
+            coords={"heat_source": []},
+            name="direct_utilisation"
+        )
+        empty_profile.to_netcdf(snakemake.output.direct_heat_source_utilisation_profiles)

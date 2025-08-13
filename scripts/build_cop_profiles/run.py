@@ -153,15 +153,30 @@ if __name__ == "__main__":
                 sink_inlet_temperature_celsius=central_heating_return_temperature,
             )
             cop_this_system_type.append(cop_da)
-        cop_all_system_types.append(
-            xr.concat(
-                cop_this_system_type, dim=pd.Index(heat_sources, name="heat_source")
+        
+        # Only append if there are heat sources for this system type
+        if heat_sources:
+            cop_all_system_types.append(
+                xr.concat(
+                    cop_this_system_type, dim=pd.Index(heat_sources, name="heat_source")
+                )
             )
-        )
 
-    cop_dataarray = xr.concat(
-        cop_all_system_types,
-        dim=pd.Index(snakemake.params.heat_pump_sources.keys(), name="heat_system"),
-    )
+    # Handle case where no heat pump sources are defined
+    if cop_all_system_types:
+        cop_dataarray = xr.concat(
+            cop_all_system_types,
+            dim=pd.Index([k for k, v in snakemake.params.heat_pump_sources.items() if v], name="heat_system"),
+        )
+    else:
+        # Create empty COP profiles with proper structure
+        # Create an empty 2D array with proper dimensions
+        import numpy as np
+        cop_dataarray = xr.DataArray(
+            data=np.empty((0, 0)),
+            dims=["heat_system", "heat_source"],
+            coords={"heat_system": [], "heat_source": []},
+            name="cop"
+        )
 
     cop_dataarray.to_netcdf(snakemake.output.cop_profiles)

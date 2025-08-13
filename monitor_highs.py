@@ -1,0 +1,344 @@
+#!/usr/bin/env python3
+"""
+Real-time HiGHS Optimization Monitor
+====================================
+Live monitoring of HiGHS solver progress with health indicators.
+
+Usage: python monitor_highs.py [logfile_path]
+If no logfile specified, monitors most recent .log files in current directory.
+"""
+
+import re
+import time
+import sys
+import os
+import glob
+from datetime import datetime, timedelta
+from pathlib import Path
+import argparse
+
+class HiGHSMonitor:
+    def __init__(self, logfile_path=None, update_interval=2.0):
+        self.logfile_path = logfile_path or self._find_latest_log()
+        self.update_interval = update_interval
+        self.last_position = 0
+        self.start_time = None
+        self.last_iteration = 0
+        self.last_objective = None
+        self.last_primal_infeas = None
+        self.last_dual_infeas = None
+        self.stall_count = 0
+        self.iteration_times = []
+        self.iteration_history = []  # Store (time, iteration, objective, primal_infeas, dual_infeas)
+        self.convergence_rate = None
+        self.estimated_completion = None
+        
+        # Regex patterns for HiGHS output
+        self.patterns = {
+            'presolve': re.compile(r'Presolve : Reductions: rows (\d+)\(-(\d+)\); columns (\d+)\(-(\d+)\)'),
+            'iteration': re.compile(r'(\d+)\s+([+-]?\d*\.?\d+(?:[eE][+-]?\d+)?)\s+([+-]?\d*\.?\d+(?:[eE][+-]?\d+)?)\s+([+-]?\d*\.?\d+(?:[eE][+-]?\d+)?)(?:\s+([+-]?\d*\.?\d+(?:[eE][+-]?\d+)?))?'),
+            'optimal': re.compile(r'Model\s+status\s*:\s*Optimal'),
+            'infeasible': re.compile(r'Model\s+status\s*:\s*Infeasible'),
+            'unbounded': re.compile(r'Model\s+status\s*:\s*Unbounded'),
+            'time_limit': re.compile(r'Model\s+status\s*:\s*Time\s+limit\s+reached'),
+            'objective_value': re.compile(r'Objective\s+value\s*:\s*([+-]?\d*\.?\d+(?:[eE][+-]?\d+)?)')
+        }
+    
+    def _find_latest_log(self):
+        """Find the most recently modified log file"""
+        log_patterns = ['*.log', '*.out', 'logs/*.log', 'benchmark_*/*.log']
+        latest_file = None
+        latest_time = 0
+        
+        for pattern in log_patterns:
+            for file_path in glob.glob(pattern):
+                mtime = os.path.getmtime(file_path)
+                if mtime > latest_time:
+                    latest_time = mtime
+                    latest_file = file_path
+        
+        if latest_file:
+            print(f"🔍 Monitoring: {latest_file}")
+            return latest_file
+        else:
+            print("❌ No log files found. Please specify a log file path.")
+            sys.exit(1)
+    
+    def _parse_iteration_line(self, line):
+        """Parse HiGHS iteration output line"""
+        match = self.patterns['iteration'].match(line.strip())
+        if match:
+            iteration = int(match.group(1))
+            objective = float(match.group(2))
+            primal_infeas = float(match.group(3)) if match.group(3) else None
+            dual_infeas = float(match.group(4)) if match.group(4) else None
+            return iteration, objective, primal_infeas, dual_infeas
+        return None
+    
+    def _assess_health(self, iteration, objective, primal_infeas, dual_infeas, elapsed_time):
+        """Assess optimization health based on current metrics"""
+        health_status = "🟢 HEALTHY"
+        warnings = []
+        
+        # Check for stalling
+        if iteration == self.last_iteration and iteration > 0:
+            self.stall_count += 1
+            if self.stall_count > 5:
+                health_status = "🟡 STALLING"
+                warnings.append(f"No progress for {self.stall_count * self.update_interval:.1f}s")
+        else:
+            self.stall_count = 0
+        
+        # Check infeasibilities
+        if primal_infeas and primal_infeas > 1e-3:
+            health_status = "🟡 HIGH PRIMAL INFEASIBILITY"
+            warnings.append(f"Primal infeas: {primal_infeas:.2e}")
+        
+        if dual_infeas and dual_infeas > 1e-3:
+            health_status = "🟡 HIGH DUAL INFEASIBILITY"
+            warnings.append(f"Dual infeas: {dual_infeas:.2e}")
+        
+        # Check for very slow progress
+        if len(self.iteration_times) > 10:
+            recent_avg = sum(self.iteration_times[-10:]) / 10
+            if recent_avg > 30:  # More than 30s per iteration
+                health_status = "🟡 SLOW PROGRESS"
+                warnings.append(f"Avg time/iter: {recent_avg:.1f}s")
+        
+        # Check objective improvement
+        if self.last_objective is not None and objective is not None:
+            obj_change = abs(objective - self.last_objective) / (abs(self.last_objective) + 1e-10)
+            if obj_change < 1e-8 and iteration > self.last_iteration + 100:
+                health_status = "🟡 MINIMAL IMPROVEMENT"
+                warnings.append(f"Obj change: {obj_change:.2e}")
+        
+        return health_status, warnings
+    
+    def _estimate_completion_time(self, iteration, objective, primal_infeas, dual_infeas, elapsed_time):
+        """Estimate time to completion based on convergence trends"""
+        # Add current state to history
+        self.iteration_history.append((elapsed_time, iteration, objective, primal_infeas, dual_infeas))
+        
+        # Keep only recent history (last 20 points or 2 minutes, whichever is larger)
+        min_history_time = max(120, 10 * self.update_interval)  # At least 2 minutes of history
+        cutoff_time = elapsed_time - min_history_time
+        self.iteration_history = [h for h in self.iteration_history if h[0] >= cutoff_time]
+        
+        if len(self.iteration_history) < 5:
+            return "Collecting data..."
+        
+        try:
+            # Calculate convergence rates
+            time_points = [h[0] for h in self.iteration_history]
+            iterations = [h[1] for h in self.iteration_history]
+            objectives = [h[2] for h in self.iteration_history]
+            primal_infeas_history = [h[3] if h[3] is not None else 0 for h in self.iteration_history]
+            dual_infeas_history = [h[4] if h[4] is not None else 0 for h in self.iteration_history]
+            
+            # Calculate iteration rate (iterations per second)
+            if len(iterations) >= 3:
+                iter_rate = (iterations[-1] - iterations[0]) / (time_points[-1] - time_points[0])
+                if iter_rate <= 0:
+                    return "Stalled"
+            else:
+                return "Calculating..."
+            
+            # Estimate completion based on infeasibility convergence
+            current_infeas = max(primal_infeas or 1e-10, dual_infeas or 1e-10)
+            target_infeas = 1e-6  # Typical convergence tolerance
+            
+            if current_infeas <= target_infeas:
+                return "Near optimal"
+            
+            # Calculate convergence rate for infeasibilities
+            if len(primal_infeas_history) >= 3:
+                recent_primal = primal_infeas_history[-5:] if len(primal_infeas_history) >= 5 else primal_infeas_history
+                recent_dual = dual_infeas_history[-5:] if len(dual_infeas_history) >= 5 else dual_infeas_history
+                recent_time = time_points[-len(recent_primal):]
+                
+                # Linear convergence rate (log scale)
+                if len(recent_primal) >= 3 and recent_primal[0] > 1e-10:
+                    log_primal_start = max(-20, min(10, float(f"{recent_primal[0]:.2e}".split('e')[1]) if 'e' in f"{recent_primal[0]:.2e}" else 0))
+                    log_primal_end = max(-20, min(10, float(f"{recent_primal[-1]:.2e}".split('e')[1]) if 'e' in f"{recent_primal[-1]:.2e}" else 0))
+                    
+                    if log_primal_end < log_primal_start:  # Improving
+                        convergence_rate = (log_primal_start - log_primal_end) / (recent_time[-1] - recent_time[0])
+                        if convergence_rate > 0:
+                            log_target = max(-20, min(10, float(f"{target_infeas:.2e}".split('e')[1]) if 'e' in f"{target_infeas:.2e}" else 0))
+                            log_current = max(-20, min(10, float(f"{current_infeas:.2e}".split('e')[1]) if 'e' in f"{current_infeas:.2e}" else 0))
+                            remaining_log_distance = log_current - log_target
+                            
+                            if remaining_log_distance > 0:
+                                est_time_to_conv = remaining_log_distance / convergence_rate
+                                if est_time_to_conv < 3600:  # Less than 1 hour estimate
+                                    return self._format_time_estimate(est_time_to_conv)
+            
+            # Fallback: estimate based on iteration rate and typical iteration counts
+            # Most LP problems converge in 1000-10000 iterations
+            if iteration < 100:
+                est_remaining_iters = 2000  # Conservative estimate for early iterations
+            elif iteration < 1000:
+                est_remaining_iters = max(1000, iteration * 2)  # Estimate 2x current progress
+            else:
+                est_remaining_iters = max(500, iteration * 0.5)  # Assume we're more than halfway
+            
+            est_time = est_remaining_iters / iter_rate
+            
+            if est_time < 3600:  # Less than 1 hour
+                return self._format_time_estimate(est_time)
+            else:
+                return ">1h"
+                
+        except (ValueError, ZeroDivisionError, IndexError):
+            return "Unknown"
+    
+    def _format_time_estimate(self, seconds):
+        """Format time estimate for display"""
+        if seconds < 60:
+            return f"{seconds:.0f}s"
+        elif seconds < 3600:
+            return f"{seconds/60:.0f}m"
+        else:
+            hours = seconds / 3600
+            return f"{hours:.1f}h"
+    
+    def _format_number(self, value):
+        """Format numbers for display"""
+        if value is None:
+            return "N/A"
+        if abs(value) < 1e-6:
+            return f"{value:.2e}"
+        elif abs(value) < 1:
+            return f"{value:.6f}"
+        elif abs(value) < 1000:
+            return f"{value:.2f}"
+        else:
+            return f"{value:.2e}"
+    
+    def monitor(self):
+        """Main monitoring loop"""
+        print("🚀 HiGHS Optimization Monitor Started")
+        print("=" * 95)
+        print(f"{'Time':>8} {'Iter':>8} {'Objective':>15} {'Primal':>12} {'Dual':>12} {'ETA':>10} {'Status'}")
+        print("-" * 95)
+        
+        if not os.path.exists(self.logfile_path):
+            print(f"❌ Log file not found: {self.logfile_path}")
+            print("⏳ Waiting for log file to be created...")
+            while not os.path.exists(self.logfile_path):
+                time.sleep(1)
+            print("✅ Log file found!")
+        
+        try:
+            with open(self.logfile_path, 'r', encoding='utf-8', errors='ignore') as f:
+                while True:
+                    # Read new content
+                    f.seek(self.last_position)
+                    new_content = f.read()
+                    self.last_position = f.tell()
+                    
+                    if new_content:
+                        for line in new_content.split('\n'):
+                            self._process_line(line)
+                    
+                    time.sleep(self.update_interval)
+                    
+        except KeyboardInterrupt:
+            print("\n🛑 Monitoring stopped by user")
+        except Exception as e:
+            print(f"❌ Error: {e}")
+    
+    def _process_line(self, line):
+        """Process a single line from the log"""
+        if not line.strip():
+            return
+        
+        # Check for presolve info
+        presolve_match = self.patterns['presolve'].search(line)
+        if presolve_match:
+            rows_after, rows_removed, cols_after, cols_removed = presolve_match.groups()
+            print(f"🔧 Presolve: {rows_removed} rows, {cols_removed} cols removed")
+            return
+        
+        # Check for iteration data
+        iteration_data = self._parse_iteration_line(line)
+        if iteration_data:
+            iteration, objective, primal_infeas, dual_infeas = iteration_data
+            
+            if self.start_time is None:
+                self.start_time = time.time()
+            
+            elapsed_time = time.time() - self.start_time
+            
+            # Track iteration timing
+            if self.last_iteration > 0:
+                iter_time = elapsed_time - sum(self.iteration_times)
+                self.iteration_times.append(iter_time)
+                if len(self.iteration_times) > 50:  # Keep only recent times
+                    self.iteration_times.pop(0)
+            
+            # Assess health
+            health_status, warnings = self._assess_health(
+                iteration, objective, primal_infeas, dual_infeas, elapsed_time
+            )
+            
+            # Calculate ETA
+            eta_str = self._estimate_completion_time(iteration, objective, primal_infeas, dual_infeas, elapsed_time)
+            
+            # Display current status
+            elapsed_str = f"{elapsed_time/60:.1f}m" if elapsed_time > 60 else f"{elapsed_time:.1f}s"
+            print(f"{elapsed_str:>8} {iteration:>8} {self._format_number(objective):>15} "
+                  f"{self._format_number(primal_infeas):>12} {self._format_number(dual_infeas):>12} "
+                  f"{eta_str:>10} {health_status}")
+            
+            # Show warnings
+            for warning in warnings:
+                print(f"         ⚠️  {warning}")
+            
+            # Update tracking variables
+            self.last_iteration = iteration
+            self.last_objective = objective
+            self.last_primal_infeas = primal_infeas
+            self.last_dual_infeas = dual_infeas
+        
+        # Check for termination conditions
+        if self.patterns['optimal'].search(line):
+            print("🎉 OPTIMAL SOLUTION FOUND!")
+            self._show_final_stats()
+        elif self.patterns['infeasible'].search(line):
+            print("❌ INFEASIBLE PROBLEM")
+            self._show_final_stats()
+        elif self.patterns['unbounded'].search(line):
+            print("❌ UNBOUNDED PROBLEM")
+            self._show_final_stats()
+        elif self.patterns['time_limit'].search(line):
+            print("⏰ TIME LIMIT REACHED")
+            self._show_final_stats()
+    
+    def _show_final_stats(self):
+        """Show final optimization statistics"""
+        if self.start_time:
+            total_time = time.time() - self.start_time
+            print(f"📊 Final Stats:")
+            print(f"   Total time: {total_time/60:.2f} minutes")
+            print(f"   Total iterations: {self.last_iteration}")
+            if self.last_iteration > 0:
+                print(f"   Avg time/iteration: {total_time/self.last_iteration:.2f}s")
+            if self.last_objective is not None:
+                print(f"   Final objective: {self._format_number(self.last_objective)}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Monitor HiGHS optimization in real-time')
+    parser.add_argument('logfile', nargs='?', help='Path to HiGHS log file')
+    parser.add_argument('--interval', '-i', type=float, default=2.0, 
+                        help='Update interval in seconds (default: 2.0)')
+    
+    args = parser.parse_args()
+    
+    monitor = HiGHSMonitor(args.logfile, args.interval)
+    monitor.monitor()
+
+
+if __name__ == '__main__':
+    main()

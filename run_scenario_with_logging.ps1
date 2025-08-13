@@ -12,7 +12,7 @@ Start-ScenarioLogging -ScenarioName $ScenarioName -LogToSameFile $true
 # Log a message from PowerShell
 Write-ScenarioLog "Starting Python scenario from PowerShell" -Level Info
 
-$pythonExecutable = "python3"
+$pythonExecutable = "python"
 $scriptPath = ".\example_scenario_with_logging.py"
 
 # Prepare for potential errors

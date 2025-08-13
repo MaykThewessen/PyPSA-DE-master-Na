@@ -1,0 +1,7 @@
+Scenario: Example Failing Scenario
+Start Time: 2025-08-13T11:40:51.466181
+End Time: 2025-08-13T11:40:52.969367
+Runtime: 0:00:01.502179
+Runtime (seconds): 1.50
+Status: FAILURE
+Error: Critical error occurred: Simulated critical error in optimization

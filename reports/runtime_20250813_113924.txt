@@ -1,0 +1,8 @@
+Scenario: Failed Test Scenario
+Start Time: 2025-08-13T11:39:23
+End Time: 2025-08-13T11:39:24
+Runtime: 00:00:01.0106186
+Runtime (seconds): 1.01
+Status: FAILURE
+Platform: PowerShell
+Error: Simulated failure for testing

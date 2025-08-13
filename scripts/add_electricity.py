@@ -312,6 +312,32 @@ def load_costs(
                 costs.loc["Iron-Air-inverter"],
                 max_hours=max_hours["Iron-Air"],
             )
+        
+        # Add specific battery types based on Lithium-Ion-LFP technology
+        for battery_type in ['Ebattery1', 'Ebattery2', 'Ebattery4', 'Ebattery8', 
+                           'battery1', 'battery2', 'battery4', 'battery8']:
+            if battery_type in max_hours:
+                costs.loc[battery_type] = costs_for_storage(
+                    costs.loc["Lithium-Ion-LFP-store"],
+                    costs.loc["Lithium-Ion-LFP-bicharger"],
+                    max_hours=max_hours[battery_type],
+                )
+        
+        # Add vanadium redox flow battery cost entry
+        if "vanadium" in max_hours:
+            costs.loc["vanadium"] = costs_for_storage(
+                costs.loc["Lithium-Ion-LFP-store"],  # Use LFP as fallback
+                costs.loc["Lithium-Ion-LFP-bicharger"],  # Use LFP as fallback
+                max_hours=max_hours["vanadium"],
+            )
+            
+        # Add CAES cost entry
+        if "CAES" in max_hours:
+            costs.loc["CAES"] = costs_for_storage(
+                costs.loc["Compressed-Air-Adiabatic-store"],
+                costs.loc["Compressed-Air-Adiabatic-bicharger"],
+                max_hours=max_hours["CAES"],
+            )
 
     for attr in ("marginal_cost", "capital_cost"):
         overwrites = config["overwrites"].get(attr)
@@ -1033,7 +1059,17 @@ def attach_storageunits(
         "Iron-Air": "Iron-Air-charge",
         "Li-Ion": "Li-Ion",
         "Vanadium-Redox-Flow": "vanadium",
-        "Compressed-Air-Adiabatic": "CAES"
+        "Compressed-Air-Adiabatic": "CAES",
+        "Ebattery1": "Lithium-Ion-LFP-bicharger",
+        "Ebattery2": "Lithium-Ion-LFP-bicharger",
+        "Ebattery4": "Lithium-Ion-LFP-bicharger",
+        "Ebattery8": "Lithium-Ion-LFP-bicharger",
+        "battery1": "Lithium-Ion-LFP-bicharger",
+        "battery2": "Lithium-Ion-LFP-bicharger",
+        "battery4": "Lithium-Ion-LFP-bicharger",
+        "battery8": "Lithium-Ion-LFP-bicharger",
+        "vanadium": "Lithium-Ion-LFP-bicharger",  # Using LFP as fallback since Vanadium-Redox-Flow-bicharger-2030 doesn't exist
+        "CAES": "Compressed-Air-Adiabatic-bicharger"
     }
     lookup_dispatch = {
         "H2": "fuel cell", 
@@ -1041,7 +1077,17 @@ def attach_storageunits(
         "Iron-Air": "Iron-Air-discharge",
         "Li-Ion": "Li-Ion",
         "Vanadium-Redox-Flow": "vanadium",
-        "Compressed-Air-Adiabatic": "CAES"
+        "Compressed-Air-Adiabatic": "CAES",
+        "Ebattery1": "Lithium-Ion-LFP-bicharger",
+        "Ebattery2": "Lithium-Ion-LFP-bicharger",
+        "Ebattery4": "Lithium-Ion-LFP-bicharger",
+        "Ebattery8": "Lithium-Ion-LFP-bicharger",
+        "battery1": "Lithium-Ion-LFP-bicharger",
+        "battery2": "Lithium-Ion-LFP-bicharger",
+        "battery4": "Lithium-Ion-LFP-bicharger",
+        "battery8": "Lithium-Ion-LFP-bicharger",
+        "vanadium": "Lithium-Ion-LFP-bicharger",  # Using LFP as fallback since Vanadium-Redox-Flow-bicharger-2030 doesn't exist
+        "CAES": "Compressed-Air-Adiabatic-bicharger"
     }
 
     # Correction factor for roundtrip efficiency (square root for symmetric charge/discharge)

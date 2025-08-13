@@ -1,0 +1,8 @@
+Scenario: Example Python Scenario
+Start Time: 2025-08-13T11:40:29
+End Time: 2025-08-13T11:40:29
+Runtime: 00:00:00.1265958
+Runtime (seconds): 0.13
+Status: FAILURE
+Platform: PowerShell
+Error: Python script returned a non-zero exit code: 9009

@@ -168,7 +168,7 @@ electricity:
   gaslimit_enable: false
   gaslimit:        false
   co2limit_enable: true
-  co2limit: 0.0         # electricity system has CO2-target of 0 emissions in 2035
+  co2limit: 0.002       # electricity system has CO2-target of 0.2% emissions in 2035 for feasible optimization
   co2base: 1.487e+9
 
   operational_reserve:
