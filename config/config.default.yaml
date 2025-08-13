@@ -33,6 +33,7 @@ run:
     policy: false
     exclude: []
   shared_cutouts: true
+  use_shadow_directory: false
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#foresight
 foresight: overnight
@@ -57,6 +58,14 @@ solving:                # Configuration for the optimization solver
     name: highs         # Use HiGHS solver (high-performance open-source solver)
     options: highs-highperf  # Reference to custom solver options defined below
   
+  # HiGHS Real-time Monitoring Configuration
+  monitoring:             # Live optimization monitoring settings
+    enable: true          # Enable real-time HiGHS monitoring
+    update_interval: 2.0  # Update frequency in seconds
+    auto_start: true      # Automatically start monitoring with solve
+    log_health_alerts: true  # Log health warnings to solver log
+    show_progress: true   # Display progress indicators
+  
   solver_options:       # Custom solver parameter configurations
     highs-highperf:     # Named configuration set for high-performance settings
       threads: 36       # Increase number of parallel threads for the solver (use all available cores if possible)
@@ -74,10 +83,17 @@ solving:                # Configuration for the optimization solver
   # Set memory limit to
   mem_mb: 60000         # Memory limit in megabytes (60GB)
   
+  # Constraint configuration
+  constraints:
+    CCL: false
+    EQ: false
+    BAU: false
+    SAFE: false
+  
   # Additional solving options for full simulation
   options:               # General solving behavior options
     clip_p_max_pu: 1.e-2   # Ensures that any per-unit generation capacity values (p_max_pu) smaller than 1×10⁻² are clipped (set to that minimum).
-    load_shedding: false    # If true, PyPSA would allow demand to be unmet at a high penalty cost; here, the model must meet all demand.
+    load_shedding: true    # If true, PyPSA would allow demand to be unmet at a high penalty cost; here, the model must meet all demand.
     curtailment_mode: false # If true, the simulation focuses on curtailment analysis rather than cost-optimal dispatch.
     noisy_costs: true       # Adds small random noise to technology costs to break symmetry. Useful to prevent the solver from splitting capacity equally among identical assets in different buses just because they have exactly equal costs.
     skip_iterations: true   # PyPSA-Eur often solves iteratively (e.g., adjusting transmission expansion, capacity factors, or other variables between runs).
@@ -167,7 +183,7 @@ electricity:
   gaslimit_enable: false
   gaslimit:        false
   co2limit_enable: true
-  co2limit: 0.0         # electricity system has CO2-target of 0 emissions in 2035
+  co2limit: 0.002       # electricity system has CO2-target of 0.2% of 1990 emissions in 2035
   co2base: 1.487e+9
 
   operational_reserve:
@@ -180,11 +196,11 @@ electricity:
     iron-air: [100] # 100 hours is the minimum storage duration for iron-air battery, preferably 100 hours standard product. longer is always possible due to easier power requirements.
 
   max_hours:
-    battery: 12
-    H2: 100
+    battery: 48              # Increased from 12h to 48h - allow longer-duration batteries
+    H2: 8760                 # Increased from 100h to 8760h (1 year) - true seasonal storage
     Vanadium-Redox-Flow: 12
     Compressed-Air-Adiabatic: 24
-    iron-air: 100
+    iron-air: 8760           # Increased from 100h to 8760h (1 year) - ultra-long duration storage
 
   extendable_carriers:    # Technologies that can be expanded in the optimization
     Generator: [solar, solar-hsat, onwind, offwind-ac, offwind-dc, offwind-float]  # Generators that can be built
@@ -447,8 +463,8 @@ lines:
     500.: "Al/St 240/40 4-bundle 380.0"
     750.: "Al/St 560/50 4-bundle 750.0"
   s_max_pu: 0.7
-  s_nom_max: .inf
-  max_extension: 20000 #MW
+  s_nom_max: &line_capacity_limit 8000  # MW - Double-circuit 380 kV line capacity limit (increased to 8 GW)
+  max_extension: *line_capacity_limit #MW
   length_factor: 1.25
   reconnect_crimea: true
   under_construction: 'keep' # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
@@ -463,8 +479,8 @@ lines:
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#links
 links:
   p_max_pu: 1.0
-  p_nom_max: .inf
-  max_extension: .inf #MW
+  p_nom_max: &link_capacity_limit 6000  # MW - Bipolar HVDC link capacity limit
+  max_extension: *link_capacity_limit #MW
   length_factor: 1.25
   include_tyndp: true
   under_construction: 'zero' # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
@@ -608,6 +624,12 @@ sector:
     district_heating_loss: 0.0
     supply_temperature_approximation:
       relative_annual_temperature_reduction: 0.005  # Add the missing parameter
+    # Fix for district heating build rules - provide empty lists/default values
+    direct_utilisation_heat_sources: []  # Empty list for electricity-only
+    limited_heat_sources: {}  # Empty dict for electricity-only
+    ptes:
+      max_top_temperature: 90  # Default PTES temperature limit
+      min_bottom_temperature: 35  # Default PTES temperature limit
   heat_pump_sources:
     urban central: []  # Empty list for electricity-only
     urban decentral: []
@@ -665,6 +687,20 @@ sector:
   MWh_MeOH_per_tCO2: 4.0321
   MWh_MeOH_per_MWh_e: 3.6907
   shipping_hydrogen_liquefaction: false
+  # Add missing methanol configuration section for prepare_sector_network
+  methanol:
+    regional_methanol_demand: false
+  # Add missing fossil_fuels configuration for prepare_sector_network
+  fossil_fuels: false  # Disable fossil fuels for electricity-only scenario
+  # Add missing shipping configuration for prepare_sector_network
+  shipping: false  # Disable shipping for electricity-only scenario
+  # Add missing aviation configuration for prepare_sector_network
+  aviation: false  # Disable aviation for electricity-only scenario
+  # Add missing allam_cycle_gas configuration for prepare_sector_network
+  allam_cycle_gas: false  # Disable allam cycle gas for electricity-only scenario
+  # Add missing imports configuration for prepare_sector_network
+  imports:
+    enable: false  # Disable imports for electricity-only scenario
   shipping_hydrogen_share:
     2020: 0
     2025: 0
@@ -753,6 +789,7 @@ sector:
   co2_sequestration_cost: 10
   co2_sequestration_lifetime: 50
   co2_spatial: false
+  co2_network: false
   co2network: false
   co2_network_cost_factor: 1
   cc_fraction: 0.9
@@ -775,7 +812,11 @@ sector:
   electricity_distribution_grid: true
   electricity_distribution_grid_cost_factor: 1.0
   electricity_grid_connection: true
+  # Add missing enable configuration for electricity distribution grid
+  enable:
+    electricity_distribution_grid: true
   transmission_efficiency:
+    enable: ["electricity distribution grid"]  # Enable electricity distribution grid specifically
     DC:
       efficiency_static: 0.98
       efficiency_per_1000km: 0.977
@@ -1035,12 +1076,6 @@ adjustments:
     agg_offwind: false
     include_existing: false
     file: data/agg_p_nom_minmax.csv
-
-  constraints:
-    CCL: false
-    EQ: false
-    BAU: false
-    SAFE: false
 
   runtime: 6h #runtime in humanfriendly style https://humanfriendly.readthedocs.io/en/latest/
   
