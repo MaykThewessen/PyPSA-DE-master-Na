@@ -77,7 +77,10 @@ if __name__ == "__main__":
     logger.info(
         "Loading district heating temperature profiles and constructing PTES temperature approximator"
     )
-    # Initialize unified PTES temperature class
+    # Initialize unified PTES temperature class with safe defaults
+    max_temp = snakemake.params.max_ptes_top_temperature or 90.0
+    min_temp = snakemake.params.min_ptes_bottom_temperature or 35.0
+    
     ptes_temperature_approximator = PtesTemperatureApproximator(
         forward_temperature=xr.open_dataarray(
             snakemake.input.central_heating_forward_temperature_profiles
@@ -85,8 +88,8 @@ if __name__ == "__main__":
         return_temperature=xr.open_dataarray(
             snakemake.input.central_heating_return_temperature_profiles
         ),
-        max_ptes_top_temperature=snakemake.params.max_ptes_top_temperature,
-        min_ptes_bottom_temperature=snakemake.params.min_ptes_bottom_temperature,
+        max_ptes_top_temperature=max_temp,
+        min_ptes_bottom_temperature=min_temp,
     )
 
     # Get PTES clipped top temperature profiles

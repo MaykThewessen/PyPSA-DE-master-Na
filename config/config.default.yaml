@@ -52,34 +52,30 @@ transmission_projects:  # Section for configuring transmission network expansion
   skip: []              # List of project IDs to skip
   new_link_capacity: "zero"  # Whether to keep existing link capacity or set to zero (options: "keep" or "zero")
 
-# High-performance solver settings using HiGHS
+# Interior Point Method solver settings using IPOPT
 solving:                # Configuration for the optimization solver
   solver:               # Solver selection and configuration
-    name: highs         # Use HiGHS solver (high-performance open-source solver)
-    options: highs-highperf  # Reference to custom solver options defined below
+    name: ipopt         # Use IPOPT solver (Interior Point Method)
+    options: ipopt-default  # Reference to custom solver options defined below
   
-  # HiGHS Real-time Monitoring Configuration
-  monitoring:             # Live optimization monitoring settings
-    enable: true          # Enable real-time HiGHS monitoring
-    update_interval: 2.0  # Update frequency in seconds
-    auto_start: true      # Automatically start monitoring with solve
-    log_health_alerts: true  # Log health warnings to solver log
-    show_progress: true   # Display progress indicators
+  # IPOPT Real-time Monitoring Configuration (removed HiGHS-specific monitoring)
+  
+  # HiGHS Real-time Monitoring Configuration (not applicable for IPM)
+  # monitoring:
+  #   enable: true
+  #   update_interval: 2.0
+  #   auto_start: true
+  #   log_health_alerts: true
+  #   show_progress: true
   
   solver_options:       # Custom solver parameter configurations
-    highs-highperf:     # Named configuration set for high-performance settings
-      threads: 36       # Increase number of parallel threads for the solver (use all available cores if possible)
-      # solver: auto-selected by HiGHS - let solver choose IPM or Simplex based on problem characteristics
-      # run_crossover: auto-selected by HiGHS - let solver decide crossover strategy
-      small_matrix_value: 1e-5  # Minimum threshold for matrix values
-      large_matrix_value: 1e9   # Maximum threshold for matrix values
-      primal_feasibility_tolerance: 1e-4  # Loosen tolerance for primal feasibility (faster, but may reduce accuracy)
-      dual_feasibility_tolerance: 1e-4    # Loosen tolerance for dual feasibility
-      ipm_optimality_tolerance: 1e-3      # Loosen optimality tolerance for faster convergence
-      parallel: "on"    # Enable parallel processing
-      random_seed: 123  # this makes sure to use same random numbers every time script is run
-      presolve: "on"    # Enable presolve to reduce problem size and speed up solving
-      time_limit: 18000  # Set a time limit (in seconds) for the solver (5 hours)
+    ipopt-default:      # Named configuration set for IPM settings
+      print_level: 5          # Output verbosity level (0-12, 5 is medium)
+      max_iter: 1000          # Maximum number of iterations
+      tol: 1e-4              # Overall convergence tolerance
+      dual_inf_tol: 1e-4     # Dual infeasibility tolerance
+      constr_viol_tol: 1e-4  # Constraint violation tolerance
+      compl_inf_tol: 1e-4    # Complementarity tolerance
   # Set memory limit to
   mem_mb: 60000         # Memory limit in megabytes (60GB)
   
@@ -129,7 +125,7 @@ scenario:                # Configuration for different simulation scenarios
   - vopt
   clusters:              # List of clustering resolutions to test
   # - 10                 # 10 spatial nodes for higher resolution
-  - 37
+  - 8
   #- 128
   #- 256
   opts:                  # Power sector options for each scenario
@@ -197,10 +193,10 @@ electricity:
 
   max_hours:
     battery: 48              # Increased from 12h to 48h - allow longer-duration batteries
-    H2: 8760                 # Increased from 100h to 8760h (1 year) - true seasonal storage
-    Vanadium-Redox-Flow: 12
-    Compressed-Air-Adiabatic: 24
-    iron-air: 8760           # Increased from 100h to 8760h (1 year) - ultra-long duration storage
+    H2: 1500        # Increased 
+    Vanadium-Redox-Flow: 200
+    Compressed-Air-Adiabatic: 200
+    iron-air: 400         # Increased from 100h to 8760h (1 year) - ultra-long duration storage
 
   extendable_carriers:    # Technologies that can be expanded in the optimization
     Generator: [solar, solar-hsat, onwind, offwind-ac, offwind-dc, offwind-float]  # Generators that can be built
@@ -1064,7 +1060,7 @@ clustering:
       ramp_limit_down: max
   temporal:
     resolution_elec: false
-    resolution_sector: false
+    resolution_sector: "2500seg"
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#adjustments
 adjustments:

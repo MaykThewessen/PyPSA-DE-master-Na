@@ -1,0 +1,151 @@
+Restricted license - for non-production use only - expires 2026-11-23
+Assuming unrestricted shared filesystem usage.
+host: ORE
+Building DAG of jobs...
+Provided cores: 32
+Rules claiming more threads will be scaled down.
+Conda environments: ignored
+Job stats:
+job                    count
+-------------------  -------
+solve_elec_networks        1
+solve_network              1
+total                      2
+
+Select jobs to execute...
+Execute 1 jobs...
+
+[Wed Aug 13 14:41:24 2025]
+localrule solve_network:
+    input: resources/de-all-tech-2035-mayk/networks/base_s_37_elec_.nc
+    output: results/de-all-tech-2035-mayk/networks/base_s_37_elec_.nc, results/de-all-tech-2035-mayk/configs/config.base_s_37_elec_.yaml
+    log: results\de-all-tech-2035-mayk\logs\solve_network\base_s_37_elec__solver.log, results/de-all-tech-2035-mayk/logs/solve_network/base_s_37_elec__memory.log, results/de-all-tech-2035-mayk/logs/solve_network/base_s_37_elec__python.log
+    jobid: 1
+    benchmark: results/de-all-tech-2035-mayk/benchmarks/solve_network/base_s_37_elec_
+    reason: Missing output files: results/de-all-tech-2035-mayk/networks/base_s_37_elec_.nc; Params have changed since last execution: Union of exclusive params before and now across all output: before: {'solver': {'name': 'highs', 'options': 'highs-highperf'}, 'solver_options': {'highs-highperf': {'threads': 36, 'small_matrix_value': '1e-5', 'large_matrix_value': '1e9', 'primal_feasibility_tolerance': '1e-4', 'dual_feasibility_tolerance': '1e-4', 'ipm_optimality_tolerance': '1e-3', 'parallel': 'on', 'random_seed': 123, 'presolve': 'on', 'time_limit': 18000}}, 'mem_mb': 60000, 'options': {'clip_p_max_pu': 0.01, 'load_shedding': False, 'curtailment_mode': False, 'noisy_costs': True, 'skip_iterations': True, 'rolling_horizon': False, 'seed': 123, 'track_iterations': False, 'min_iterations': 2, 'max_iterations': 6, 'transmission_losses': 2, 'linearized_unit_commitment': True, 'horizon': 365}} now: {'solver': {'name': 'highs', 'options': 'highs-highperf'}, 'monitoring': {'enable': True, 'update_interval': 2.0, 'auto_start': True, 'log_health_alerts': True, 'show_progress': True}, 'solver_options': {'highs-highperf': {'threads': 36, 'small_matrix_value': '1e-5', 'large_matrix_value': '1e9', 'primal_feasibility_tolerance': '1e-4', 'dual_feasibility_tolerance': '1e-4', 'ipm_optimality_tolerance': '1e-3', 'parallel': 'on', 'random_seed': 123, 'presolve': 'on', 'time_limit': 18000, 'user_bound_scale': -1}}, 'mem_mb': 60000, 'constraints': {'CCL': False, 'EQ': False, 'BAU': False, 'SAFE': False}, 'options': {'clip_p_max_pu': 0.01, 'load_shedding': True, 'curtailment_mode': False, 'noisy_costs': True, 'skip_iterations': True, 'rolling_horizon': False, 'seed': 123, 'track_iterations': False, 'min_iterations': 2, 'max_iterations': 6, 'transmission_losses': 2, 'linearized_unit_commitment': True, 'horizon': 365}} 
+    wildcards: clusters=37, opts=
+    threads: 32
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=51645, mem_mib=49253, runtime=360
+WARNING:pypsa.network.io:Importing network from PyPSA version v0.0.0 while current version is v0.35.1. Read the release notes at https://pypsa.readthedocs.io/en/latest/release_notes.html to prepare your network for import.
+INFO:pypsa.network.io:Imported network 'Unnamed Network' has buses, carriers, generators, global_constraints, lines, links, loads, storage_units, stores
+INFO:scripts._bounds_helper:Using default technical limits
+INFO:__main__:No expandable lines found. Skipping iterative solving.
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\logging\__init__.py", line 1163, in emit
+    stream.write(msg + self.terminator)
+  File "C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f680' in position 14: character maps to <undefined>
+Call stack:
+  File "C:\Users\mayk\PyPSA-DE-master-Na\.snakemake\scripts\tmpc07v18s3.solve_network.py", line 1571, in <module>
+    solve_network(
+  File "C:\Users\mayk\PyPSA-DE-master-Na\.snakemake\scripts\tmpc07v18s3.solve_network.py", line 1492, in solve_network
+    monitor_process = start_highs_monitor(log_file, config)
+  File "C:\Users\mayk\PyPSA-DE-master-Na\.snakemake\scripts\tmpc07v18s3.solve_network.py", line 1318, in start_highs_monitor
+    logger.info(f"\U0001f680 Starting HiGHS real-time monitoring: {' '.join(cmd)}")
+Message: '\U0001f680 Starting HiGHS real-time monitoring: C:\\Users\\mayk\\miniforge3\\envs\\pypsa-eur\\python.exe C:\\Users\\mayk\\PyPSA-DE-master-Na\\monitor_highs.py results\\de-all-tech-2035-mayk\\logs\\solve_network\\base_s_37_elec__solver.log -i 2.0'
+Arguments: ()
+INFO:__main__:\U0001f680 Starting HiGHS real-time monitoring: C:\Users\mayk\miniforge3\envs\pypsa-eur\python.exe C:\Users\mayk\PyPSA-DE-master-Na\monitor_highs.py results\de-all-tech-2035-mayk\logs\solve_network\base_s_37_elec__solver.log -i 2.0
+ERROR:__main__:HiGHS monitor failed to start: usage: monitor_highs.py [-h] [--history HISTORY]
+                        [--stall-threshold STALL_THRESHOLD]
+                        [logfile]
+monitor_highs.py: error: unrecognized arguments: -i 2.0
+
+INFO:__main__:Adding solar potential constraint.
+INFO:linopy.model: Solve problem using Highs solver
+INFO:linopy.model:Solver logs written to `results\de-all-tech-2035-mayk\logs\solve_network\base_s_37_elec__solver.log`.
+INFO:linopy.model:Solver options:
+ - threads: 36
+ - small_matrix_value: 1e-5
+ - large_matrix_value: 1e9
+ - primal_feasibility_tolerance: 1e-4
+ - dual_feasibility_tolerance: 1e-4
+ - ipm_optimality_tolerance: 1e-3
+ - parallel: on
+ - random_seed: 123
+ - presolve: on
+ - time_limit: 18000
+ - user_bound_scale: -1
+INFO:linopy.io:Writing objective.
+
+Writing constraints.:   0%|          | 0/36 [00:00<?, ?it/s]
+Writing constraints.:  19%|#9        | 7/36 [00:04<00:20,  1.44it/s]
+Writing constraints.:  22%|##2       | 8/36 [00:09<00:40,  1.43s/it]
+Writing constraints.:  25%|##5       | 9/36 [00:12<00:42,  1.58s/it]
+Writing constraints.:  28%|##7       | 10/36 [00:15<00:51,  1.99s/it]
+Writing constraints.:  31%|###       | 11/36 [00:17<00:51,  2.06s/it]
+Writing constraints.:  33%|###3      | 12/36 [00:20<00:50,  2.11s/it]
+Writing constraints.:  36%|###6      | 13/36 [00:20<00:37,  1.64s/it]
+Writing constraints.:  39%|###8      | 14/36 [00:20<00:27,  1.27s/it]
+Writing constraints.:  42%|####1     | 15/36 [00:23<00:34,  1.64s/it]
+Writing constraints.:  44%|####4     | 16/36 [00:27<00:48,  2.42s/it]
+Writing constraints.:  47%|####7     | 17/36 [00:29<00:40,  2.11s/it]
+Writing constraints.:  50%|#####     | 18/36 [00:31<00:38,  2.15s/it]
+Writing constraints.:  53%|#####2    | 19/36 [00:31<00:27,  1.63s/it]
+Writing constraints.:  56%|#####5    | 20/36 [00:32<00:20,  1.26s/it]
+Writing constraints.:  58%|#####8    | 21/36 [00:32<00:15,  1.00s/it]
+Writing constraints.:  61%|######1   | 22/36 [00:32<00:11,  1.22it/s]
+Writing constraints.:  64%|######3   | 23/36 [00:33<00:09,  1.44it/s]
+Writing constraints.:  67%|######6   | 24/36 [00:33<00:07,  1.65it/s]
+Writing constraints.:  69%|######9   | 25/36 [00:49<00:56,  5.16s/it]
+Writing constraints.:  72%|#######2  | 26/36 [00:51<00:43,  4.37s/it]
+Writing constraints.:  75%|#######5  | 27/36 [00:53<00:30,  3.44s/it]
+Writing constraints.:  78%|#######7  | 28/36 [00:56<00:26,  3.36s/it]
+Writing constraints.:  81%|########  | 29/36 [00:57<00:19,  2.75s/it]
+Writing constraints.:  83%|########3 | 30/36 [01:00<00:15,  2.67s/it]
+Writing constraints.:  86%|########6 | 31/36 [01:02<00:13,  2.61s/it]
+Writing constraints.:  89%|########8 | 32/36 [01:05<00:10,  2.57s/it]
+Writing constraints.:  92%|#########1| 33/36 [01:07<00:07,  2.54s/it]
+Writing constraints.:  94%|#########4| 34/36 [01:08<00:04,  2.17s/it]
+Writing constraints.: 100%|##########| 36/36 [01:08<00:00,  1.91s/it]
+
+Writing continuous variables.:   0%|          | 0/13 [00:00<?, ?it/s]
+Writing continuous variables.:  31%|###       | 4/13 [00:04<00:10,  1.17s/it]
+Writing continuous variables.:  38%|###8      | 5/13 [00:05<00:08,  1.08s/it]
+Writing continuous variables.:  46%|####6     | 6/13 [00:07<00:09,  1.30s/it]
+Writing continuous variables.:  54%|#####3    | 7/13 [00:08<00:06,  1.16s/it]
+Writing continuous variables.:  62%|######1   | 8/13 [00:08<00:04,  1.10it/s]
+Writing continuous variables.:  69%|######9   | 9/13 [00:08<00:02,  1.40it/s]
+Writing continuous variables.:  77%|#######6  | 10/13 [00:08<00:01,  1.72it/s]
+Writing continuous variables.:  85%|########4 | 11/13 [00:09<00:01,  1.54it/s]
+Writing continuous variables.:  92%|#########2| 12/13 [00:10<00:00,  1.43it/s]
+Writing continuous variables.: 100%|##########| 13/13 [00:10<00:00,  1.23it/s]
+INFO:linopy.io: Writing time: 86.98s
+Running HiGHS 1.11.0 (git hash: 364c83a): Copyright (c) 2025 HiGHS under MIT licence terms
+INFO:linopy.solvers:Log file at C:\Users\mayk\PyPSA-DE-master-Na\results\de-all-tech-2035-mayk\logs\solve_network\base_s_37_elec__solver.log
+LP   linopy-problem-tib5c6gl has 19325115 rows; 8278552 cols; 39107396 nonzeros
+Coefficient ranges:
+  Matrix [1e-03, 8e+01]
+  Cost   [9e-03, 3e+05]
+  Bound  [4e+09, 4e+09]
+  RHS    [2e-02, 3e+04]
+Presolving model
+8546809 rows, 6763659 cols, 25608970 nonzeros  19s
+Dependent equations search running on 1287756 equations with time limit of 180.00s
+Dependent equations search removed 0 rows and 0 nonzeros in 0.27s (limit = 180.00s)
+7732165 rows, 5949015 cols, 25037340 nonzeros  56s
+Presolve : Reductions: rows 7732165(-11592950); columns 5949015(-2329537); elements 25037340(-14070056)
+Solving the presolved LP
+Using EKK parallel dual simplex solver - PAMI with concurrency of 8
+  Iteration        Objective     Infeasibilities num(sum)
+          0     1.1990787271e+04 Pr: 324120(1.01335e+09); Du: 0(9.49586e-07) 68s
+       1255     5.4433775710e+08 Pr: 325102(1.03864e+09); Du: 0(0.00175626) 142s
+       2665     7.9957568597e+08 Pr: 457477(1.08077e+09); Du: 0(0.00277228) 229s
+       4065     7.9969190018e+08 Pr: 616863(1.18703e+12); Du: 0(0.00306911) 322s
+       5433     1.1456069789e+09 Pr: 380954(6.9358e+11); Du: 0(0.00760622) 429s
+       6601     1.1456102278e+09 Pr: 540010(4.87984e+12); Du: 0(0.0070342) 519s
+       7484     1.1456125903e+09 Pr: 460740(1.3658e+11); Du: 0(0.00742533) 591s
+       8442     1.1456153607e+09 Pr: 567140(7.3752e+11); Du: 0(0.00865287) 668s
+       9578     1.1456189676e+09 Pr: 489401(3.77326e+11); Du: 0(0.0101937) 754s
+      10484     1.1456210691e+09 Pr: 516191(2.2212e+11); Du: 0(0.00884513) 827s
+      11986     1.1456255681e+09 Pr: 483537(4.6541e+11); Du: 0(0.0122796) 931s
+      13175     1.1456278302e+09 Pr: 651288(9.82405e+11); Du: 0(0.014171) 1023s
+      14486     1.1456304497e+09 Pr: 573409(2.04087e+12); Du: 0(0.0159938) 1116s
+      15667     1.1456687901e+09 Pr: 521077(9.43326e+11); Du: 0(0.0185325) 1228s
+      17435     1.1456728658e+09 Pr: 663546(1.01229e+13); Du: 0(0.0194909) 1373s
+      19360     1.1456785199e+09 Pr: 604088(4.34128e+13); Du: 0(0.0253174) 1523s
+      21625     1.1456854977e+09 Pr: 606108(1.09253e+14); Du: 0(0.030538) 1680s
+      22867     1.1456890642e+09 Pr: 632980(4.51804e+13); Du: 0(0.0298503) 1772s
+      24466     1.1456931456e+09 Pr: 634236(3.31114e+13); Du: 0(0.0347444) 1889s

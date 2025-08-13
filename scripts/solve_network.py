@@ -31,7 +31,10 @@ import logging
 import os
 import re
 import sys
+import threading
+import subprocess
 from functools import partial
+from pathlib import Path
 from typing import Any
 
 import linopy
@@ -1265,6 +1268,112 @@ def extra_functionality(
         custom_extra_functionality(n, snapshots, snakemake)  # pylint: disable=E0601
 
 
+def start_highs_monitor(log_file: str, config: dict) -> subprocess.Popen | None:
+    """
+    Start HiGHS real-time monitoring in background process.
+    
+    Parameters
+    ----------
+    log_file : str
+        Path to HiGHS solver log file
+    config : dict
+        Configuration dictionary containing monitoring settings
+    
+    Returns
+    -------
+    subprocess.Popen | None
+        Monitor process handle or None if monitoring disabled
+    """
+    monitoring_config = config.get("solving", {}).get("monitoring", {})
+    
+    if not monitoring_config.get("enable", False):
+        return None
+    
+    if not monitoring_config.get("auto_start", True):
+        logger.info("HiGHS monitoring configured but auto_start is disabled. "
+                   f"Run manually: python monitor_highs.py {log_file}")
+        return None
+    
+    try:
+        # Get the directory of the current script
+        script_dir = Path(__file__).parent.parent
+        monitor_script = script_dir / "monitor_highs.py"
+        
+        if not monitor_script.exists():
+            logger.warning(f"HiGHS monitor script not found at {monitor_script}. "
+                          "Monitoring disabled.")
+            return None
+        
+        # Prepare command
+        update_interval = monitoring_config.get("update_interval", 2.0)
+        cmd = [
+            sys.executable, str(monitor_script),
+            log_file,
+            "-i", str(update_interval)
+        ]
+        
+        logger.info(f"🚀 Starting HiGHS real-time monitoring: {' '.join(cmd)}")
+        
+        # Start monitoring process with output redirected to avoid interference
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1
+        )
+        
+        # Give the process a moment to start
+        import time
+        time.sleep(1)
+        
+        if process.poll() is not None:
+            # Process already terminated
+            stderr = process.stderr.read() if process.stderr else "No error output"
+            logger.error(f"HiGHS monitor failed to start: {stderr}")
+            return None
+            
+        logger.info("✅ HiGHS monitoring started successfully")
+        return process
+        
+    except Exception as e:
+        logger.warning(f"Failed to start HiGHS monitoring: {e}. Continuing without monitoring.")
+        return None
+
+
+def stop_highs_monitor(process: subprocess.Popen | None) -> None:
+    """
+    Stop HiGHS monitoring process gracefully.
+    
+    Parameters
+    ----------
+    process : subprocess.Popen | None
+        Monitor process handle
+    """
+    if process is None:
+        return
+        
+    try:
+        if process.poll() is None:  # Process is still running
+            logger.info("🛑 Stopping HiGHS monitoring")
+            process.terminate()
+            
+            # Wait up to 5 seconds for graceful termination
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                logger.warning("HiGHS monitor didn't terminate gracefully, killing process")
+                process.kill()
+                process.wait()
+                
+            logger.info("✅ HiGHS monitoring stopped")
+        else:
+            logger.debug("HiGHS monitor process already terminated")
+            
+    except Exception as e:
+        logger.warning(f"Error stopping HiGHS monitor: {e}")
+
+
 def check_objective_value(n: pypsa.Network, solving: dict) -> None:
     """
     Check if objective value matches expected value within tolerance.
@@ -1281,8 +1390,8 @@ def check_objective_value(n: pypsa.Network, solving: dict) -> None:
     ObjectiveValueError
         If objective value differs from expected value beyond tolerance
     """
-    check_objective = solving["check_objective"]
-    if check_objective["enable"]:
+    check_objective = solving.get("check_objective", {})
+    if check_objective.get("enable", False):
         atol = check_objective["atol"]
         rtol = check_objective["rtol"]
         expected_value = check_objective["expected_value"]
@@ -1372,23 +1481,34 @@ def solve_network(
     n.config = config
     n.params = params
 
-    if rolling_horizon and rule_name == "solve_operations_network":
-        kwargs["horizon"] = cf_solving.get("horizon", 365)
-        kwargs["overlap"] = cf_solving.get("overlap", 0)
-        n.optimize.optimize_with_rolling_horizon(**kwargs)
-        status, condition = "", ""
-    elif skip_iterations:
-        status, condition = n.optimize(**kwargs)
-    else:
-        kwargs["track_iterations"] = cf_solving["track_iterations"]
-        kwargs["min_iterations"] = cf_solving["min_iterations"]
-        kwargs["max_iterations"] = cf_solving["max_iterations"]
-        if cf_solving["post_discretization"].pop("enable"):
-            logger.info("Add post-discretization parameters.")
-            kwargs.update(cf_solving["post_discretization"])
-        status, condition = n.optimize.optimize_transmission_expansion_iteratively(
-            **kwargs
-        )
+    # HiGHS monitoring integration
+    monitor_process = None
+    if kwargs["solver_name"].lower() == "highs":
+        log_file = kwargs.get("log_fn", "solver.log")
+        if log_file:
+            monitor_process = start_highs_monitor(log_file, config)
+    
+    try:
+        if rolling_horizon and rule_name == "solve_operations_network":
+            kwargs["horizon"] = cf_solving.get("horizon", 365)
+            kwargs["overlap"] = cf_solving.get("overlap", 0)
+            n.optimize.optimize_with_rolling_horizon(**kwargs)
+            status, condition = "", ""
+        elif skip_iterations:
+            status, condition = n.optimize(**kwargs)
+        else:
+            kwargs["track_iterations"] = cf_solving["track_iterations"]
+            kwargs["min_iterations"] = cf_solving["min_iterations"]
+            kwargs["max_iterations"] = cf_solving["max_iterations"]
+            if cf_solving["post_discretization"].pop("enable"):
+                logger.info("Add post-discretization parameters.")
+                kwargs.update(cf_solving["post_discretization"])
+            status, condition = n.optimize.optimize_transmission_expansion_iteratively(
+                **kwargs
+            )
+    finally:
+        # Always stop monitoring when optimization completes
+        stop_highs_monitor(monitor_process)
 
     if not rolling_horizon:
         if status != "ok":

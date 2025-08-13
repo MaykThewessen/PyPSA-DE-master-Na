@@ -88,20 +88,27 @@ if __name__ == "__main__":
     set_scenario_config(snakemake)
 
     direct_utilisation_heat_sources: list[str] = (
-        snakemake.params.direct_utilisation_heat_sources
+        snakemake.params.direct_utilisation_heat_sources or []
     )
 
     central_heating_forward_temperature: xr.DataArray = xr.open_dataarray(
         snakemake.input.central_heating_forward_temperature_profiles
     )
 
-    xr.concat(
-        [
-            get_profile(
-                source_temperature=get_source_temperature(heat_source_key),
-                forward_temperature=central_heating_forward_temperature,
-            ).assign_coords(heat_source=heat_source_key)
-            for heat_source_key in direct_utilisation_heat_sources
-        ],
-        dim="heat_source",
-    ).to_netcdf(snakemake.output.direct_heat_source_utilisation_profiles)
+    # Handle empty list by creating a dummy output
+    if not direct_utilisation_heat_sources:
+        # Create empty DataArray with proper structure for district heating disabled case
+        dummy_profile = xr.zeros_like(central_heating_forward_temperature)
+        dummy_profile = dummy_profile.expand_dims("heat_source").assign_coords(heat_source=["none"])
+        dummy_profile.to_netcdf(snakemake.output.direct_heat_source_utilisation_profiles)
+    else:
+        xr.concat(
+            [
+                get_profile(
+                    source_temperature=get_source_temperature(heat_source_key),
+                    forward_temperature=central_heating_forward_temperature,
+                ).assign_coords(heat_source=heat_source_key)
+                for heat_source_key in direct_utilisation_heat_sources
+            ],
+            dim="heat_source",
+        ).to_netcdf(snakemake.output.direct_heat_source_utilisation_profiles)
