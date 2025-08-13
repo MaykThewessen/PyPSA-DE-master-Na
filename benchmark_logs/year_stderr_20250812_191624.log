@@ -1,0 +1,865 @@
+Assuming unrestricted shared filesystem usage.
+host: ORE
+Building DAG of jobs...
+Provided cores: 2
+Rules claiming more threads will be scaled down.
+Conda environments: ignored
+Job stats:
+job                                  count
+---------------------------------  -------
+add_electricity                          1
+add_transmission_projects_and_dlr        1
+base_network                             1
+build_electricity_demand_base            1
+build_hydro_profile                      1
+build_powerplants                        1
+build_renewable_profiles                 6
+build_shapes                             1
+build_transmission_projects              1
+cluster_network                          1
+determine_availability_matrix            6
+prepare_network                          1
+simplify_network                         1
+solve_network                            1
+total                                   24
+
+Select jobs to execute...
+Execute 1 jobs...
+
+[Tue Aug 12 18:49:54 2025]
+localrule build_shapes:
+    input: data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg, data/nuts/NUTS_RG_01M_2021_4326_LEVL_3.geojson, data/osm-boundaries/build/BA_adm1.geojson, data/osm-boundaries/build/MD_adm1.geojson, data/osm-boundaries/build/UA_adm1.geojson, data/osm-boundaries/build/XK_adm1.geojson, data/jrc-ardeco/ARDECO-SUVGDP.2021.table.csv, data/jrc-ardeco/ARDECO-SNPTD.2021.table.csv, data/bundle/GDP_per_capita_PPP_1990_2015_v2.nc, data/bundle/ppp_2019_1km_Aggregated.tif
+    output: resources/de-all-tech-2035-mayk/country_shapes.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/europe_shape.geojson, resources/de-all-tech-2035-mayk/nuts3_shapes.geojson
+    log: logs/de-all-tech-2035-mayk/build_shapes.log
+    jobid: 6
+    benchmark: benchmarks/de-all-tech-2035-mayk/build_shapes
+    reason: Params have changed since last execution: Union of exclusive params before and now across all output: before: 'base' now: 'busmap' 
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=1500, mem_mib=1431
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:pyogrio._io:Created 1 records
+INFO:__main__:Processing NUTS regions.
+INFO:__main__:Processing non-NUTS regions.
+INFO:__main__:Harmonising NUTS and non-NUTS regions.
+INFO:__main__:Clipping regions by offshore shapes.
+INFO:__main__:Importing JRC ARDECO GDP data for year 2019.
+INFO:__main__:Importing JRC ARDECO population data for year 2019.
+INFO:__main__:Simplifying geometries for Europe by removing small islands smaller than 500 km2 or further than 200 km away.
+INFO:pyogrio._io:Created 1 records
+INFO:pyogrio._io:Created 1 records
+INFO:__main__:Exporting NUTS3 and ADM1 shapes with GDP and POP values to resources/de-all-tech-2035-mayk/nuts3_shapes.geojson.
+INFO:pyogrio._io:Created 401 records
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 18:51:35 2025]
+Finished jobid: 6 (Rule: build_shapes)
+1 of 24 steps (4%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Tue Aug 12 18:51:35 2025]
+localrule base_network:
+    input: data/osm-prebuilt/0.6/converters.csv, data/osm-prebuilt/0.6/links.csv, data/osm-prebuilt/0.6/lines.csv, data/osm-prebuilt/0.6/buses.csv, data/osm-prebuilt/0.6/transformers.csv, resources/de-all-tech-2035-mayk/nuts3_shapes.geojson, resources/de-all-tech-2035-mayk/country_shapes.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/europe_shape.geojson
+    output: resources/de-all-tech-2035-mayk/networks/base.nc, resources/de-all-tech-2035-mayk/regions_onshore.geojson, resources/de-all-tech-2035-mayk/regions_offshore.geojson, resources/de-all-tech-2035-mayk/admin_shapes.geojson
+    log: logs/de-all-tech-2035-mayk/base_network.log
+    jobid: 21
+    benchmark: benchmarks/de-all-tech-2035-mayk/base_network
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/country_shapes.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/europe_shape.geojson, resources/de-all-tech-2035-mayk/nuts3_shapes.geojson
+    threads: 2
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=1500, mem_mib=1431
+Select jobs to execute...
+INFO:__main__:Creating base network using osm-prebuilt v0.6.
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:__main__:Removing buses outside of range AC 220.0 - 750.0 V
+WARNING:__main__:Voltages {400.0, 330.0} not in the {220.0: 'Al/St 240/40 2-bundle 220.0', 300.0: 'Al/St 240/40 3-bundle 300.0', 380.0: 'Al/St 240/40 4-bundle 380.0', 500.0: 'Al/St 240/40 4-bundle 380.0', 750.0: 'Al/St 560/50 4-bundle 750.0'} or [220.0, 300.0, 330.0, 380.0, 400.0, 500.0, 750.0] list.
+INFO:__main__:Removing 0 unconnected network components with less than nan buses. In total 0 buses.
+INFO:__main__:Building bus regions per country level.
+
+Building onshore regions:   0%|          | 0/1 [00:00<?, ? regions/s]
+Building onshore regions: 100%|██████████| 1/1 [00:02<00:00,  2.54s/ regions]
+Building onshore regions: 100%|██████████| 1/1 [00:02<00:00,  2.54s/ regions]
+INFO:__main__:In total 789 onshore regions.
+
+Building offshore regions:   0%|          | 0/1 [00:00<?, ? regions/s]
+Building offshore regions: 100%|██████████| 1/1 [00:00<00:00,  4.08 regions/s]
+Building offshore regions: 100%|██████████| 1/1 [00:00<00:00,  4.08 regions/s]
+INFO:__main__:In total 60 offshore regions.
+INFO:pypsa.io:Exported network 'base.nc' contains: carriers, lines, transformers, links, buses, shapes
+INFO:pyogrio._io:Created 789 records
+INFO:pyogrio._io:Created 60 records
+INFO:pyogrio._io:Created 1 records
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 18:51:42 2025]
+Finished jobid: 21 (Rule: base_network)
+2 of 24 steps (8%) done
+Execute 2 jobs...
+
+[Tue Aug 12 18:51:42 2025]
+localrule build_hydro_profile:
+    input: resources/de-all-tech-2035-mayk/country_shapes.geojson, data/eia_hydro_annual_generation.csv, data/eia_hydro_annual_capacity.csv, data/bundle/era5-runoff-per-country.csv, cutouts/europe-2023-sarah3-era5.nc
+    output: resources/de-all-tech-2035-mayk/profile_hydro.nc
+    log: logs/de-all-tech-2035-mayk/build_hydro_profile.log
+    jobid: 41
+    benchmark: benchmarks/de-all-tech-2035-mayk/build_hydro_profile
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/country_shapes.geojson
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=5000, mem_mib=4769
+[Tue Aug 12 18:51:42 2025]
+localrule build_transmission_projects:
+    input: resources/de-all-tech-2035-mayk/networks/base.nc, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/europe_shape.geojson, data/transmission_projects/tyndp2020, data/transmission_projects/nep, data/transmission_projects/manual
+    output: resources/de-all-tech-2035-mayk/transmission_projects/new_lines.csv, resources/de-all-tech-2035-mayk/transmission_projects/new_links.csv, resources/de-all-tech-2035-mayk/transmission_projects/adjust_lines.csv, resources/de-all-tech-2035-mayk/transmission_projects/adjust_links.csv, resources/de-all-tech-2035-mayk/transmission_projects/new_buses.csv
+    log: logs/de-all-tech-2035-mayk/build_transmission_projects.log
+    jobid: 23
+    benchmark: benchmarks/de-all-tech-2035-mayk/build_transmission_projects
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/networks/base.nc, resources/de-all-tech-2035-mayk/europe_shape.geojson
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=4000, mem_mib=3815
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:pypsa.io:Imported network base.nc has buses, carriers, lines, links, shapes, transformers
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+WARNING:country_converter.country_converter:Eurasia not found in regex
+INFO:atlite.convert:Convert and aggregate 'runoff'.
+INFO:__main__:Processing new lines projects from tyndp2020.
+WARNING:__main__:Project lines outside of the covered area (skipping): TYNDP2020_0, TYNDP2020_1, TYNDP2020_2, TYNDP2020_3, TYNDP2020_4, TYNDP2020_6, TYNDP2020_8, TYNDP2020_9, TYNDP2020_11, TYNDP2020_12, TYNDP2020_13, TYNDP2020_14, TYNDP2020_15, TYNDP2020_16, TYNDP2020_17, TYNDP2020_21, TYNDP2020_22, TYNDP2020_23, TYNDP2020_24, TYNDP2020_25, TYNDP2020_26, TYNDP2020_27, TYNDP2020_28, TYNDP2020_29, TYNDP2020_30, TYNDP2020_31, TYNDP2020_32, TYNDP2020_33, TYNDP2020_34, TYNDP2020_35, TYNDP2020_36, TYNDP2020_37, TYNDP2020_38, TYNDP2020_39, TYNDP2020_43, TYNDP2020_44, TYNDP2020_45, TYNDP2020_46, TYNDP2020_47, TYNDP2020_48, TYNDP2020_49, TYNDP2020_50, TYNDP2020_51, TYNDP2020_52, TYNDP2020_56, TYNDP2020_57, TYNDP2020_58, TYNDP2020_59, TYNDP2020_60, TYNDP2020_61, TYNDP2020_62, TYNDP2020_63, TYNDP2020_64, TYNDP2020_65, TYNDP2020_66, TYNDP2020_67, TYNDP2020_68, TYNDP2020_69, TYNDP2020_70, TYNDP2020_71, TYNDP2020_72, TYNDP2020_73, TYNDP2020_74, TYNDP2020_76, TYNDP2020_77, TYNDP2020_78, TYNDP2020_79, TYNDP2020_80, TYNDP2020_81, TYNDP2020_82, TYNDP2020_83, TYNDP2020_84, TYNDP2020_85, TYNDP2020_86, TYNDP2020_87, TYNDP2020_88, TYNDP2020_89, TYNDP2020_90, TYNDP2020_92, TYNDP2020_93, TYNDP2020_94, TYNDP2020_95, TYNDP2020_96, TYNDP2020_97, TYNDP2020_98, TYNDP2020_99, TYNDP2020_100, TYNDP2020_104, TYNDP2020_105, TYNDP2020_107, TYNDP2020_108, TYNDP2020_109, TYNDP2020_110, TYNDP2020_111, TYNDP2020_113, TYNDP2020_115, TYNDP2020_116, TYNDP2020_117, TYNDP2020_124, TYNDP2020_125, TYNDP2020_126, TYNDP2020_127, TYNDP2020_128, TYNDP2020_129, TYNDP2020_130, TYNDP2020_132, TYNDP2020_133, TYNDP2020_134, TYNDP2020_135, TYNDP2020_136, TYNDP2020_137
+WARNING:__main__:Found new lines similar to existing lines:
+{'TYNDP2020_120': 'way/881636336-380', 'TYNDP2020_122': 'merged_way/574218866-380+6', 'TYNDP2020_53': 'relation/15097913-380'}
+ Lines are assumed to be duplicated and will be ignored.
+INFO:__main__:Processing new links projects from tyndp2020.
+WARNING:__main__:Project lines outside of the covered area (skipping): TYNDP2020_0, TYNDP2020_3, TYNDP2020_6, TYNDP2020_7, TYNDP2020_8, TYNDP2020_11, TYNDP2020_12, TYNDP2020_13, TYNDP2020_14, TYNDP2020_15, TYNDP2020_16, TYNDP2020_17, TYNDP2020_19, TYNDP2020_20, TYNDP2020_21, TYNDP2020_23_NEP_DC1, TYNDP2020_24, TYNDP2020_25, TYNDP2020_26, TYNDP2020_27, TYNDP2020_28, TYNDP2020_29, TYNDP2020_30, TYNDP2020_31, TYNDP2020_32, TYNDP2020_33, TYNDP2020_34, TYNDP2020_35, TYNDP2020_36, TYNDP2020_37, TYNDP2020_38, TYNDP2020_39, TYNDP2020_40, TYNDP2020_41, TYNDP2020_42, TYNDP2020_43, TYNDP2020_44, TYNDP2020_45, TYNDP2020_46, TYNDP2020_47, TYNDP2020_48, TYNDP2020_49
+INFO:__main__:Processing upgraded lines projects from tyndp2020.
+WARNING:__main__:Project lines outside of the covered area (skipping): 6031, 5123, 8435, 12697, 14734, 6348, 6347, 14499, 9296, 6044, 6087, 14697, 14758, 8621, 6036, 3715, 8260, 8367, 1693, 12696, 3966, 14277, 14594, 12655, 6355
+INFO:__main__:Processing upgraded links projects from tyndp2020.
+WARNING:__main__:Project lines outside of the covered area (skipping): T0, 14801, T17, T25, T12, T13, 5635
+INFO:__main__:Processing new lines projects from nep.
+INFO:__main__:Processing new links projects from nep.
+WARNING:__main__:Project lines outside of the covered area (skipping): DC1, DC2
+WARNING:__main__:Found new lines similar to existing lines:
+{'DC3': 'TYNDP2020_1_NEP_DC3', 'DC4': 'TYNDP2020_2_NEP_DC4'}
+ Lines are assumed to be duplicated and will be ignored.
+INFO:__main__:Processing new links projects from manual.
+WARNING:__main__:Project lines outside of the covered area (skipping): TYNDP2024_153, TYNDP2018_25, TYNDP2024_285, TYNDP2024_16, TYNDP2018_21, TYNDP2022_286, TYNDP2024_1134, TYNDP2024_1157, TYNDP2024_1166, TYNDP2024_1169, TYNDP2024_1168, TYNDP2024_1168_1, TYNDP2024_1192, TYNDP2024_1197, TYNDP2024_1210, TYNDP2024_1211, TYNDP2024_1216, TYNDP2024_1231
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 18:51:46 2025]
+Finished jobid: 23 (Rule: build_transmission_projects)
+3 of 24 steps (12%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Tue Aug 12 18:51:46 2025]
+localrule add_transmission_projects_and_dlr:
+    input: resources/de-all-tech-2035-mayk/networks/base.nc, resources/de-all-tech-2035-mayk/transmission_projects/new_buses.csv, resources/de-all-tech-2035-mayk/transmission_projects/new_lines.csv, resources/de-all-tech-2035-mayk/transmission_projects/new_links.csv, resources/de-all-tech-2035-mayk/transmission_projects/adjust_lines.csv, resources/de-all-tech-2035-mayk/transmission_projects/adjust_links.csv
+    output: resources/de-all-tech-2035-mayk/networks/base_extended.nc
+    log: logs/de-all-tech-2035-mayk/add_transmission_projects_and_dlr.log
+    jobid: 20
+    benchmark: benchmarks/de-all-tech-2035-mayk/add_transmission_projects_and_dlr
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/transmission_projects/new_buses.csv, resources/de-all-tech-2035-mayk/transmission_projects/new_lines.csv, resources/de-all-tech-2035-mayk/transmission_projects/adjust_links.csv, resources/de-all-tech-2035-mayk/transmission_projects/adjust_lines.csv, resources/de-all-tech-2035-mayk/networks/base.nc, resources/de-all-tech-2035-mayk/transmission_projects/new_links.csv
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=4000, mem_mib=3815
+INFO:pypsa.io:Imported network base.nc has buses, carriers, lines, links, shapes, transformers
+INFO:__main__:Adding transmission projects to network.
+INFO:pypsa.io:Exported network 'base_extended.nc' contains: links, shapes, transformers, carriers, lines, buses
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 18:51:49 2025]
+Finished jobid: 20 (Rule: add_transmission_projects_and_dlr)
+4 of 24 steps (17%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Tue Aug 12 18:51:49 2025]
+localrule simplify_network:
+    input: resources/de-all-tech-2035-mayk/networks/base_extended.nc, resources/de-all-tech-2035-mayk/regions_onshore.geojson, resources/de-all-tech-2035-mayk/regions_offshore.geojson, resources/de-all-tech-2035-mayk/admin_shapes.geojson
+    output: resources/de-all-tech-2035-mayk/networks/base_s.nc, resources/de-all-tech-2035-mayk/regions_onshore_base_s.geojson, resources/de-all-tech-2035-mayk/regions_offshore_base_s.geojson, resources/de-all-tech-2035-mayk/busmap_base_s.csv
+    log: logs/de-all-tech-2035-mayk/simplify_network.log
+    jobid: 19
+    benchmark: benchmarks/de-all-tech-2035-mayk/simplify_network_b
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/networks/base_extended.nc, resources/de-all-tech-2035-mayk/regions_offshore.geojson, resources/de-all-tech-2035-mayk/admin_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore.geojson
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=12000, mem_mib=11445
+INFO:pypsa.io:Imported network base_extended.nc has buses, carriers, lines, links, shapes, transformers
+INFO:__main__:Mapping all network lines onto a single 380kV layer
+INFO:__main__:Simplifying connected link components
+INFO:__main__:Removing stubs
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:pyogrio._io:Created 471 records
+INFO:pyogrio._io:Created 43 records
+INFO:pypsa.io:Exported network 'base_s.nc' contains: lines, links, shapes, buses, carriers
+INFO:__main__:Simplified network:
+Buses: 792 to 471
+Lines: 1046 to 835
+Links: 22 to 18
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 18:51:53 2025]
+Finished jobid: 19 (Rule: simplify_network)
+5 of 24 steps (21%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Tue Aug 12 18:51:53 2025]
+localrule build_electricity_demand_base:
+    input: resources/de-all-tech-2035-mayk/networks/base_s.nc, resources/de-all-tech-2035-mayk/regions_onshore_base_s.geojson, resources/de-all-tech-2035-mayk/nuts3_shapes.geojson, resources/de-all-tech-2035-mayk/electricity_demand.csv
+    output: resources/de-all-tech-2035-mayk/electricity_demand_base_s.nc
+    log: logs/de-all-tech-2035-mayk/build_electricity_demand_base_s.log
+    jobid: 24
+    benchmark: benchmarks/de-all-tech-2035-mayk/build_electricity_demand_base_s
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/regions_onshore_base_s.geojson, resources/de-all-tech-2035-mayk/nuts3_shapes.geojson, resources/de-all-tech-2035-mayk/networks/base_s.nc
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=5000, mem_mib=4769
+INFO:pypsa.io:Imported network base_s.nc has buses, carriers, lines, links, shapes
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 18:52:01 2025]
+Finished jobid: 24 (Rule: build_electricity_demand_base)
+6 of 24 steps (25%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Tue Aug 12 18:52:01 2025]
+localrule cluster_network:
+    input: resources/de-all-tech-2035-mayk/networks/base_s.nc, resources/de-all-tech-2035-mayk/admin_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s.geojson, resources/de-all-tech-2035-mayk/regions_offshore_base_s.geojson, resources/de-all-tech-2035-mayk/electricity_demand_base_s.nc
+    output: resources/de-all-tech-2035-mayk/networks/base_s_37.nc, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/regions_offshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/busmap_base_s_37.csv, resources/de-all-tech-2035-mayk/linemap_base_s_37.csv
+    log: logs/de-all-tech-2035-mayk/cluster_network_base_s_37.log
+    jobid: 18
+    benchmark: benchmarks/de-all-tech-2035-mayk/cluster_network_base_s_37
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/regions_onshore_base_s.geojson, resources/de-all-tech-2035-mayk/regions_offshore_base_s.geojson, resources/de-all-tech-2035-mayk/admin_shapes.geojson, resources/de-all-tech-2035-mayk/electricity_demand_base_s.nc, resources/de-all-tech-2035-mayk/networks/base_s.nc
+    wildcards: clusters=37
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=10000, mem_mib=9537
+INFO:pypsa.io:Imported network base_s.nc has buses, carriers, lines, links, shapes
+INFO:__main__:The configured solver `highs` does not support quadratic objectives. Falling back to `scip`.
+INFO:linopy.model: Solve problem using Scip solver
+INFO:linopy.io: Writing time: 0.02s
+INFO:linopy.constants: Optimization successful: 
+Status: ok
+Termination condition: optimal
+Solution: 1 primals, 1 duals
+Objective: -1.37e+03
+Solver model: available
+Solver message: optimal
+
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\threadpoolctl.py:1226: RuntimeWarning:
+
+
+Found Intel OpenMP ('libiomp') and LLVM OpenMP ('libomp') loaded at
+the same time. Both libraries are known to be incompatible and this
+can cause random crashes or deadlocks on Linux when loaded in the
+same Python program.
+Using threadpoolctl may cause crashes or deadlocks. For more
+information and possible workarounds, please see
+    https://github.com/joblib/threadpoolctl/blob/master/multiple_openmp.md
+
+
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:pyogrio._io:Created 37 records
+INFO:pyogrio._io:Created 7 records
+INFO:pypsa.io:Exported network 'base_s_37.nc' contains: carriers, links, lines, buses
+INFO:__main__:Clustered network:
+Buses: 471 to 37
+Lines: 835 to 73
+Links: 18 to 18
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 18:52:10 2025]
+Finished jobid: 18 (Rule: cluster_network)
+7 of 24 steps (29%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Tue Aug 12 18:52:10 2025]
+localrule build_powerplants:
+    input: resources/de-all-tech-2035-mayk/networks/base_s_37.nc, data/custom_powerplants.csv
+    output: resources/de-all-tech-2035-mayk/powerplants_s_37.csv
+    log: logs/de-all-tech-2035-mayk/build_powerplants_s_37.log
+    jobid: 42
+    benchmark: benchmarks/de-all-tech-2035-mayk/build_powerplants_s_37
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/networks/base_s_37.nc
+    wildcards: clusters=37
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=7000, mem_mib=6676
+Select jobs to execute...
+INFO:pypsa.io:Imported network base_s_37.nc has buses, carriers, lines, links
+INFO:powerplantmatching.collection:Retrieving data from https://raw.githubusercontent.com/PyPSA/powerplantmatching/v0.7.1/powerplants.csv
+INFO:powerplantmatching.collection:Store data at C:\Users\mayk\AppData\Roaming\powerplantmatching\data\out\default\matched_data_red.csv
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 18:52:21 2025]
+Finished jobid: 42 (Rule: build_powerplants)
+8 of 24 steps (33%) done
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 18:52:23 2025]
+Finished jobid: 41 (Rule: build_hydro_profile)
+9 of 24 steps (38%) done
+Execute 1 jobs...
+
+[Tue Aug 12 18:52:23 2025]
+localrule determine_availability_matrix:
+    input: data/bundle/corine/g250_clc06_V18_5.tif, data/bundle/natura/natura.tiff, data/bundle/gebco/GEBCO_2014_2D.nc, resources/de-all-tech-2035-mayk/shipdensity_raster.tif, resources/de-all-tech-2035-mayk/country_shapes.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_offshore_base_s_37.geojson, cutouts/europe-2023-sarah3-era5.nc
+    output: resources/de-all-tech-2035-mayk/availability_matrix_37_offwind-float.nc
+    log: logs/de-all-tech-2035-mayk/determine_availability_matrix_37_offwind-float.log
+    jobid: 40
+    benchmark: benchmarks/de-all-tech-2035-mayk/determine_availability_matrix_37_offwind-float
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/country_shapes.geojson, resources/de-all-tech-2035-mayk/regions_offshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson
+    wildcards: clusters=37, technology=offwind-float
+    threads: 2
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=50000, mem_mib=47684
+Select jobs to execute...
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:__main__:Calculate landuse availability for offwind-float...
+
+Compute availability matrix:   0%|          | 0/7 [00:00<?, ? gridcells/s]
+Compute availability matrix:  14%|█▍        | 1/7 [00:00<00:01,  3.15 gridcells/s]
+Compute availability matrix:  57%|█████▋    | 4/7 [00:00<00:00,  8.97 gridcells/s]
+Compute availability matrix:  86%|████████▌ | 6/7 [00:00<00:00,  9.59 gridcells/s]
+Compute availability matrix: 100%|██████████| 7/7 [00:00<00:00,  9.60 gridcells/s]
+INFO:__main__:Completed landuse availability calculation for offwind-float (4.87s)
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 18:52:31 2025]
+Finished jobid: 40 (Rule: determine_availability_matrix)
+10 of 24 steps (42%) done
+Execute 1 jobs...
+
+[Tue Aug 12 18:52:31 2025]
+localrule build_renewable_profiles:
+    input: resources/de-all-tech-2035-mayk/availability_matrix_37_offwind-float.nc, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/regions_offshore_base_s_37.geojson, cutouts/europe-2023-sarah3-era5.nc
+    output: resources/de-all-tech-2035-mayk/profile_37_offwind-float.nc, resources/de-all-tech-2035-mayk/regions_by_class_37_offwind-float.geojson
+    log: logs/de-all-tech-2035-mayk/build_renewable_profile_37_offwind-float.log
+    jobid: 39
+    benchmark: benchmarks/de-all-tech-2035-mayk/build_renewable_profile_37_offwind-float
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/regions_offshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/availability_matrix_37_offwind-float.nc
+    wildcards: clusters=37, technology=offwind-float
+    threads: 2
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=50000, mem_mib=47684
+Select jobs to execute...
+INFO:__main__:correction_factor is set as 0.8855
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:__main__:Calculate average capacity factor per grid cell for technology offwind-float...
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\atlite\resource.py:90: FutureWarning:
+
+'add_cutout_windspeed' for wind turbine
+power curves will default to True in atlite relase v0.2.15.
+
+INFO:atlite.convert:Convert and aggregate 'wind'.
+INFO:__main__:Completed average capacity factor calculation per grid cell for technology offwind-float (47.51s)
+INFO:__main__:Create masks for 1 resource classes for technology offwind-float...
+
+Compute availability matrix:   0%|          | 0/7 [00:00<?, ? gridcells/s]
+Compute availability matrix:  29%|██▊       | 2/7 [00:00<00:00, 18.63 gridcells/s]
+Compute availability matrix:  71%|███████▏  | 5/7 [00:00<00:00, 21.18 gridcells/s]
+Compute availability matrix: 100%|██████████| 7/7 [00:00<00:00, 28.45 gridcells/s]
+INFO:pyogrio._io:Created 7 records
+INFO:__main__:Completed resource class calculation for technology offwind-float (4.77s)
+INFO:__main__:Calculate weighted capacity factor time series for model NREL_ReferenceTurbine_5MW_offshore for technology offwind-float...
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\atlite\resource.py:90: FutureWarning:
+
+'add_cutout_windspeed' for wind turbine
+power curves will default to True in atlite relase v0.2.15.
+
+INFO:atlite.convert:Convert and aggregate 'wind'.
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\atlite\aggregate.py:18: FutureWarning:
+
+the `pandas.MultiIndex` object(s) passed as 'bus_bin' coordinate(s) or data variable(s) will no longer be implicitly promoted and wrapped into multiple indexed coordinates in the future (i.e., one coordinate for each multi-index level + one dimension coordinate). If you want to keep this behavior, you need to first wrap it explicitly using `mindex_coords = xarray.Coordinates.from_pandas_multiindex(mindex_obj, 'dim')` and pass it as coordinates, e.g., `xarray.Dataset(coords=mindex_coords)`, `dataset.assign_coords(mindex_coords)` or `dataarray.assign_coords(mindex_coords)`.
+
+INFO:__main__:Completed weighted capacity factor time series calculation for model NREL_ReferenceTurbine_5MW_offshore for technology offwind-float (47.39s)
+INFO:__main__:Calculating maximal capacity per bus for technology offwind-float
+INFO:__main__:Calculate average distances for technology offwind-float.
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 18:54:18 2025]
+Finished jobid: 39 (Rule: build_renewable_profiles)
+11 of 24 steps (46%) done
+Execute 1 jobs...
+
+[Tue Aug 12 18:54:18 2025]
+localrule determine_availability_matrix:
+    input: data/bundle/corine/g250_clc06_V18_5.tif, data/bundle/natura/natura.tiff, resources/de-all-tech-2035-mayk/country_shapes.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, cutouts/europe-2023-sarah3-era5.nc
+    output: resources/de-all-tech-2035-mayk/availability_matrix_37_solar.nc
+    log: logs/de-all-tech-2035-mayk/determine_availability_matrix_37_solar.log
+    jobid: 4
+    benchmark: benchmarks/de-all-tech-2035-mayk/determine_availability_matrix_37_solar
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/country_shapes.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson
+    wildcards: clusters=37, technology=solar
+    threads: 2
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=50000, mem_mib=47684
+Select jobs to execute...
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:__main__:Calculate landuse availability for solar...
+
+Compute availability matrix:   0%|          | 0/37 [00:00<?, ? gridcells/s]
+Compute availability matrix:   3%|▎         | 1/37 [00:00<00:06,  5.75 gridcells/s]
+Compute availability matrix:   8%|▊         | 3/37 [00:00<00:03,  9.62 gridcells/s]
+Compute availability matrix:  16%|█▌        | 6/37 [00:00<00:01, 15.87 gridcells/s]
+Compute availability matrix:  22%|██▏       | 8/37 [00:00<00:02, 14.08 gridcells/s]
+Compute availability matrix:  32%|███▏      | 12/37 [00:00<00:01, 18.71 gridcells/s]
+Compute availability matrix:  41%|████      | 15/37 [00:00<00:01, 21.00 gridcells/s]
+Compute availability matrix:  49%|████▊     | 18/37 [00:00<00:00, 21.81 gridcells/s]
+Compute availability matrix:  57%|█████▋    | 21/37 [00:01<00:00, 22.04 gridcells/s]
+Compute availability matrix:  65%|██████▍   | 24/37 [00:01<00:00, 20.79 gridcells/s]
+Compute availability matrix:  73%|███████▎  | 27/37 [00:01<00:00, 20.18 gridcells/s]
+Compute availability matrix:  84%|████████▍ | 31/37 [00:01<00:00, 22.52 gridcells/s]
+Compute availability matrix:  92%|█████████▏| 34/37 [00:01<00:00, 18.48 gridcells/s]
+Compute availability matrix: 100%|██████████| 37/37 [00:01<00:00, 19.18 gridcells/s]
+INFO:__main__:Completed landuse availability calculation for solar (6.10s)
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 18:54:26 2025]
+Finished jobid: 4 (Rule: determine_availability_matrix)
+12 of 24 steps (50%) done
+Execute 1 jobs...
+
+[Tue Aug 12 18:54:26 2025]
+localrule build_renewable_profiles:
+    input: resources/de-all-tech-2035-mayk/availability_matrix_37_solar.nc, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, cutouts/europe-2023-sarah3-era5.nc
+    output: resources/de-all-tech-2035-mayk/profile_37_solar.nc, resources/de-all-tech-2035-mayk/regions_by_class_37_solar.geojson
+    log: logs/de-all-tech-2035-mayk/build_renewable_profile_37_solar.log
+    jobid: 3
+    benchmark: benchmarks/de-all-tech-2035-mayk/build_renewable_profile_37_solar
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/availability_matrix_37_solar.nc
+    wildcards: clusters=37, technology=solar
+    threads: 2
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=50000, mem_mib=47684
+Select jobs to execute...
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:__main__:Calculate average capacity factor per grid cell for technology solar...
+INFO:atlite.convert:Convert and aggregate 'pv'.
+INFO:__main__:Completed average capacity factor calculation per grid cell for technology solar (212.79s)
+INFO:__main__:Create masks for 1 resource classes for technology solar...
+
+Compute availability matrix:   0%|          | 0/37 [00:00<?, ? gridcells/s]
+Compute availability matrix:   8%|▊         | 3/37 [00:00<00:01, 24.51 gridcells/s]
+Compute availability matrix:  27%|██▋       | 10/37 [00:00<00:00, 43.22 gridcells/s]
+Compute availability matrix:  43%|████▎     | 16/37 [00:00<00:00, 47.74 gridcells/s]
+Compute availability matrix:  65%|██████▍   | 24/37 [00:00<00:00, 52.53 gridcells/s]
+Compute availability matrix:  81%|████████  | 30/37 [00:00<00:00, 52.88 gridcells/s]
+Compute availability matrix:  97%|█████████▋| 36/37 [00:00<00:00, 50.29 gridcells/s]
+Compute availability matrix: 100%|██████████| 37/37 [00:00<00:00, 48.62 gridcells/s]
+INFO:pyogrio._io:Created 37 records
+INFO:__main__:Completed resource class calculation for technology solar (5.28s)
+INFO:__main__:Calculate weighted capacity factor time series for model CSi for technology solar...
+INFO:atlite.convert:Convert and aggregate 'pv'.
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\atlite\aggregate.py:18: FutureWarning:
+
+the `pandas.MultiIndex` object(s) passed as 'bus_bin' coordinate(s) or data variable(s) will no longer be implicitly promoted and wrapped into multiple indexed coordinates in the future (i.e., one coordinate for each multi-index level + one dimension coordinate). If you want to keep this behavior, you need to first wrap it explicitly using `mindex_coords = xarray.Coordinates.from_pandas_multiindex(mindex_obj, 'dim')` and pass it as coordinates, e.g., `xarray.Dataset(coords=mindex_coords)`, `dataset.assign_coords(mindex_coords)` or `dataarray.assign_coords(mindex_coords)`.
+
+INFO:__main__:Completed weighted capacity factor time series calculation for model CSi for technology solar (229.69s)
+INFO:__main__:Calculating maximal capacity per bus for technology solar
+INFO:__main__:Calculate average distances for technology solar.
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 19:02:02 2025]
+Finished jobid: 3 (Rule: build_renewable_profiles)
+13 of 24 steps (54%) done
+Execute 1 jobs...
+
+[Tue Aug 12 19:02:02 2025]
+localrule determine_availability_matrix:
+    input: data/bundle/corine/g250_clc06_V18_5.tif, data/bundle/natura/natura.tiff, data/bundle/gebco/GEBCO_2014_2D.nc, resources/de-all-tech-2035-mayk/shipdensity_raster.tif, resources/de-all-tech-2035-mayk/country_shapes.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_offshore_base_s_37.geojson, cutouts/europe-2023-sarah3-era5.nc
+    output: resources/de-all-tech-2035-mayk/availability_matrix_37_offwind-ac.nc
+    log: logs/de-all-tech-2035-mayk/determine_availability_matrix_37_offwind-ac.log
+    jobid: 34
+    benchmark: benchmarks/de-all-tech-2035-mayk/determine_availability_matrix_37_offwind-ac
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/country_shapes.geojson, resources/de-all-tech-2035-mayk/regions_offshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson
+    wildcards: clusters=37, technology=offwind-ac
+    threads: 2
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=50000, mem_mib=47684
+Select jobs to execute...
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:__main__:Calculate landuse availability for offwind-ac...
+
+Compute availability matrix:   0%|          | 0/7 [00:00<?, ? gridcells/s]
+Compute availability matrix:  14%|█▍        | 1/7 [00:00<00:04,  1.21 gridcells/s]
+Compute availability matrix:  57%|█████▋    | 4/7 [00:00<00:00,  5.13 gridcells/s]
+Compute availability matrix:  86%|████████▌ | 6/7 [00:01<00:00,  6.27 gridcells/s]
+Compute availability matrix: 100%|██████████| 7/7 [00:01<00:00,  5.86 gridcells/s]
+INFO:__main__:Completed landuse availability calculation for offwind-ac (5.64s)
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 19:02:10 2025]
+Finished jobid: 34 (Rule: determine_availability_matrix)
+14 of 24 steps (58%) done
+Execute 1 jobs...
+
+[Tue Aug 12 19:02:10 2025]
+localrule build_renewable_profiles:
+    input: resources/de-all-tech-2035-mayk/availability_matrix_37_offwind-ac.nc, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/regions_offshore_base_s_37.geojson, cutouts/europe-2023-sarah3-era5.nc
+    output: resources/de-all-tech-2035-mayk/profile_37_offwind-ac.nc, resources/de-all-tech-2035-mayk/regions_by_class_37_offwind-ac.geojson
+    log: logs/de-all-tech-2035-mayk/build_renewable_profile_37_offwind-ac.log
+    jobid: 33
+    benchmark: benchmarks/de-all-tech-2035-mayk/build_renewable_profile_37_offwind-ac
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/regions_offshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/availability_matrix_37_offwind-ac.nc
+    wildcards: clusters=37, technology=offwind-ac
+    threads: 2
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=50000, mem_mib=47684
+Select jobs to execute...
+INFO:__main__:correction_factor is set as 0.8855
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:__main__:Calculate average capacity factor per grid cell for technology offwind-ac...
+INFO:atlite.convert:Convert and aggregate 'wind'.
+INFO:__main__:Completed average capacity factor calculation per grid cell for technology offwind-ac (52.08s)
+INFO:__main__:Create masks for 1 resource classes for technology offwind-ac...
+
+Compute availability matrix:   0%|          | 0/7 [00:00<?, ? gridcells/s]
+Compute availability matrix:  14%|█▍        | 1/7 [00:00<00:00,  9.60 gridcells/s]
+Compute availability matrix:  71%|███████▏  | 5/7 [00:00<00:00, 20.73 gridcells/s]
+Compute availability matrix: 100%|██████████| 7/7 [00:00<00:00, 27.14 gridcells/s]
+INFO:pyogrio._io:Created 7 records
+INFO:__main__:Completed resource class calculation for technology offwind-ac (5.11s)
+INFO:__main__:Calculate weighted capacity factor time series for model NREL_ReferenceTurbine_2020ATB_5.5MW for technology offwind-ac...
+INFO:atlite.convert:Convert and aggregate 'wind'.
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\atlite\aggregate.py:18: FutureWarning:
+
+the `pandas.MultiIndex` object(s) passed as 'bus_bin' coordinate(s) or data variable(s) will no longer be implicitly promoted and wrapped into multiple indexed coordinates in the future (i.e., one coordinate for each multi-index level + one dimension coordinate). If you want to keep this behavior, you need to first wrap it explicitly using `mindex_coords = xarray.Coordinates.from_pandas_multiindex(mindex_obj, 'dim')` and pass it as coordinates, e.g., `xarray.Dataset(coords=mindex_coords)`, `dataset.assign_coords(mindex_coords)` or `dataarray.assign_coords(mindex_coords)`.
+
+INFO:__main__:Completed weighted capacity factor time series calculation for model NREL_ReferenceTurbine_2020ATB_5.5MW for technology offwind-ac (53.74s)
+INFO:__main__:Calculating maximal capacity per bus for technology offwind-ac
+INFO:__main__:Calculate average distances for technology offwind-ac.
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 19:04:09 2025]
+Finished jobid: 33 (Rule: build_renewable_profiles)
+15 of 24 steps (62%) done
+Execute 1 jobs...
+
+[Tue Aug 12 19:04:09 2025]
+localrule determine_availability_matrix:
+    input: data/bundle/corine/g250_clc06_V18_5.tif, data/bundle/natura/natura.tiff, resources/de-all-tech-2035-mayk/country_shapes.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, cutouts/europe-2023-sarah3-era5.nc
+    output: resources/de-all-tech-2035-mayk/availability_matrix_37_solar-hsat.nc
+    log: logs/de-all-tech-2035-mayk/determine_availability_matrix_37_solar-hsat.log
+    jobid: 30
+    benchmark: benchmarks/de-all-tech-2035-mayk/determine_availability_matrix_37_solar-hsat
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/country_shapes.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson
+    wildcards: clusters=37, technology=solar-hsat
+    threads: 2
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=50000, mem_mib=47684
+Select jobs to execute...
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:__main__:Calculate landuse availability for solar-hsat...
+
+Compute availability matrix:   0%|          | 0/37 [00:00<?, ? gridcells/s]
+Compute availability matrix:   3%|▎         | 1/37 [00:00<00:06,  5.76 gridcells/s]
+Compute availability matrix:   8%|▊         | 3/37 [00:00<00:03,  9.36 gridcells/s]
+Compute availability matrix:  16%|█▌        | 6/37 [00:00<00:02, 15.31 gridcells/s]
+Compute availability matrix:  22%|██▏       | 8/37 [00:00<00:02, 14.45 gridcells/s]
+Compute availability matrix:  32%|███▏      | 12/37 [00:00<00:01, 18.54 gridcells/s]
+Compute availability matrix:  41%|████      | 15/37 [00:00<00:01, 21.05 gridcells/s]
+Compute availability matrix:  49%|████▊     | 18/37 [00:01<00:00, 20.93 gridcells/s]
+Compute availability matrix:  57%|█████▋    | 21/37 [00:01<00:00, 21.99 gridcells/s]
+Compute availability matrix:  65%|██████▍   | 24/37 [00:01<00:00, 20.33 gridcells/s]
+Compute availability matrix:  73%|███████▎  | 27/37 [00:01<00:00, 20.32 gridcells/s]
+Compute availability matrix:  81%|████████  | 30/37 [00:01<00:00, 21.15 gridcells/s]
+Compute availability matrix:  89%|████████▉ | 33/37 [00:01<00:00, 19.71 gridcells/s]
+Compute availability matrix:  97%|█████████▋| 36/37 [00:01<00:00, 18.94 gridcells/s]
+Compute availability matrix: 100%|██████████| 37/37 [00:02<00:00, 18.24 gridcells/s]
+INFO:__main__:Completed landuse availability calculation for solar-hsat (6.36s)
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 19:04:18 2025]
+Finished jobid: 30 (Rule: determine_availability_matrix)
+16 of 24 steps (67%) done
+Execute 1 jobs...
+
+[Tue Aug 12 19:04:18 2025]
+localrule build_renewable_profiles:
+    input: resources/de-all-tech-2035-mayk/availability_matrix_37_solar-hsat.nc, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, cutouts/europe-2023-sarah3-era5.nc
+    output: resources/de-all-tech-2035-mayk/profile_37_solar-hsat.nc, resources/de-all-tech-2035-mayk/regions_by_class_37_solar-hsat.geojson
+    log: logs/de-all-tech-2035-mayk/build_renewable_profile_37_solar-hsat.log
+    jobid: 29
+    benchmark: benchmarks/de-all-tech-2035-mayk/build_renewable_profile_37_solar-hsat
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/availability_matrix_37_solar-hsat.nc
+    wildcards: clusters=37, technology=solar-hsat
+    threads: 2
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=50000, mem_mib=47684
+Select jobs to execute...
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:__main__:Calculate average capacity factor per grid cell for technology solar-hsat...
+INFO:atlite.convert:Convert and aggregate 'pv'.
+INFO:__main__:Completed average capacity factor calculation per grid cell for technology solar-hsat (233.52s)
+INFO:__main__:Create masks for 1 resource classes for technology solar-hsat...
+
+Compute availability matrix:   0%|          | 0/37 [00:00<?, ? gridcells/s]
+Compute availability matrix:   8%|▊         | 3/37 [00:00<00:01, 22.32 gridcells/s]
+Compute availability matrix:  27%|██▋       | 10/37 [00:00<00:00, 41.80 gridcells/s]
+Compute availability matrix:  43%|████▎     | 16/37 [00:00<00:00, 46.53 gridcells/s]
+Compute availability matrix:  62%|██████▏   | 23/37 [00:00<00:00, 54.61 gridcells/s]
+Compute availability matrix:  78%|███████▊  | 29/37 [00:00<00:00, 52.19 gridcells/s]
+Compute availability matrix:  95%|█████████▍| 35/37 [00:00<00:00, 49.79 gridcells/s]
+Compute availability matrix: 100%|██████████| 37/37 [00:00<00:00, 47.92 gridcells/s]
+INFO:pyogrio._io:Created 37 records
+INFO:__main__:Completed resource class calculation for technology solar-hsat (5.61s)
+INFO:__main__:Calculate weighted capacity factor time series for model CSi for technology solar-hsat...
+INFO:atlite.convert:Convert and aggregate 'pv'.
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\atlite\aggregate.py:18: FutureWarning:
+
+the `pandas.MultiIndex` object(s) passed as 'bus_bin' coordinate(s) or data variable(s) will no longer be implicitly promoted and wrapped into multiple indexed coordinates in the future (i.e., one coordinate for each multi-index level + one dimension coordinate). If you want to keep this behavior, you need to first wrap it explicitly using `mindex_coords = xarray.Coordinates.from_pandas_multiindex(mindex_obj, 'dim')` and pass it as coordinates, e.g., `xarray.Dataset(coords=mindex_coords)`, `dataset.assign_coords(mindex_coords)` or `dataarray.assign_coords(mindex_coords)`.
+
+INFO:__main__:Completed weighted capacity factor time series calculation for model CSi for technology solar-hsat (227.80s)
+INFO:__main__:Calculating maximal capacity per bus for technology solar-hsat
+INFO:__main__:Calculate average distances for technology solar-hsat.
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 19:12:12 2025]
+Finished jobid: 29 (Rule: build_renewable_profiles)
+17 of 24 steps (71%) done
+Execute 1 jobs...
+
+[Tue Aug 12 19:12:12 2025]
+localrule determine_availability_matrix:
+    input: data/bundle/corine/g250_clc06_V18_5.tif, data/bundle/natura/natura.tiff, resources/de-all-tech-2035-mayk/country_shapes.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, cutouts/europe-2023-sarah3-era5.nc
+    output: resources/de-all-tech-2035-mayk/availability_matrix_37_onwind.nc
+    log: logs/de-all-tech-2035-mayk/determine_availability_matrix_37_onwind.log
+    jobid: 32
+    benchmark: benchmarks/de-all-tech-2035-mayk/determine_availability_matrix_37_onwind
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/country_shapes.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson
+    wildcards: clusters=37, technology=onwind
+    threads: 2
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=50000, mem_mib=47684
+Select jobs to execute...
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:__main__:Calculate landuse availability for onwind...
+
+Compute availability matrix:   0%|          | 0/37 [00:00<?, ? gridcells/s]
+Compute availability matrix:   3%|▎         | 1/37 [00:00<00:07,  4.92 gridcells/s]
+Compute availability matrix:   8%|▊         | 3/37 [00:00<00:04,  7.44 gridcells/s]
+Compute availability matrix:  16%|█▌        | 6/37 [00:00<00:02, 11.67 gridcells/s]
+Compute availability matrix:  22%|██▏       | 8/37 [00:00<00:02, 10.65 gridcells/s]
+Compute availability matrix:  32%|███▏      | 12/37 [00:01<00:01, 13.99 gridcells/s]
+Compute availability matrix:  41%|████      | 15/37 [00:01<00:01, 15.36 gridcells/s]
+Compute availability matrix:  46%|████▌     | 17/37 [00:01<00:01, 14.44 gridcells/s]
+Compute availability matrix:  54%|█████▍    | 20/37 [00:01<00:01, 16.24 gridcells/s]
+Compute availability matrix:  59%|█████▉    | 22/37 [00:01<00:00, 15.78 gridcells/s]
+Compute availability matrix:  65%|██████▍   | 24/37 [00:01<00:00, 14.38 gridcells/s]
+Compute availability matrix:  73%|███████▎  | 27/37 [00:01<00:00, 14.18 gridcells/s]
+Compute availability matrix:  81%|████████  | 30/37 [00:02<00:00, 16.30 gridcells/s]
+Compute availability matrix:  86%|████████▋ | 32/37 [00:02<00:00, 12.90 gridcells/s]
+Compute availability matrix:  92%|█████████▏| 34/37 [00:02<00:00, 13.95 gridcells/s]
+Compute availability matrix:  97%|█████████▋| 36/37 [00:02<00:00, 13.88 gridcells/s]
+Compute availability matrix: 100%|██████████| 37/37 [00:02<00:00, 13.75 gridcells/s]
+INFO:__main__:Completed landuse availability calculation for onwind (6.95s)
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 19:12:22 2025]
+Finished jobid: 32 (Rule: determine_availability_matrix)
+18 of 24 steps (75%) done
+Execute 1 jobs...
+
+[Tue Aug 12 19:12:22 2025]
+localrule build_renewable_profiles:
+    input: resources/de-all-tech-2035-mayk/availability_matrix_37_onwind.nc, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, cutouts/europe-2023-sarah3-era5.nc
+    output: resources/de-all-tech-2035-mayk/profile_37_onwind.nc, resources/de-all-tech-2035-mayk/regions_by_class_37_onwind.geojson
+    log: logs/de-all-tech-2035-mayk/build_renewable_profile_37_onwind.log
+    jobid: 31
+    benchmark: benchmarks/de-all-tech-2035-mayk/build_renewable_profile_37_onwind
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/availability_matrix_37_onwind.nc
+    wildcards: clusters=37, technology=onwind
+    threads: 2
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=50000, mem_mib=47684
+Select jobs to execute...
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:__main__:Calculate average capacity factor per grid cell for technology onwind...
+INFO:atlite.convert:Convert and aggregate 'wind'.
+INFO:__main__:Completed average capacity factor calculation per grid cell for technology onwind (50.77s)
+INFO:__main__:Create masks for 1 resource classes for technology onwind...
+
+Compute availability matrix:   0%|          | 0/37 [00:00<?, ? gridcells/s]
+Compute availability matrix:   8%|▊         | 3/37 [00:00<00:01, 22.71 gridcells/s]
+Compute availability matrix:  27%|██▋       | 10/37 [00:00<00:00, 41.52 gridcells/s]
+Compute availability matrix:  43%|████▎     | 16/37 [00:00<00:00, 46.73 gridcells/s]
+Compute availability matrix:  59%|█████▉    | 22/37 [00:00<00:00, 51.24 gridcells/s]
+Compute availability matrix:  76%|███████▌  | 28/37 [00:00<00:00, 53.47 gridcells/s]
+Compute availability matrix:  92%|█████████▏| 34/37 [00:00<00:00, 49.46 gridcells/s]
+Compute availability matrix: 100%|██████████| 37/37 [00:00<00:00, 47.78 gridcells/s]
+INFO:pyogrio._io:Created 37 records
+INFO:__main__:Completed resource class calculation for technology onwind (5.46s)
+INFO:__main__:Calculate weighted capacity factor time series for model Vestas_V112_3MW for technology onwind...
+INFO:atlite.convert:Convert and aggregate 'wind'.
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\atlite\aggregate.py:18: FutureWarning:
+
+the `pandas.MultiIndex` object(s) passed as 'bus_bin' coordinate(s) or data variable(s) will no longer be implicitly promoted and wrapped into multiple indexed coordinates in the future (i.e., one coordinate for each multi-index level + one dimension coordinate). If you want to keep this behavior, you need to first wrap it explicitly using `mindex_coords = xarray.Coordinates.from_pandas_multiindex(mindex_obj, 'dim')` and pass it as coordinates, e.g., `xarray.Dataset(coords=mindex_coords)`, `dataset.assign_coords(mindex_coords)` or `dataarray.assign_coords(mindex_coords)`.
+
+INFO:__main__:Completed weighted capacity factor time series calculation for model Vestas_V112_3MW for technology onwind (50.65s)
+INFO:__main__:Calculating maximal capacity per bus for technology onwind
+INFO:__main__:Calculate average distances for technology onwind.
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 19:14:16 2025]
+Finished jobid: 31 (Rule: build_renewable_profiles)
+19 of 24 steps (79%) done
+Execute 1 jobs...
+
+[Tue Aug 12 19:14:16 2025]
+localrule determine_availability_matrix:
+    input: data/bundle/corine/g250_clc06_V18_5.tif, data/bundle/natura/natura.tiff, data/bundle/gebco/GEBCO_2014_2D.nc, resources/de-all-tech-2035-mayk/shipdensity_raster.tif, resources/de-all-tech-2035-mayk/country_shapes.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_offshore_base_s_37.geojson, cutouts/europe-2023-sarah3-era5.nc
+    output: resources/de-all-tech-2035-mayk/availability_matrix_37_offwind-dc.nc
+    log: logs/de-all-tech-2035-mayk/determine_availability_matrix_37_offwind-dc.log
+    jobid: 38
+    benchmark: benchmarks/de-all-tech-2035-mayk/determine_availability_matrix_37_offwind-dc
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/country_shapes.geojson, resources/de-all-tech-2035-mayk/regions_offshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson
+    wildcards: clusters=37, technology=offwind-dc
+    threads: 2
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=50000, mem_mib=47684
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:__main__:Calculate landuse availability for offwind-dc...
+
+Compute availability matrix:   0%|          | 0/7 [00:00<?, ? gridcells/s]
+Compute availability matrix:  14%|█▍        | 1/7 [00:00<00:04,  1.31 gridcells/s]
+Compute availability matrix:  57%|█████▋    | 4/7 [00:00<00:00,  5.16 gridcells/s]
+Compute availability matrix:  86%|████████▌ | 6/7 [00:01<00:00,  6.46 gridcells/s]
+Compute availability matrix: 100%|██████████| 7/7 [00:01<00:00,  5.97 gridcells/s]
+INFO:__main__:Completed landuse availability calculation for offwind-dc (5.49s)
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 19:14:24 2025]
+Finished jobid: 38 (Rule: determine_availability_matrix)
+20 of 24 steps (83%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Tue Aug 12 19:14:24 2025]
+localrule build_renewable_profiles:
+    input: resources/de-all-tech-2035-mayk/availability_matrix_37_offwind-dc.nc, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/regions_offshore_base_s_37.geojson, cutouts/europe-2023-sarah3-era5.nc
+    output: resources/de-all-tech-2035-mayk/profile_37_offwind-dc.nc, resources/de-all-tech-2035-mayk/regions_by_class_37_offwind-dc.geojson
+    log: logs/de-all-tech-2035-mayk/build_renewable_profile_37_offwind-dc.log
+    jobid: 37
+    benchmark: benchmarks/de-all-tech-2035-mayk/build_renewable_profile_37_offwind-dc
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/availability_matrix_37_offwind-dc.nc, resources/de-all-tech-2035-mayk/regions_offshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/offshore_shapes.geojson, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson
+    wildcards: clusters=37, technology=offwind-dc
+    threads: 2
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=50000, mem_mib=47684
+INFO:__main__:correction_factor is set as 0.8855
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pyogrio\__init__.py:7: DeprecationWarning:
+
+The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+
+INFO:__main__:Calculate average capacity factor per grid cell for technology offwind-dc...
+INFO:atlite.convert:Convert and aggregate 'wind'.
+INFO:__main__:Completed average capacity factor calculation per grid cell for technology offwind-dc (51.43s)
+INFO:__main__:Create masks for 1 resource classes for technology offwind-dc...
+
+Compute availability matrix:   0%|          | 0/7 [00:00<?, ? gridcells/s]
+Compute availability matrix:  43%|████▎     | 3/7 [00:00<00:00, 22.43 gridcells/s]
+Compute availability matrix:  86%|████████▌ | 6/7 [00:00<00:00, 25.34 gridcells/s]
+Compute availability matrix: 100%|██████████| 7/7 [00:00<00:00, 28.75 gridcells/s]
+INFO:pyogrio._io:Created 7 records
+INFO:__main__:Completed resource class calculation for technology offwind-dc (4.92s)
+INFO:__main__:Calculate weighted capacity factor time series for model NREL_ReferenceTurbine_2020ATB_5.5MW for technology offwind-dc...
+INFO:atlite.convert:Convert and aggregate 'wind'.
+C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\atlite\aggregate.py:18: FutureWarning:
+
+the `pandas.MultiIndex` object(s) passed as 'bus_bin' coordinate(s) or data variable(s) will no longer be implicitly promoted and wrapped into multiple indexed coordinates in the future (i.e., one coordinate for each multi-index level + one dimension coordinate). If you want to keep this behavior, you need to first wrap it explicitly using `mindex_coords = xarray.Coordinates.from_pandas_multiindex(mindex_obj, 'dim')` and pass it as coordinates, e.g., `xarray.Dataset(coords=mindex_coords)`, `dataset.assign_coords(mindex_coords)` or `dataarray.assign_coords(mindex_coords)`.
+
+INFO:__main__:Completed weighted capacity factor time series calculation for model NREL_ReferenceTurbine_2020ATB_5.5MW for technology offwind-dc (51.30s)
+INFO:__main__:Calculating maximal capacity per bus for technology offwind-dc
+INFO:__main__:Calculate average distances for technology offwind-dc.
+Benchmark: unable to collect cpu and memory benchmark statistics
+[Tue Aug 12 19:16:19 2025]
+Finished jobid: 37 (Rule: build_renewable_profiles)
+21 of 24 steps (88%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Tue Aug 12 19:16:19 2025]
+localrule add_electricity:
+    input: resources/de-all-tech-2035-mayk/profile_37_solar.nc, resources/de-all-tech-2035-mayk/profile_37_solar-hsat.nc, resources/de-all-tech-2035-mayk/profile_37_onwind.nc, resources/de-all-tech-2035-mayk/profile_37_offwind-ac.nc, resources/de-all-tech-2035-mayk/profile_37_offwind-dc.nc, resources/de-all-tech-2035-mayk/profile_37_offwind-float.nc, resources/de-all-tech-2035-mayk/profile_hydro.nc, resources/de-all-tech-2035-mayk/regions_by_class_37_offwind-float.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_offwind-dc.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_onwind.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_solar.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_solar-hsat.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_offwind-ac.geojson, data/nuclear_p_max_pu.csv, resources/de-all-tech-2035-mayk/networks/base_s_37.nc, resources/de-all-tech-2035-mayk/costs_2035.csv, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/powerplants_s_37.csv, data/hydro_capacities.csv, data/unit_commitment.csv, resources/de-all-tech-2035-mayk/electricity_demand_base_s.nc, resources/de-all-tech-2035-mayk/busmap_base_s_37.csv
+    output: resources/de-all-tech-2035-mayk/networks/base_s_37_elec.nc
+    log: logs/de-all-tech-2035-mayk/add_electricity_37.log
+    jobid: 2
+    benchmark: benchmarks/de-all-tech-2035-mayk/add_electricity_37
+    reason: Input files updated by another job: resources/de-all-tech-2035-mayk/powerplants_s_37.csv, resources/de-all-tech-2035-mayk/regions_by_class_37_offwind-ac.geojson, resources/de-all-tech-2035-mayk/profile_37_offwind-dc.nc, resources/de-all-tech-2035-mayk/profile_37_onwind.nc, resources/de-all-tech-2035-mayk/regions_by_class_37_offwind-float.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_solar-hsat.geojson, resources/de-all-tech-2035-mayk/profile_37_offwind-ac.nc, resources/de-all-tech-2035-mayk/profile_37_solar.nc, resources/de-all-tech-2035-mayk/networks/base_s_37.nc, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_solar.geojson, resources/de-all-tech-2035-mayk/electricity_demand_base_s.nc, resources/de-all-tech-2035-mayk/regions_by_class_37_onwind.geojson, resources/de-all-tech-2035-mayk/profile_hydro.nc, resources/de-all-tech-2035-mayk/regions_by_class_37_offwind-dc.geojson, resources/de-all-tech-2035-mayk/profile_37_offwind-float.nc, resources/de-all-tech-2035-mayk/busmap_base_s_37.csv, resources/de-all-tech-2035-mayk/profile_37_solar-hsat.nc
+    wildcards: clusters=37
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=10000, mem_mib=9537
+INFO:pypsa.io:Imported network base_s_37.nc has buses, carriers, lines, links
+INFO:__main__:Overwriting efficiency with:
+Series([], dtype: object)
+INFO:__main__:Overwriting marginal_cost with:
+Series([], dtype: object)
+INFO:__main__:Overwriting capital_cost with:
+Series([], dtype: object)
+INFO:scripts._bounds_helper:Using default technical limits
+INFO:__main__:Load data scaled by factor 1.0.
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "C:\Users\mayk\PyPSA-DE-master-Na\.snakemake\scripts\tmpyw6dn5uq.add_electricity.py", line 1228, in <module>
+    set_transmission_costs(
+  File "C:\Users\mayk\PyPSA-DE-master-Na\.snakemake\scripts\tmpyw6dn5uq.add_electricity.py", line 507, in set_transmission_costs
+    n.links.loc[dc_b, "length"]
+  File "C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pandas\core\ops\common.py", line 76, in new_method
+    return method(self, other)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pandas\core\arraylike.py", line 202, in __mul__
+    return self._arith_method(other, operator.mul)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pandas\core\series.py", line 6146, in _arith_method
+    return base.IndexOpsMixin._arith_method(self, other, op)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pandas\core\base.py", line 1391, in _arith_method
+    result = ops.arithmetic_op(lvalues, rvalues, op)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pandas\core\ops\array_ops.py", line 283, in arithmetic_op
+    res_values = _na_arithmetic_op(left, right, op)  # type: ignore[arg-type]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pandas\core\ops\array_ops.py", line 218, in _na_arithmetic_op
+    result = func(left, right)
+             ^^^^^^^^^^^^^^^^^
+  File "C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pandas\core\computation\expressions.py", line 242, in evaluate
+    return _evaluate(op, op_str, a, b)  # type: ignore[misc]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pandas\core\computation\expressions.py", line 131, in _evaluate_numexpr
+    result = _evaluate_standard(op, op_str, a, b)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\site-packages\pandas\core\computation\expressions.py", line 73, in _evaluate_standard
+    return op(a, b)
+           ^^^^^^^^
+TypeError: unsupported operand type(s) for *: 'float' and 'NoneType'
+RuleException:
+CalledProcessError in file "C:\Users\mayk\PyPSA-DE-master-Na\rules/build_electricity.smk", line 764:
+Command 'C:/Users/mayk/miniforge3/envs/pypsa-eur/python.exe "C:\Users\mayk\PyPSA-DE-master-Na\.snakemake\scripts\tmpyw6dn5uq.add_electricity.py"' returned non-zero exit status 1.
+[Tue Aug 12 19:16:24 2025]
+Error in rule add_electricity:
+    message: None
+    jobid: 2
+    input: resources/de-all-tech-2035-mayk/profile_37_solar.nc, resources/de-all-tech-2035-mayk/profile_37_solar-hsat.nc, resources/de-all-tech-2035-mayk/profile_37_onwind.nc, resources/de-all-tech-2035-mayk/profile_37_offwind-ac.nc, resources/de-all-tech-2035-mayk/profile_37_offwind-dc.nc, resources/de-all-tech-2035-mayk/profile_37_offwind-float.nc, resources/de-all-tech-2035-mayk/profile_hydro.nc, resources/de-all-tech-2035-mayk/regions_by_class_37_offwind-float.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_offwind-dc.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_onwind.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_solar.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_solar-hsat.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_offwind-ac.geojson, data/nuclear_p_max_pu.csv, resources/de-all-tech-2035-mayk/networks/base_s_37.nc, resources/de-all-tech-2035-mayk/costs_2035.csv, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/powerplants_s_37.csv, data/hydro_capacities.csv, data/unit_commitment.csv, resources/de-all-tech-2035-mayk/electricity_demand_base_s.nc, resources/de-all-tech-2035-mayk/busmap_base_s_37.csv
+    output: resources/de-all-tech-2035-mayk/networks/base_s_37_elec.nc
+    log: logs/de-all-tech-2035-mayk/add_electricity_37.log (check log file(s) for error details)
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look below for error messages
+[Tue Aug 12 19:16:24 2025]
+Error in rule add_electricity:
+    message: None
+    jobid: 2
+    input: resources/de-all-tech-2035-mayk/profile_37_solar.nc, resources/de-all-tech-2035-mayk/profile_37_solar-hsat.nc, resources/de-all-tech-2035-mayk/profile_37_onwind.nc, resources/de-all-tech-2035-mayk/profile_37_offwind-ac.nc, resources/de-all-tech-2035-mayk/profile_37_offwind-dc.nc, resources/de-all-tech-2035-mayk/profile_37_offwind-float.nc, resources/de-all-tech-2035-mayk/profile_hydro.nc, resources/de-all-tech-2035-mayk/regions_by_class_37_offwind-float.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_offwind-dc.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_onwind.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_solar.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_solar-hsat.geojson, resources/de-all-tech-2035-mayk/regions_by_class_37_offwind-ac.geojson, data/nuclear_p_max_pu.csv, resources/de-all-tech-2035-mayk/networks/base_s_37.nc, resources/de-all-tech-2035-mayk/costs_2035.csv, resources/de-all-tech-2035-mayk/regions_onshore_base_s_37.geojson, resources/de-all-tech-2035-mayk/powerplants_s_37.csv, data/hydro_capacities.csv, data/unit_commitment.csv, resources/de-all-tech-2035-mayk/electricity_demand_base_s.nc, resources/de-all-tech-2035-mayk/busmap_base_s_37.csv
+    output: resources/de-all-tech-2035-mayk/networks/base_s_37_elec.nc
+    log: logs/de-all-tech-2035-mayk/add_electricity_37.log (check log file(s) for error details)
+Complete log(s): C:\Users\mayk\PyPSA-DE-master-Na\.snakemake\log\2025-08-12T184950.821034.snakemake.log
+WorkflowError:
+At least one job did not complete successfully.

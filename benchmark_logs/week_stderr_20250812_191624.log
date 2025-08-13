@@ -1,0 +1,9 @@
+Assuming unrestricted shared filesystem usage.
+host: ORE
+Building DAG of jobs...
+MissingInputException in rule add_electricity in file "C:\Users\mayk\PyPSA-DE-master-Na\rules/build_electricity.smk", line 715:
+Missing input files for rule add_electricity:
+    output: resources/de-all-tech-2035-test-week/networks/base_s_37_elec.nc
+    wildcards: clusters=37
+    affected files:
+        resources/de-all-tech-2035-test-week/costs_2035.csv
