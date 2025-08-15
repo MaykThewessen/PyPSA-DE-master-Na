@@ -1,0 +1,28 @@
+carrier,nice_name,color,co2_emissions,category
+AC,AC,#70af1d,0.0,Other
+DC,DC,#8a1caf,0.0,Other
+oil,oil,#c9c9c9,0.2571,Other
+lignite,lignite,#826837,0.4069,Coal
+biomass,biomass,#baa741,0.0,Biomass
+OCGT,Open-Cycle Gas,#e0986c,0.198,Gas
+CCGT,Combined-Cycle Gas,#a85522,0.198,Gas
+nuclear,nuclear,#ff8c00,0.0,Nuclear
+coal,coal,#545454,0.3361,Coal
+offwind-float,Offshore Wind (Floating),#b5e2fa,0.0,Wind
+offwind-ac,Offshore Wind (AC),#6895dd,0.0,Wind
+solar-hsat,solar-hsat,#fdb915,0.0,Solar
+hydro,Reservoir & Dam,#298c81,0.0,Hydro
+solar,Solar,#f9d002,0.0,Solar
+onwind,Onshore Wind,#235ebc,0.0,Wind
+offwind-dc,Offshore Wind (DC),#74c6f2,0.0,Wind
+ror,Run of River,#3dbfb0,0.0,Hydro
+PHS,Pumped Hydro Storage,#51dbcc,0.0,Storage
+battery,Battery Storage,#ace37f,0.0,Storage
+vanadium,Vanadium Redox Flow,#46caf0,0.0,Storage
+CAES,CAES,#c251ae,0.0,Storage
+IronAir,IronAir storage,#00ace0,0.0,Storage
+Hydrogen,Hydrogen,,0.0,Storage
+battery charger,battery charger,#88a75b,0.0,Storage
+battery discharger,battery discharger,#5d4e29,0.0,Storage
+,,,0.0,Other
+load,Load shedding,#dd2e23,0.0,Other

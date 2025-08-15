@@ -15,7 +15,7 @@ def analyze_all_storage_technologies():
     """Analyze all storage technologies in detail including durations, power, and deployment."""
     
     # Load the solved network
-    network_path = "results/de-all-tech-2035-mayk/networks/base_s_1_elec_solved_co2_pricing.nc"
+    network_path = "analysis-de-white-paper-v3/networks/900Mt_CO2_Limit_solved_network.nc"
     
     logger.info(f"Loading solved network from {network_path}")
     n = pypsa.Network(network_path)
@@ -230,7 +230,7 @@ def analyze_all_storage_technologies():
     logger.info("-" * 80)
     
     try:
-        costs_path = "resources/de-all-tech-2035-mayk/costs_2035.csv"
+        costs_path = "analysis-de-white-paper-v3/costs_2035_technology_mapped.csv"
         costs = pd.read_csv(costs_path, index_col=0)
         
         storage_techs = ['battery', 'H2', 'iron-air', 'Vanadium-Redox-Flow', 'Compressed-Air-Adiabatic']

@@ -1,0 +1,328 @@
+# Complete full-year Germany-only PyPSA electricity-only simulation
+
+# SPDX-FileCopyrightText: : 2017-2024 The PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#top-level-configuration
+version: 0.35.1
+tutorial: false
+
+logging:
+  level: INFO
+  format: '%(levelname)s:%(name)s:%(message)s'
+
+private:
+  keys:
+    entsoe_api:
+
+remote:
+  ssh: ""
+  path: ""
+
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
+run:
+  prefix: ""
+  name: "de-electricity-only-2035-mayk"
+  scenarios:
+    enable: false
+    file: config/scenarios.yaml
+  disable_progressbar: false
+  shared_resources:
+    policy: false
+    exclude: []
+  shared_cutouts: true
+  use_shadow_directory: false
+
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#foresight
+foresight: overnight
+
+# Minimal transmission projects for electricity-only
+transmission_projects:
+  enable: false  # Disable transmission projects to simplify
+  include:
+    tyndp2020: false
+    nep: false
+    manual: false
+
+# CPLEX/HiGHS solver configuration
+solving:
+  solver:
+    name: highs  # or cplex if available
+    options: default
+  
+  solver_options:
+    default:
+      threads: 16
+  
+  mem_mb: 50000
+  
+  constraints:
+    CCL: false
+    EQ: false
+    BAU: false
+    SAFE: false
+  
+  options:
+    clip_p_max_pu: 1.e-2
+    load_shedding: false    # Must meet all demand
+    curtailment_mode: false
+    noisy_costs: true
+    skip_iterations: true
+    rolling_horizon: false
+    seed: 123
+    track_iterations: false
+    min_iterations: 1
+    max_iterations: 1
+    transmission_losses: 0  # No transmission losses for simplicity
+    linearized_unit_commitment: true
+    horizon: 365
+
+# Weather data settings
+atlite:
+  nprocesses: 10
+  cutout_directory: cutouts
+  default_cutout: europe-2023-sarah3-era5
+  show_progress: true
+  cutouts:
+    europe-2023-sarah3-era5:
+      module: [sarah, era5]
+      x: [5., 16.]
+      y: [47., 56.]
+      dx: 0.3
+      dy: 0.3
+      time: ['2023', '2023']
+
+# Electricity-only scenario setup
+scenario:
+  simpl:
+  - ''
+  ll:
+  - vopt
+  clusters:
+  - 1
+  opts:
+  - ''
+  sector_opts:
+  - ''  # Empty = electricity-only
+  planning_horizons:
+  - 2035
+
+countries:
+- DE
+
+snapshots:
+  start: "2023-01-01"
+  end: "2024-01-01"
+  inclusive: 'left'
+
+# Minimal data retrieval
+enable:
+  retrieve: auto
+  prepare_links_p_nom: false
+  retrieve_databundle: false  # Not needed for electricity-only
+  retrieve_cost_data: true
+  build_cutout: false
+  retrieve_cutout: true
+  custom_busmap: false
+  drop_leap_day: true
+
+# CO2 budget (relaxed for feasibility)
+co2_budget:
+  2035: 0.4  # 20% reduction instead of 15%
+
+# Electricity system configuration
+electricity:
+  voltages: [220., 300., 330., 380., 400., 500., 750.]
+  base_network: osm-prebuilt
+  osm-prebuilt-version: 0.6
+  gaslimit_enable: false
+  gaslimit: false
+  co2limit_enable: false
+  co2limit: 0.00  
+  co2base: 1.487e+9
+
+  operational_reserve:
+    activate: false
+
+  max_hours:
+    battery: 8
+    vanadium: 12
+    CAES: 24
+    iron-air battery: 100
+    H2: 100
+
+  extendable_carriers:
+    Generator: [solar, onwind, offwind-ac]  
+    StorageUnit: [battery, H2, iron-air battery] 
+    Store: []
+    Link: []
+
+  powerplants_filter: "(DateOut >= 2023 or DateOut != DateOut)"
+  custom_powerplants: false
+  everywhere_powerplants: []
+
+  conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
+  renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
+
+  estimate_renewable_capacities:
+    enable: true
+    from_opsd: true
+    from_gem: false
+    year: 2023
+    expansion_limit: false
+    technology_mapping:
+      Offshore: offwind-ac
+      Onshore: onwind
+      PV: solar
+
+  autarky:
+    enable: false
+    by_country: false
+
+# Renewable energy settings (simplified)
+renewable:
+  onwind:
+    cutout: europe-2023-sarah3-era5
+    resource:
+      method: wind
+      turbine: Vestas_V112_3MW
+    capacity_per_sqkm: 3
+  offwind-ac:
+    cutout: europe-2023-sarah3-era5
+    resource:
+      method: wind
+      turbine: NREL_ReferenceTurbine_2020ATB_5.5MW
+    capacity_per_sqkm: 2
+  offwind-dc:
+    cutout: europe-2023-sarah3-era5
+    resource:
+      method: wind
+      turbine: NREL_ReferenceTurbine_2020ATB_5.5MW
+    capacity_per_sqkm: 2
+  solar:
+    cutout: europe-2023-sarah3-era5
+    resource:
+      method: pv
+      panel: CSi
+      orientation:
+        slope: 19.
+        azimuth: 180.
+    capacity_per_sqkm: 5.1
+  hydro:
+    cutout: europe-2023-sarah3-era5
+    carriers: [ror, PHS, hydro]
+
+# Conventional power plants
+conventional:
+  unit_commitment: false
+  dynamic_fuel_price: false
+
+# Lines configuration
+lines:
+  types:
+    220.: "Al/St 240/40 2-bundle 220.0"
+    300.: "Al/St 240/40 3-bundle 300.0"
+    380.: "Al/St 240/40 4-bundle 380.0"
+  s_max_pu: 0.7
+  length_factor: 1.25
+
+# Links configuration  
+links:
+  p_max_pu: 1.0
+  length_factor: 1.25
+
+# Load configuration
+load:
+  scaling_factor: 1.0
+  fixed_year: false
+  supplement_synthetic: true
+
+# DISABLE ALL SECTOR COUPLING
+sector:
+  transport: false
+  heating: false      # DISABLE HEATING
+  biomass: false
+  industry: false
+  agriculture: false
+  enable_sector: false  # Master switch OFF
+  
+  district_heating:
+    enable: false
+    potential: 0.0
+    progress:
+      2020: 0.0
+      2025: 0.0
+      2030: 0.0
+      2035: 0.0
+      2040: 0.0
+      2045: 0.0
+      2050: 0.0
+    supply_temperature_approximation:
+      max_forward_temperature_baseyear:
+        default: 90
+        DE: 90
+      min_forward_temperature_baseyear:
+        default: 40
+        DE: 40
+      return_temperature_baseyear:
+        default: 30
+        DE: 30
+      lower_threshold_ambient_temperature: 0
+      upper_threshold_ambient_temperature: 10
+      rolling_window_ambient_temperature: 7
+      relative_annual_temperature_reduction: 0.005
+
+# Costs
+costs:
+  year: 2035
+  version: v0.13.3
+  social_discountrate: 0.02
+  fill_values:
+    FOM: 0
+    VOM: 0
+    efficiency: 1
+    fuel: 0
+    investment: 0
+    lifetime: 25
+    "CO2 intensity": 0
+    "discount rate": 0.05
+  fuel:
+    OCGT: 25
+    CCGT: 25
+    gas: 25
+    coal: 24.57
+    lignite: 22.11
+    nuclear: 1.75
+    uranium: 1.75
+
+# Clustering (simplified)
+clustering:
+  mode: busmap
+  focus_weights: false
+  simplify_network:
+    to_substations: false
+    algorithm: kmeans
+    feature: solar+onwind-time
+    exclude_carriers: []
+  cluster_network:
+    algorithm: kmeans
+    feature: solar+onwind-time
+    exclude_carriers: []
+  temporal:
+    resolution_elec: false
+    resolution_sector: false  # No sector coupling
+
+# Plotting
+plotting:
+  map:
+    boundaries: [-11, 30, 34, 71]
+  nice_names:
+    OCGT: "Open-Cycle Gas"
+    CCGT: "Combined-Cycle Gas" 
+    offwind-ac: "Offshore Wind (AC)"
+    offwind-dc: "Offshore Wind (DC)"
+    onwind: "Onshore Wind"
+    solar: "Solar"
+    battery: "Battery Storage"
+    H2: "Hydrogen Storage"

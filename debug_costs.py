@@ -6,7 +6,7 @@ sys.path.append('scripts')
 from scripts.add_electricity import load_costs
 
 # Load the costs file manually first
-costs_raw = pd.read_csv('resources/de-all-tech-2035-mayk/costs_2035.csv', index_col=[0, 1]).sort_index()
+costs_raw = pd.read_csv('analysis-de-white-paper-v3/costs_2035_technology_mapped.csv', index_col=[0, 1]).sort_index()
 print("Raw costs file structure:")
 print(costs_raw.head())
 print(f"\nRaw costs shape: {costs_raw.shape}")
@@ -34,7 +34,7 @@ config = {
 }
 
 try:
-    costs = load_costs('resources/de-all-tech-2035-mayk/costs_2035.csv', config, max_hours=None, nyears=1.0)
+    costs = load_costs('analysis-de-white-paper-v3/costs_2035_technology_mapped.csv', config, max_hours=None, nyears=1.0)
     print(f"Processed costs shape: {costs.shape}")
     print(f"Processed costs columns: {costs.columns.tolist()}")
     

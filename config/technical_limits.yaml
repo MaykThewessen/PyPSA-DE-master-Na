@@ -106,8 +106,8 @@ system:
   # National-scale capacity deployment constraints
   # Source: Grid integration studies, renewable energy scenarios
   total_renewable_capacity: 900000  # MW - 900 GW total renewable capacity limit
-  total_storage_power: 800000       # MW - 800 GW total storage power limit  
-  total_storage_energy: 7000000     # MWh - 7 TWh total storage energy limit
+  total_storage_power: 900000       # MW - 900 GW total storage power limit  
+  total_storage_energy: 40000000     # MWh - 40 TWh total storage energy limit
   # Source: German grid development plan, European decarbonization scenarios
 
 # TECHNICAL JUSTIFICATION AND SOURCES:

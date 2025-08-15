@@ -1,0 +1,396 @@
+# PyPSA-EUR configuration with REALISTIC hydrogen costs and no imports
+# This configuration reflects market-reality hydrogen economics
+
+# SPDX-FileCopyrightText: : 2017-2024 The PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#top-level-configuration
+version: 0.35.1
+tutorial: false
+
+logging:
+  level: INFO
+  format: '%(levelname)s:%(name)s:%(message)s'
+
+private:
+  keys:
+    entsoe_api:
+
+remote:
+  ssh: ""
+  path: ""
+
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
+run:
+  prefix: ""
+  name: "de-realistic-h2-costs-2035"
+  scenarios:
+    enable: false
+    file: config/scenarios.yaml
+  disable_progressbar: false
+  shared_resources:
+    policy: false
+    exclude: []
+  shared_cutouts: true
+  use_shadow_directory: false
+
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#foresight
+foresight: overnight
+
+# Minimal transmission projects for electricity-only
+transmission_projects:
+  enable: false  # Disable transmission projects to simplify
+  include:
+    tyndp2020: false
+    nep: false
+    manual: false
+
+# CPLEX/HiGHS solver configuration
+solving:
+  solver:
+    name: highs  # or cplex if available
+    options: default
+  
+  solver_options:
+    default:
+      threads: 8
+      presolve: 'on'
+      parallel: 'on'
+      time_limit: 7200  # 2 hour time limit
+  
+  mem_mb: 60000
+  
+  constraints:
+    CCL: false
+    EQ: false
+    BAU: false
+    SAFE: false
+  
+  options:
+    clip_p_max_pu: 1.e-2
+    load_shedding: false    # Must meet all demand
+    curtailment_mode: false
+    noisy_costs: true
+    skip_iterations: true
+    rolling_horizon: false
+    seed: 123
+    track_iterations: false
+    min_iterations: 1
+    max_iterations: 1
+    transmission_losses: 0  # No transmission losses for simplicity
+    linearized_unit_commitment: true
+    horizon: 365
+
+# Weather data settings
+atlite:
+  nprocesses: 10
+  cutout_directory: cutouts
+  default_cutout: europe-2023-sarah3-era5
+  show_progress: true
+  cutouts:
+    europe-2023-sarah3-era5:
+      module: [sarah, era5]
+      x: [5., 16.]
+      y: [47., 56.]
+      dx: 0.3
+      dy: 0.3
+      time: ['2023', '2023']
+
+# Electricity-only scenario setup
+scenario:
+  simpl:
+  - ''
+  ll:
+  - vopt
+  clusters:
+  - 1
+  opts:
+  - 'Co2L0.05'  # CO2 limit: 5% of 1990 emissions
+  sector_opts:
+  - ''  # Empty = electricity-only
+  planning_horizons:
+  - 2035
+
+countries:
+- DE
+
+snapshots:
+  start: "2023-01-01"
+  end: "2024-01-01"
+  inclusive: 'left'
+
+# Minimal data retrieval
+enable:
+  retrieve: auto
+  prepare_links_p_nom: false
+  retrieve_databundle: false  # Not needed for electricity-only
+  retrieve_cost_data: true
+  build_cutout: false
+  retrieve_cutout: true
+  custom_busmap: false
+  drop_leap_day: true
+
+# CO2 budget (relaxed for feasibility)
+co2_budget:
+  2035: 0.05  # 5% of 1990 emissions
+
+# Electricity system configuration
+electricity:
+  voltages: [220., 300., 330., 380., 400., 500., 750.]
+  base_network: osm-prebuilt
+  osm-prebuilt-version: 0.6
+  gaslimit_enable: false
+  gaslimit: false
+  co2limit_enable: true
+  co2limit: 0.05  # 5% of 1990 emissions
+  co2base: 1.487e+9
+
+  operational_reserve:
+    activate: false
+
+  max_hours:
+    battery: 8
+    vanadium: 12
+    CAES: 24
+    iron-air battery: 100
+    H2: 100
+
+  extendable_carriers:
+    Generator: [solar, onwind, offwind-ac, offwind-dc]  
+    StorageUnit: [battery, H2, iron-air battery, PHS] 
+    Store: [H2]
+    Link: [H2 Electrolysis, H2 Fuel Cell, H2 CCGT, H2 OCGT, H2 Turbine]
+
+  powerplants_filter: "(DateOut >= 2023 or DateOut != DateOut)"
+  custom_powerplants: false
+  everywhere_powerplants: []
+
+  conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
+  renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
+
+  estimate_renewable_capacities:
+    enable: true
+    from_opsd: true
+    from_gem: false
+    year: 2023
+    expansion_limit: false
+    technology_mapping:
+      Offshore: offwind-ac
+      Onshore: onwind
+      PV: solar
+
+  autarky:
+    enable: true      # ENABLE AUTARKY - NO IMPORTS!
+    by_country: true  # Germany must be self-sufficient
+
+# Renewable energy settings (simplified)
+renewable:
+  onwind:
+    cutout: europe-2023-sarah3-era5
+    resource:
+      method: wind
+      turbine: Vestas_V112_3MW
+    capacity_per_sqkm: 3
+  offwind-ac:
+    cutout: europe-2023-sarah3-era5
+    resource:
+      method: wind
+      turbine: NREL_ReferenceTurbine_2020ATB_5.5MW
+    capacity_per_sqkm: 2
+  offwind-dc:
+    cutout: europe-2023-sarah3-era5
+    resource:
+      method: wind
+      turbine: NREL_ReferenceTurbine_2020ATB_5.5MW
+    capacity_per_sqkm: 2
+  solar:
+    cutout: europe-2023-sarah3-era5
+    resource:
+      method: pv
+      panel: CSi
+      orientation:
+        slope: 19.
+        azimuth: 180.
+    capacity_per_sqkm: 5.1
+  hydro:
+    cutout: europe-2023-sarah3-era5
+    carriers: [ror, PHS, hydro]
+
+# Conventional power plants
+conventional:
+  unit_commitment: false
+  dynamic_fuel_price: false
+
+# Lines configuration
+lines:
+  types:
+    220.: "Al/St 240/40 2-bundle 220.0"
+    300.: "Al/St 240/40 3-bundle 300.0"
+    380.: "Al/St 240/40 4-bundle 380.0"
+  s_max_pu: 0.7
+  length_factor: 1.25
+
+# Links configuration  
+links:
+  p_max_pu: 1.0
+  length_factor: 1.25
+
+# Load configuration
+load:
+  scaling_factor: 1.0
+  fixed_year: false
+  supplement_synthetic: true
+
+# DISABLE ALL SECTOR COUPLING AND IMPORTS
+sector:
+  transport: false
+  heating: false      # DISABLE HEATING
+  biomass: false
+  industry: false
+  agriculture: false
+  enable_sector: false  # Master switch OFF
+  
+  # DISABLE H2 IMPORTS
+  H2_for_shipping: false
+  H2_for_industry: false
+  H2_for_steel: false
+  H2_for_ammonia: false
+  H2_for_methanol: false
+  
+  district_heating:
+    enable: false
+    potential: 0.0
+
+# REALISTIC HYDROGEN COSTS - MARKET REALITY 2035
+costs:
+  year: 2035
+  version: v0.13.3
+  social_discountrate: 0.02
+  fill_values:
+    FOM: 0
+    VOM: 0
+    efficiency: 1
+    fuel: 0
+    investment: 0
+    lifetime: 25
+    "CO2 intensity": 0
+    "discount rate": 0.05
+  
+  # OVERRIDE WITH REALISTIC MARKET COSTS
+  overwrites:
+    capital_cost: 
+      # HYDROGEN STORAGE - REALISTIC COSTS
+      "H2 Store": 5000000  # €5000/MWh = €5,000,000/GWh (53x more expensive than PyPSA default)
+      "Hydrogen-store": 5000000  # Alternative naming
+      "hydrogen storage underground": 5000000
+      
+      # HYDROGEN PRODUCTION - REALISTIC COSTS  
+      "electrolysis": 1710000  # €1,710,000/MW (11x more expensive)
+      "H2 Electrolysis": 1710000
+      "Hydrogen-charger": 1710000
+      "Alkaline electrolyzer large size": 1710000
+      "PEM electrolyzer small size": 1710000
+      
+      # HYDROGEN POWER GENERATION - REALISTIC COSTS
+      "H2 Fuel Cell": 1510000  # €1,510,000/MW (15x more expensive)
+      "Hydrogen-discharger": 1510000
+      "fuel cell": 1510000
+      "H2 Turbine": 1200000   # €1,200,000/MW for hydrogen turbines
+      "H2 CCGT": 1300000      # €1,300,000/MW for H2 combined cycle
+      "H2 OCGT": 1100000      # €1,100,000/MW for H2 open cycle
+    
+    marginal_cost: {}
+    efficiency: 
+      # Keep realistic efficiencies
+      "electrolysis": 0.6374  # 63.74% efficiency
+      "H2 Electrolysis": 0.6374
+      "H2 Fuel Cell": 0.50    # 50% efficiency
+      "fuel cell": 0.50
+      "H2 CCGT": 0.55         # 55% efficiency for H2 CCGT
+      "H2 OCGT": 0.35         # 35% efficiency for H2 OCGT
+      
+  fuel:
+    OCGT: 25
+    CCGT: 25
+    gas: 25
+    coal: 24.57
+    lignite: 22.11
+    nuclear: 1.75
+    uranium: 1.75
+  
+  investment:
+    # RENEWABLE COSTS (keep optimistic)
+    solar: 380
+    onwind: 1200
+    offwind-ac: 2500
+    offwind-dc: 2700
+    nuclear: 10871
+    
+    # BATTERY STORAGE (keep competitive)
+    battery: 132000  # €132/kWh for battery storage
+    "Lithium-Ion-LFP-store": 134000
+    "Lithium-Ion-LFP-bicharger": 132000
+    
+    # IRON-AIR BATTERY (competitive long-duration)
+    "IronAir battery": 27000
+    "iron-air battery": 27000
+    
+    # PUMPED HYDRO (keep low cost)
+    PHS: 2000  # €2000/kW for pumped hydro storage
+    
+  lifetime:
+    "H2 Store": 30
+    "Hydrogen-store": 30
+    "electrolysis": 21
+    "H2 Electrolysis": 21
+    "H2 Fuel Cell": 20
+    "fuel cell": 20
+    "H2 Turbine": 25
+    "H2 CCGT": 25
+    "H2 OCGT": 25
+    battery: 16
+    "Lithium-Ion-LFP-store": 22
+    "IronAir battery": 25
+    PHS: 50
+
+  emission_prices:
+    enable: true
+    co2: 300  # €300/tCO2 carbon price
+    co2_monthly_prices: false
+
+# Clustering (simplified)
+clustering:
+  mode: busmap
+  focus_weights: false
+  simplify_network:
+    to_substations: false
+    algorithm: kmeans
+    feature: solar+onwind-time
+    exclude_carriers: []
+  cluster_network:
+    algorithm: kmeans
+    feature: solar+onwind-time
+    exclude_carriers: []
+  temporal:
+    resolution_elec: false
+    resolution_sector: false  # No sector coupling
+
+# Plotting
+plotting:
+  map:
+    boundaries: [-11, 30, 34, 71]
+  nice_names:
+    OCGT: "Open-Cycle Gas"
+    CCGT: "Combined-Cycle Gas" 
+    offwind-ac: "Offshore Wind (AC)"
+    offwind-dc: "Offshore Wind (DC)"
+    onwind: "Onshore Wind"
+    solar: "Solar"
+    battery: "Battery Storage"
+    H2: "Hydrogen Storage"
+    "H2 Store": "Hydrogen Storage"
+    "H2 Electrolysis": "Hydrogen Electrolysis"
+    "H2 Fuel Cell": "Hydrogen Fuel Cell"
+    "iron-air battery": "Iron-Air Battery"
+    PHS: "Pumped Hydro Storage"

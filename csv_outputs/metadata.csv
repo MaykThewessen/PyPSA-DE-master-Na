@@ -1,0 +1,9 @@
+key,value
+extraction_date,2025-08-15T14:39:17.538744
+network_file,results/de-full-year-2035/networks/base_s_1_elec_Co2L0.05.nc
+total_snapshots,8760
+start_date,2023-01-01 00:00:00
+end_date,2023-12-31 23:00:00
+objective_value,23535498912.531937
+solver_status,optimal
+files_created,"['generators.csv', 'stores.csv', 'storage_units.csv', 'generator_summary_by_carrier.csv', 'storage_summary_by_carrier.csv', 'system_summary.csv', 'snapshots.csv', 'load_sample.csv', 'technology_mapping.csv']"

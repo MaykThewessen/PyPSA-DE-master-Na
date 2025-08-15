@@ -16,7 +16,7 @@ def analyze_storage_results():
     """Analyze storage deployment and operation from the solved network."""
     
     # Load the solved network
-    network_path = "results/de-all-tech-2035-mayk/networks/base_s_1_elec_solved_co2_pricing.nc"
+    network_path = "analysis-de-white-paper-v3/networks/250Mt_CO2_Limit_solved_network.nc"
     
     logger.info(f"Loading solved network from {network_path}")
     n = pypsa.Network(network_path)
@@ -124,7 +124,7 @@ def analyze_storage_results():
     
     # Load cost data to analyze storage economics
     try:
-        costs_path = "resources/de-all-tech-2035-mayk/costs_2035.csv"
+        costs_path = "analysis-de-white-paper-v3/costs_2035_technology_mapped.csv"
         costs = pd.read_csv(costs_path, index_col=0)
         
         storage_costs = {}

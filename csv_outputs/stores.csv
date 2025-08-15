@@ -1,0 +1,2 @@
+Store,bus,type,carrier,e_nom,e_nom_mod,e_nom_extendable,e_nom_min,e_nom_max,e_min_pu,e_max_pu,e_initial,e_initial_per_period,e_cyclic,e_cyclic_per_period,p_set,q_set,sign,marginal_cost,marginal_cost_quadratic,marginal_cost_storage,capital_cost,standing_loss,active,build_year,lifetime,e_nom_opt,e_nom_opt_MWh,e_nom_opt_GWh,capital_cost_total
+DE0 0 battery,DE0 0 battery,,battery,0.0,0.0,True,0.0,inf,0.0,1.0,0.0,False,True,True,0.0,0.0,1.0,0.009453702907128407,0.0,0.0,8494.451918761823,0.0,True,0,inf,88556.2457765579,88556.2457765579,88.5562457765579,752236771.8550258

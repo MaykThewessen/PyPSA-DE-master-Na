@@ -166,9 +166,9 @@ def solve_scenario3_very_high_carbon_price():
                     logger.info(f"❌ Target missed by {excess:.1f} MtCO2")
             
             # Save the solved network
-            results_dir = "results/de-all-tech-2035-mayk/networks"
+            results_dir = "analysis-de-white-paper-v3/networks"
             os.makedirs(results_dir, exist_ok=True)
-            output_path = f"{results_dir}/base_s_1_elec_solved_scenario3_500co2.nc"
+            output_path = f"{results_dir}/500Mt_CO2_Limit_solved_network.nc"
             logger.info(f"\nSaving solved network to {output_path}")
             n.export_to_netcdf(output_path)
             
@@ -192,9 +192,9 @@ def compare_all_scenarios():
     try:
         # Load all scenario results
         scenario_paths = {
-            "Scenario 1 (250€)": "results/de-all-tech-2035-mayk/networks/base_s_1_elec_solved_co2_pricing.nc",
-            "Scenario 2 (300€)": "results/de-all-tech-2035-mayk/networks/base_s_1_elec_solved_scenario2_300co2.nc",
-            "Scenario 3 (500€)": "results/de-all-tech-2035-mayk/networks/base_s_1_elec_solved_scenario3_500co2.nc"
+            "250Mt CO2 Limit": "analysis-de-white-paper-v3/networks/250Mt_CO2_Limit_solved_network.nc",
+            "300Mt CO2 Limit": "analysis-de-white-paper-v3/networks/300Mt_CO2_Limit_solved_network.nc",
+            "500Mt CO2 Limit": "analysis-de-white-paper-v3/networks/500Mt_CO2_Limit_solved_network.nc"
         }
         
         networks = {}

@@ -11,15 +11,37 @@ import pandas as pd
 import warnings
 warnings.filterwarnings('ignore')
 
-def load_network():
+def load_network(specific_path=None):
     """Load the solved PyPSA network"""
-    network_path = "results/networks/base_s_1_elec_Co2L0.001.nc"
-    try:
-        n = pypsa.Network(network_path)
-        return n
-    except FileNotFoundError:
-        print(f"Network file not found at {network_path}")
-        return None
+    if specific_path:
+        try:
+            print(f"Loading: {specific_path}")
+            n = pypsa.Network(specific_path)
+            print(f"Successfully loaded network from: {specific_path}")
+            return n
+        except FileNotFoundError:
+            print(f"Network file not found at {specific_path}")
+            return None
+    
+    # Try multiple possible network files in order of preference
+    network_paths = [
+        "results/networks/base_s_1_elec_Co2L0.001.nc",
+        "results/de-all-tech-2035-mayk/networks/base_s_1_elec_solved_co2_pricing.nc",
+        "results/de-all-tech-2035-mayk/networks/base_s_1_elec_solved_scenario1_250co2.nc"
+    ]
+    
+    for network_path in network_paths:
+        try:
+            print(f"Trying to load: {network_path}")
+            n = pypsa.Network(network_path)
+            print(f"Successfully loaded network from: {network_path}")
+            return n
+        except FileNotFoundError:
+            print(f"Network file not found at {network_path}")
+            continue
+    
+    print("No network files found in any of the expected locations.")
+    return None
 
 def calculate_co2_emissions(n):
     """Calculate CO2 emissions from generation"""

@@ -1,0 +1,3 @@
+carrier,e_nom_opt_GWh,capital_cost,capital_cost_total,type,count,p_nom_opt_GW,max_hours,e_nom_calculated
+battery,88.56,8494.45,752236771.86,Store,1,,,
+PHS,,,,StorageUnit,1,7.24,4.95,35831.43

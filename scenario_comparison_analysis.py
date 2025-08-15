@@ -23,9 +23,9 @@ def load_and_compare_scenarios():
     
     # Network dictionary - loading different scenario files
     networks = {
-        '250Mt CO2 Limit': 'results/de-all-tech-2035-mayk/networks/base_s_1_elec_solved_scenario1_250co2.nc',
-        '300Mt CO2 Limit': 'results/de-all-tech-2035-mayk/networks/base_s_1_elec_solved_scenario2_300co2.nc', 
-        '500Mt CO2 Limit': 'results/de-all-tech-2035-mayk/networks/base_s_1_elec_solved_scenario3_500co2.nc'
+        '250Mt_CO2_Limit': 'results/de-all-tech-2035-mayk/networks/base_s_1_elec_solved_scenario1_250co2.nc',
+        '300Mt_CO2_Limit': 'results/de-all-tech-2035-mayk/networks/base_s_1_elec_solved_scenario2_300co2.nc', 
+        '500Mt_CO2_Limit': 'results/de-all-tech-2035-mayk/networks/base_s_1_elec_solved_scenario3_500co2.nc'
     }
     
     loaded_networks = {}
@@ -121,10 +121,11 @@ def display_comparison_table(comparison_data):
     
     for metric_name, metric_key, format_str in metrics_order:
         row = f"{metric_name:<30} "
-        for scenario in ['250Mt CO2 Limit', '300Mt CO2 Limit', '500Mt CO2 Limit']:
+        for scenario in ['250Mt_CO2_Limit', '300Mt_CO2_Limit', '500Mt_CO2_Limit']:
             if scenario in comparison_data and metric_key in comparison_data[scenario]:
                 value = comparison_data[scenario][metric_key]
-                row += f"{value:{format_str}:<15} "
+                formatted_value = f"{value:{format_str}}"
+                row += f"{formatted_value:<15} "
             else:
                 row += f"{'N/A':<15} "
         logger.info(row)
@@ -136,7 +137,7 @@ def create_comparison_plots(comparison_data):
         return
     
     # Create plots directory
-    plots_dir = "plots/scenario_comparison"
+    plots_dir = "analysis-de-white-paper-v3/plots/scenario_comparison"
     os.makedirs(plots_dir, exist_ok=True)
     
     # Plot 1: System Cost Comparison
@@ -149,7 +150,7 @@ def create_comparison_plots(comparison_data):
     plt.ylabel('System Cost (Billion €)')
     plt.xlabel('Scenarios')
     plt.tight_layout()
-    plt.savefig(f"{plots_dir}/system_cost_comparison.png")
+    plt.savefig(f"{plots_dir}/system_cost_comparison_250Mt_300Mt_500Mt_CO2_Limit.png")
     plt.close()
     
     # Plot 2: Renewable Share Comparison  
@@ -162,7 +163,7 @@ def create_comparison_plots(comparison_data):
     plt.xlabel('Scenarios')
     plt.ylim(0, 100)
     plt.tight_layout()
-    plt.savefig(f"{plots_dir}/renewable_share_comparison.png")
+    plt.savefig(f"{plots_dir}/renewable_share_comparison_250Mt_300Mt_500Mt_CO2_Limit.png")
     plt.close()
     
     logger.info(f"📊 Comparison plots saved to {plots_dir}/")

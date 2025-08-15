@@ -1025,6 +1025,12 @@ def rename_techs(label: str) -> str:
         "AC": "transmission lines",
         "DC": "transmission lines",
         "B2B": "transmission lines",
+        # New battery technology mappings
+        "iron-air battery": "Iron-Air Battery",
+        "Lithium-Ion-LFP-bicharger": "Li-ion LFP (Charge)",
+        "Lithium-Ion-LFP-store": "Li-ion LFP (Storage)",
+        "battery storage": "Battery Storage",
+        "battery inverter": "Battery Inverter",
     }
 
     for ptr in prefix_to_remove:
@@ -1042,6 +1048,17 @@ def rename_techs(label: str) -> str:
     for old, new in rename.items():
         if old == label:
             label = new
+    
+    # Remove old battery technology names
+    old_battery_names = [
+        "battery1", "battery2", "battery4", "battery8", 
+        "Ebattery1", "Ebattery2"
+    ]
+    
+    # If label matches old battery names, map to generic "Battery Storage"
+    if label in old_battery_names:
+        label = "Battery Storage"
+    
     return label
 
 

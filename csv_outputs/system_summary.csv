@@ -1,0 +1,8 @@
+metric,value
+total_capacity_GW,400.4289350562422
+renewable_capacity_GW,321.61095724493674
+renewable_share_percent,80.31661278417978
+conventional_capacity_GW,78.81797781130547
+total_system_cost_billion_EUR,23.535498912531935
+total_snapshots,8760
+optimization_status,optimal

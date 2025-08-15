@@ -1,5 +1,5 @@
 run:
-  name: "de-custom-run-2035"
+  name: "de-realistic-h2-costs-2035"
 
 solving:
   mem_mb: 60000
@@ -8,20 +8,23 @@ solving:
     options: default
   solver_options:
     default:
-      threads: 4
+      threads: 8  # Increased for better performance
       presolve: 'on'
       parallel: 'on'
+      time_limit: 7200  # 2 hour time limit
     
 scenario:
   clusters:
   - 1
+  opts:
+  - 'Co2L0.05'  # This matches the CO2 limit above
 
 enable:
   retrieve_cost_data: true
 
 electricity:
-  co2limit_enable: false  # Disable hard constraint (use pricing instead)
-  co2limit: 0.02  # Limit CO2 emissions to 2% of 1990 emissions
+  co2limit_enable: true  # Enable hard constraint for very low emissions
+  co2limit: 0.05  # Allow 5% of 1990 CO2 emissions (more feasible)
 
 costs:
   emission_prices:

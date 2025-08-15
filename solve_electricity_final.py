@@ -151,9 +151,9 @@ def solve_electricity_with_carbon_pricing():
                 logger.info(f"CO2 intensity: {co2_intensity:.3f} tCO2/MWh")
             
             # Save the solved network
-            results_dir = "results/de-all-tech-2035-mayk/networks"
+            results_dir = "analysis-de-white-paper-v3/networks"
             os.makedirs(results_dir, exist_ok=True)
-            output_path = f"{results_dir}/base_s_1_elec_solved_co2_pricing.nc"
+            output_path = f"{results_dir}/250Mt_CO2_Limit_solved_network.nc"
             logger.info(f"\nSaving solved network to {output_path}")
             n.export_to_netcdf(output_path)
             
@@ -175,7 +175,7 @@ if __name__ == "__main__":
         print("="*80)
         print("✅ Network solved with HiGHS solver")
         print("✅ Carbon pricing applied (250 EUR/tCO2)")
-        print("✅ Results saved to results/de-all-tech-2035-mayk/networks/")
+        print("✅ Results saved to analysis-de-white-paper-v3/networks/")
         print("✅ Single spatial zone (Germany aggregated)")
         print("✅ Full year 2023 optimization (8760 hours)")
         print("="*80)

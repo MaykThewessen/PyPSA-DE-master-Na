@@ -1,0 +1,13 @@
+
+H2 P2G2P Cost Analysis Summary
+=============================
+
+Round-Trip Efficiency: 31.9%
+P2G2P Cost (input): 27.1 EUR/MWh
+P2G2P Cost (output): 85.1 EUR/MWh
+Total System CAPEX: 13.26 billion EUR
+
+Component Costs:
+- H2 Storage: 93.76 EUR/MWh
+- Electrolysis: 149786 EUR/MW
+- Fuel Cell: 97352 EUR/MW
