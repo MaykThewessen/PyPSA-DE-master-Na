@@ -11,7 +11,7 @@ Features:
 - Technology capacity comparison
 - Cost analysis
 - Storage breakdown
-- Renewable transition paths
+- Renewable transition paths 
 """
 
 import pandas as pd

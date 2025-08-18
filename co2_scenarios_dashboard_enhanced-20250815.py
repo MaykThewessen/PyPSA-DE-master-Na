@@ -5,7 +5,7 @@ Creates an interactive dashboard comparing 4 CO2 scenarios:
 A) 15% of 1990 emissions
 B) 5% of 1990 emissions  
 C) 1% of 1990 emissions
-D) 0% of 1990 emissions (net-zero)
+D) 0% of 1990 emissions (net-zero) 
 
 Features:
 - 1-decimal precision formatting

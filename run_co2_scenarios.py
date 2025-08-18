@@ -11,7 +11,7 @@ Features:
 - LP optimization only
 - 5-hour solver time limit
 - 1e-6 tolerance
-- Simplified linear transmission losses
+- Simplified linear transmission losses 
 """
 
 import os

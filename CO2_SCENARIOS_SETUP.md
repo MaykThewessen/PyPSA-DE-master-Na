@@ -21,7 +21,7 @@ Run PyPSA-EUR for 4 different CO2 emission targets to analyze the impact of deca
 - **Heating Sector:** DISABLED ✅
 - **Sector Coupling:** DISABLED ✅
 - **Transmission Losses:** 2% linear ✅
-- **LP Optimization:** Linear programming only ✅
+- **LP Optimization:** Linear programming only ✅ 
 
 ### **Solver Configuration:**
 - **Solver:** HiGHS
