@@ -17,7 +17,7 @@ run:
     file: config/scenarios.yaml
   disable_progressbar: false
   shared_resources:
-    policy: false
+    policy: true
     exclude: []
   shared_cutouts: true
   use_shadow_directory: false

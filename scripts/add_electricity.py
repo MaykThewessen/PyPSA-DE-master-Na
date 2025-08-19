@@ -300,12 +300,15 @@ def load_costs(
             costs.loc["battery inverter"],
             max_hours=max_hours["battery"],
         )
-        costs.loc["H2"] = costs_for_storage(
-            costs.loc["hydrogen storage underground"],
-            costs.loc["fuel cell"],
-            costs.loc["electrolysis"],
-            max_hours=max_hours["H2"],
-        )
+        # Only create Hydrogen combined cost if max_hours["Hydrogen"] is defined
+        # (used for StorageUnit approach, not for flexible Store approach)
+        if "Hydrogen" in max_hours:
+            costs.loc["Hydrogen"] = costs_for_storage(
+                costs.loc["hydrogen storage underground"],
+                costs.loc["fuel cell"],
+                costs.loc["electrolysis"],
+                max_hours=max_hours["Hydrogen"],
+            )
         if "Iron-Air" in max_hours:
             costs.loc["Iron-Air"] = costs_for_storage(
                 costs.loc["Iron-Air-store"],
@@ -1028,7 +1031,7 @@ def attach_storageunits(
     buses_i = n.buses.index
 
     lookup_store = {
-        "H2": "electrolysis", 
+        "Hydrogen": "electrolysis", 
         "battery": "battery inverter", 
         "Iron-Air": "Iron-Air-charge",
         "Li-Ion": "Li-Ion",
@@ -1036,7 +1039,7 @@ def attach_storageunits(
         "Compressed-Air-Adiabatic": "CAES"
     }
     lookup_dispatch = {
-        "H2": "fuel cell", 
+        "Hydrogen": "fuel cell", 
         "battery": "battery inverter", 
         "Iron-Air": "Iron-Air-discharge",
         "Li-Ion": "Li-Ion",
@@ -1095,14 +1098,14 @@ def attach_stores(
 
     buses_i = n.buses.index
 
-    if "H2" in carriers:
-        h2_buses_i = n.add("Bus", buses_i + " H2", carrier="H2", location=buses_i)
+    if "Hydrogen" in carriers:
+        h2_buses_i = n.add("Bus", buses_i + " Hydrogen", carrier="Hydrogen", location=buses_i)
 
         n.add(
             "Store",
             h2_buses_i,
             bus=h2_buses_i,
-            carrier="H2",
+            carrier="Hydrogen",
             e_nom_extendable=True,
             e_cyclic=True,
             capital_cost=costs.at["hydrogen storage underground", "capital_cost"],
@@ -1113,7 +1116,7 @@ def attach_stores(
             h2_buses_i + " Electrolysis",
             bus0=buses_i,
             bus1=h2_buses_i,
-            carrier="H2 electrolysis",
+            carrier="Hydrogen electrolysis",
             p_nom_extendable=True,
             efficiency=costs.at["electrolysis", "efficiency"],
             capital_cost=costs.at["electrolysis", "capital_cost"],
@@ -1125,7 +1128,7 @@ def attach_stores(
             h2_buses_i + " Fuel Cell",
             bus0=h2_buses_i,
             bus1=buses_i,
-            carrier="H2 fuel cell",
+            carrier="Hydrogen fuel cell",
             p_nom_extendable=True,
             efficiency=costs.at["fuel cell", "efficiency"],
             # NB: fixed cost is per MWel

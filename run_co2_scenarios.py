@@ -36,6 +36,14 @@ def update_config_for_scenario(config_path, co2_target, scenario_name, demand_tw
     config['co2_budget'][2035] = co2_target
     config['electricity']['co2limit'] = co2_target
 
+    # Enable shared resources to avoid rebuilding common files
+    config['run']['shared_resources'] = {
+        'policy': True,  # Enable shared resources
+        'exclude': []    # Don't exclude anything from sharing
+    }
+    
+    # Note: Hydrogen storage uses flexible Store component, not StorageUnit with max_hours
+    
     if demand_twh:
         # Default average demand is 491.5 TWh / 8760 h = 56.1 GW
         # Scaling factor = (new_demand / 491.5)
@@ -53,7 +61,7 @@ def update_config_for_scenario(config_path, co2_target, scenario_name, demand_tw
     print(f"✅ Config saved: {scenario_config_path}")
     return scenario_config_path
 
-def run_scenario(config_path, scenario_name):
+def run_scenario(config_path, scenario_name, co2_target):
     """Run PyPSA optimization for one scenario"""
     
     print(f"\n🚀 Starting Scenario {scenario_name} optimization...")
@@ -73,6 +81,17 @@ def run_scenario(config_path, scenario_name):
         print(f"   {existing_networks[0]}")
         print(f"⏩ Skipping optimization, using existing results")
         return True
+    
+    # Check if network building is already done and we just need to solve
+    unsolved_pattern = f"{results_dir}/networks/base_s_1_elec_.nc"
+    unsolved_networks = glob.glob(unsolved_pattern)
+    
+    if unsolved_networks:
+        print(f"🔧 Network already built, targeting solve step only...")
+        target = f"results/de-co2-scenario-{scenario_name}-2035/networks/base_s_1_elec_Co2L{co2_target:.2f}.nc"
+    else:
+        print(f"🏗️  Building complete network and solving...")
+        target = "solve_elec_networks"
     
     try:
         # Run snakemake command with improved network settings
@@ -324,7 +343,7 @@ def main(demand_twh=None):
         config_path = update_config_for_scenario(base_config, co2_target, scenario_name, demand_twh=demand_twh)
         
         # Run scenario
-        success = run_scenario(config_path, scenario_name)
+        success = run_scenario(config_path, scenario_name, co2_target)
         
         if success:
             # Extract results
