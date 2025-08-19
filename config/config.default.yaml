@@ -258,6 +258,8 @@ load:
     enable: false
     fill_offshore: true
     normalize: true
+    interpolate_limit: 3
+    time_shift_for_large_gaps: 1w
 sector:
   transport: false
   heating: false

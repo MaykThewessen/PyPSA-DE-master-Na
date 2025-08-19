@@ -54,7 +54,7 @@ solving:
     SAFE: false
   options:
     clip_p_max_pu: 0.01
-    load_shedding: false
+    load_shedding: true
     curtailment_mode: false
     noisy_costs: true
     skip_iterations: true
@@ -137,15 +137,36 @@ electricity:
     battery: 8
     iron-air: 100
   extendable_carriers:
-    Generator: [solar, onwind, offwind-ac, CCGT, OCGT]
-    StorageUnit: [battery, iron-air]  # Fixed power-to-energy ratio storage
-    Store: [Hydrogen]                 # H2 Store with independent power/energy optimization
-    Link: [electrolysis, fuel cell]   # hydrogen generation, and electricity  generation, connected to hydrogen storage
-  powerplants_filter: "(DateOut >= 2023 or DateOut != DateOut)"
+    Generator:
+    - solar
+    - onwind
+    - offwind-ac
+    - CCGT
+    - OCGT
+    StorageUnit:
+    - battery
+    - iron-air
+    Store:
+    - Hydrogen
+    Link:
+    - electrolysis
+    - fuel cell
+  powerplants_filter: (DateOut >= 2023 or DateOut != DateOut)
   custom_powerplants: false
   everywhere_powerplants: []
-  conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, biomass]
-  renewable_carriers: [solar, onwind, offwind-ac, hydro]
+  conventional_carriers:
+  - nuclear
+  - oil
+  - OCGT
+  - CCGT
+  - coal
+  - lignite
+  - biomass
+  renewable_carriers:
+  - solar
+  - onwind
+  - offwind-ac
+  - hydro
   estimate_renewable_capacities:
     enable: true
     from_opsd: true
@@ -227,7 +248,7 @@ transformers:
   s_nom: 2000
   type: ''
 load:
-  scaling_factor: 1.017293997965412
+  scaling_factor: 1.0
   fixed_year: false
   supplement_synthetic: true
   manual_adjustments: false
@@ -245,6 +266,8 @@ sector:
   industry: false
   agriculture: false
   enable_sector: false
+  enhanced_geothermal:
+    enable: false
   district_heating:
     enable: false
     potential: 0.0
@@ -261,9 +284,23 @@ costs:
     lifetime: 25
     CO2 intensity: 0
     discount rate: 0.05
+  overwrites:
+    capital_cost: {}
+    marginal_cost: {}
+    efficiency: {}
+  fuel:
+    OCGT: 25
+    CCGT: 25
+    gas: 25
+    coal: 24.57
+    lignite: 22.11
+    nuclear: 1.75
+    uranium: 1.75
+  investment: null
+  lifetime: null
   emission_prices:
     enable: true
-    co2: 300
+    co2: 200
     co2_monthly_prices: false
 clustering:
   mode: busmap
@@ -300,7 +337,8 @@ plotting:
     CCGT: Combined-Cycle Gas
     offwind-ac: Offshore Wind (AC)
     onwind: Onshore Wind
-    solar: Solar
-    battery: Battery Storage
-    H2: Hydrogen Storage
+    solar: Solar PV
+    battery: Battery LFP Storage
+    iron-air: Iron-Air Storage
+    Hydrogen: Hydrogen Storage
     PHS: Pumped Hydro Storage

@@ -63,17 +63,29 @@ def run_scenario(config_path, scenario_name):
     results_dir = f"results/de-co2-scenario-{scenario_name}-2035"
     os.makedirs(results_dir, exist_ok=True)
     
+    # Check if scenario is already completed
+    import glob
+    network_pattern = f"{results_dir}/networks/base_s_1_elec_Co2L*.nc"
+    existing_networks = glob.glob(network_pattern)
+    
+    if existing_networks:
+        print(f"✅ Scenario {scenario_name} already completed! Found network file:")
+        print(f"   {existing_networks[0]}")
+        print(f"⏩ Skipping optimization, using existing results")
+        return True
+    
     try:
         # Run snakemake command with improved network settings
+        # Remove --forceall to avoid unnecessary re-downloads of existing data
         cmd = [
             "snakemake", 
             "-j8",  # Reduce cores to avoid overwhelming network
             f"--configfile={config_path}",
             "solve_elec_networks",
-            "--forceall",
             "--latency-wait", "30",  # Wait longer for file operations
             "--retries", "5",  # Retry failed jobs more times
-            "--restart-times", "3"  # Allow more restarts
+            "--restart-times", "3",  # Allow more restarts
+            "--rerun-triggers", "mtime"  # Only rerun if files are newer
         ]
         
         print(f"🔄 Running command: {' '.join(cmd)}")
