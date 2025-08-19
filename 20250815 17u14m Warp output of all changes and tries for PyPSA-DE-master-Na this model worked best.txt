@@ -1,0 +1,319 @@
+python run_co2_scenarios.py --demand 650
+🚀 PyPSA CO2 Scenarios Analysis
+============================================================
+Running 4 scenarios with:
+  • 4380 timesteps (2-hour resolution)
+  • LP optimization only
+  • 5-hour solver time limit
+  • 1e-6 tolerance
+  • No heating sector
+============================================================
+
+============================================================
+SCENARIO A: 15% of 1990 emissions
+============================================================
+📝 Updating config for Scenario A: 15% CO2 target
+⚡️ Overriding demand to 650.0 TWh/y (scaling factor: 1.32)
+✅ Config saved: config/de-co2-scenario-A-2035.yaml
+
+🚀 Starting Scenario A optimization...
+============================================================
+🔄 Running command: snakemake -j16 --configfile=config/de-co2-scenario-A-2035.yaml solve_elec_networks --forceall
+❌ Scenario A failed!
+STDOUT: Restricted license - for non-production use only - expires 2026-11-23
+https://raw.githubusercontent.com/PyPSA/technology-data/v0.13.3/outputs/costs_2035.csv
+resources\de-co2-scenario-A-2035\costs_2035.csv
+
+STDERR: Assuming unrestricted shared filesystem usage.
+host: ORE
+Building DAG of jobs...
+Retrieving from storage: https://gisco-services.ec.europa.eu/distribution/v2/nuts/download/ref-nuts-2021-01m.geojson.zip
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/buses.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/converters.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/lines.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/links.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/transformers.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/map.html
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/10820928/files/demand_hourly.csv
+Finished retrieval.
+Provided cores: 16
+Rules claiming more threads will be scaled down.
+Conda environments: ignored
+Job stats:
+job                                      count
+-------------------------------------  -------
+add_electricity                              1
+add_transmission_projects_and_dlr            1
+base_network                                 1
+build_electricity_demand                     1
+build_electricity_demand_base                1
+build_hydro_profile                          1
+build_osm_boundaries                         4
+build_powerplants                            1
+build_renewable_profiles                     4
+build_shapes                                 1
+build_ship_raster                            1
+cluster_network                              1
+determine_availability_matrix                4
+prepare_network                              1
+retrieve_cost_data                           1
+retrieve_cutout                              1
+retrieve_eez                                 1
+retrieve_electricity_demand                  1
+retrieve_jrc_ardeco                          1
+retrieve_nuts_2021_shapes                    1
+retrieve_osm_boundaries                      4
+retrieve_osm_prebuilt                        1
+retrieve_ship_raster                         1
+retrieve_synthetic_electricity_demand        1
+simplify_network                             1
+solve_elec_networks                          1
+solve_network                                1
+total                                       39
+
+Select jobs to execute...
+Execute 13 jobs...
+
+[Fri Aug 15 16:51:47 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/UA_adm1.json
+    log: logs/retrieve_osm_boundaries_UA_adm1.log
+    jobid: 14
+    reason: Forced execution
+    wildcards: country=UA
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp
+[Fri Aug 15 16:51:47 2025]
+localrule retrieve_electricity_demand:
+    output: data/electricity_demand_raw.csv
+    log: logs/retrieve_electricity_demand.log
+    jobid: 25
+    reason: Forced execution
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=5000, mem_mib=4769
+[Fri Aug 15 16:51:47 2025]
+localrule retrieve_jrc_ardeco:
+    output: data/jrc-ardeco/ARDECO-SUVGDP.2021.table.csv, data/jrc-ardeco/ARDECO-SNPTD.2021.table.csv
+    jobid: 17
+    reason: Forced execution
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp
+[Fri Aug 15 16:51:47 2025]
+localrule retrieve_synthetic_electricity_demand:
+    input: https://zenodo.org/records/10820928/files/demand_hourly.csv (retrieve from storage)
+    output: data/load_synthetic_raw.csv
+    log: logs/retrieve_synthetic_electricity_demand.log
+    jobid: 26
+    reason: Forced execution
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=5000, mem_mib=4769
+[Fri Aug 15 16:51:48 2025]
+localrule retrieve_cutout:
+    input: https://zenodo.org/records/15349674/files/europe-2023-sarah3-era5.nc (retrieve from storage)
+    output: cutouts/europe-2023-sarah3-era5.nc
+    log: logs/cutouts/retrieve_cutout_europe-2023-sarah3-era5.log
+    jobid: 27
+    reason: Forced execution
+    wildcards: cutout=europe-2023-sarah3-era5
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=5000, mem_mib=4769
+[Fri Aug 15 16:51:49 2025]
+localrule retrieve_nuts_2021_shapes:
+    input: https://gisco-services.ec.europa.eu/distribution/v2/nuts/download/ref-nuts-2021-01m.geojson.zip (retrieve from storage)
+    output: data/nuts/NUTS_RG_01M_2021_4326_LEVL_3.geojson, data/nuts/NUTS_RG_01M_2021_4326_LEVL_2.geojson, data/nuts/NUTS_RG_01M_2021_4326_LEVL_1.geojson, data/nuts/NUTS_RG_01M_2021_4326_LEVL_0.geojson
+    jobid: 8
+    reason: Forced execution
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp
+[Fri Aug 15 16:51:49 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/MD_adm1.json
+    log: logs/retrieve_osm_boundaries_MD_adm1.log
+    jobid: 12
+    reason: Forced execution
+    wildcards: country=MD
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp
+[Fri Aug 15 16:51:49 2025]
+localrule retrieve_osm_prebuilt:
+    input: https://zenodo.org/records/14144752/files/buses.csv (retrieve from storage), https://zenodo.org/records/14144752/files/converters.csv (retrieve from storage), https://zenodo.org/records/14144752/files/lines.csv (retrieve from storage), https://zenodo.org/records/14144752/files/links.csv (retrieve from storage), https://zenodo.org/records/14144752/files/transformers.csv (retrieve from storage), https://zenodo.org/records/14144752/files/map.html (retrieve from storage)
+    output: data/osm-prebuilt/0.6/buses.csv, data/osm-prebuilt/0.6/converters.csv, data/osm-prebuilt/0.6/lines.csv, data/osm-prebuilt/0.6/links.csv, data/osm-prebuilt/0.6/transformers.csv, data/osm-prebuilt/0.6/map.html
+    log: logs/retrieve_osm_prebuilt.log
+    jobid: 22
+    reason: Forced execution
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=500, mem_mib=477
+[Fri Aug 15 16:51:50 2025]
+localrule retrieve_eez:
+    output: data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    jobid: 7
+    reason: Forced execution
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp
+[Fri Aug 15 16:51:50 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/BA_adm1.json
+    log: logs/retrieve_osm_boundaries_BA_adm1.log
+    jobid: 10
+    reason: Forced execution
+    wildcards: country=BA
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp
+[Fri Aug 15 16:51:50 2025]
+localrule retrieve_ship_raster:
+    input: https://zenodo.org/records/13757228/files/shipdensity_global.zip (retrieve from storage)
+    output: data/shipdensity_global.zip
+    log: logs/retrieve_ship_raster.log
+    jobid: 33
+    reason: Forced execution
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=5000, mem_mib=4769
+[Fri Aug 15 16:51:51 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/XK_adm1.json
+    log: logs/retrieve_osm_boundaries_XK_adm1.log
+    jobid: 16
+    reason: Forced execution
+    wildcards: country=XK
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp
+[Fri Aug 15 16:51:51 2025]
+localrule retrieve_cost_data:
+    output: resources/de-co2-scenario-A-2035/costs_2035.csv
+    log: logs/de-co2-scenario-A-2035/retrieve_cost_data_2035.log
+    jobid: 37
+    reason: Forced execution
+    wildcards: year=2035
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=1000, mem_mib=954
+[Fri Aug 15 16:51:51 2025]
+Finished jobid: 26 (Rule: retrieve_synthetic_electricity_demand)
+1 of 39 steps (3%) done
+[Fri Aug 15 16:51:51 2025]
+Finished jobid: 8 (Rule: retrieve_nuts_2021_shapes)
+2 of 39 steps (5%) done
+INFO:__main__: - Fetching OSM administrative boundaries for UA (Attempt 1)...
+[Fri Aug 15 16:51:52 2025]
+Finished jobid: 17 (Rule: retrieve_jrc_ardeco)
+3 of 39 steps (8%) done
+RuleException:
+AssertionError in file "C:\Users\mayk\PyPSA-DE-master-Na\rules/retrieve.smk", line 169:
+Checksum is invalid. This may be due to an incomplete download. Delete the file and re-execute the rule.
+  File "C:\Users\mayk\PyPSA-DE-master-Na\rules/retrieve.smk", line 169, in __rule_retrieve_cutout
+  File "C:\Users\mayk\PyPSA-DE-master-Na\scripts\_helpers.py", line 888, in validate_checksum
+[Fri Aug 15 16:51:52 2025]
+Error in rule retrieve_cutout:
+    message: None
+    jobid: 27
+    input: https://zenodo.org/records/15349674/files/europe-2023-sarah3-era5.nc (retrieve from storage)
+    output: cutouts/europe-2023-sarah3-era5.nc
+    log: logs/cutouts/retrieve_cutout_europe-2023-sarah3-era5.log (check log file(s) for error details)
+Removing output files of failed job retrieve_cutout since they might be corrupted:
+cutouts/europe-2023-sarah3-era5.nc
+Trying to restart job 27.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Fri Aug 15 16:51:52 2025]
+localrule retrieve_cutout:
+    input: https://zenodo.org/records/15349674/files/europe-2023-sarah3-era5.nc (retrieve from storage)
+    output: cutouts/europe-2023-sarah3-era5.nc
+    log: logs/cutouts/retrieve_cutout_europe-2023-sarah3-era5.log
+    jobid: 27
+    reason: Forced execution
+    wildcards: cutout=europe-2023-sarah3-era5
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=5000, mem_mib=4769
+RuleException:
+FileNotFoundError in file "C:\Users\mayk\PyPSA-DE-master-Na\rules/retrieve.smk", line 168:
+[WinError 2] Het systeem kan het opgegeven bestand niet vinden
+  File "C:\Users\mayk\PyPSA-DE-master-Na\rules/retrieve.smk", line 168, in __rule_retrieve_cutout
+  File "C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\shutil.py", line 867, in move
+  File "C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\shutil.py", line 460, in copy2
+[Fri Aug 15 16:51:52 2025]
+Error in rule retrieve_cutout:
+    message: None
+    jobid: 27
+    input: https://zenodo.org/records/15349674/files/europe-2023-sarah3-era5.nc (retrieve from storage)
+    output: cutouts/europe-2023-sarah3-era5.nc
+    log: logs/cutouts/retrieve_cutout_europe-2023-sarah3-era5.log (check log file(s) for error details)
+[Fri Aug 15 16:51:52 2025]
+Finished jobid: 33 (Rule: retrieve_ship_raster)
+4 of 39 steps (10%) done
+Trying to restart job 27.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Fri Aug 15 16:51:52 2025]
+localrule retrieve_cutout:
+    input: https://zenodo.org/records/15349674/files/europe-2023-sarah3-era5.nc (retrieve from storage)
+    output: cutouts/europe-2023-sarah3-era5.nc
+    log: logs/cutouts/retrieve_cutout_europe-2023-sarah3-era5.log
+    jobid: 27
+    reason: Forced execution
+    wildcards: cutout=europe-2023-sarah3-era5
+    resources: tmpdir=C:\Users\mayk\AppData\Local\Temp, mem_mb=5000, mem_mib=4769
+RuleException:
+FileNotFoundError in file "C:\Users\mayk\PyPSA-DE-master-Na\rules/retrieve.smk", line 168:
+[WinError 2] Het systeem kan het opgegeven bestand niet vinden
+  File "C:\Users\mayk\PyPSA-DE-master-Na\rules/retrieve.smk", line 168, in __rule_retrieve_cutout
+  File "C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\shutil.py", line 867, in move
+  File "C:\Users\mayk\miniforge3\envs\pypsa-eur\Lib\shutil.py", line 460, in copy2
+[Fri Aug 15 16:51:53 2025]
+Error in rule retrieve_cutout:
+    message: None
+    jobid: 27
+    input: https://zenodo.org/records/15349674/files/europe-2023-sarah3-era5.nc (retrieve from storage)
+    output: cutouts/europe-2023-sarah3-era5.nc
+    log: logs/cutouts/retrieve_cutout_europe-2023-sarah3-era5.log (check log file(s) for error details)
+[Fri Aug 15 16:51:53 2025]
+Finished jobid: 22 (Rule: retrieve_osm_prebuilt)
+5 of 39 steps (13%) done
+INFO:__main__: - Fetching OSM administrative boundaries for MD (Attempt 1)...
+INFO:__main__: - Fetching OSM administrative boundaries for BA (Attempt 1)...
+INFO:__main__: - Fetching OSM administrative boundaries for XK (Attempt 1)...
+INFO:__main__:Downloading technology data from 'https://raw.githubusercontent.com/PyPSA/technology-data/v0.13.3/outputs/costs_2035.csv'.
+INFO:__main__:Technology data available at at resources\de-co2-scenario-A-2035\costs_2035.csv
+[Fri Aug 15 16:51:55 2025]
+Finished jobid: 37 (Rule: retrieve_cost_data)
+6 of 39 steps (15%) done
+INFO:__main__: - Done.
+[Fri Aug 15 16:51:56 2025]
+Finished jobid: 12 (Rule: retrieve_osm_boundaries)
+7 of 39 steps (18%) done
+INFO:__main__: - Done.
+INFO:__main__: - Done.
+[Fri Aug 15 16:51:57 2025]
+Finished jobid: 7 (Rule: retrieve_eez)
+8 of 39 steps (21%) done
+[Fri Aug 15 16:51:57 2025]
+Finished jobid: 16 (Rule: retrieve_osm_boundaries)
+9 of 39 steps (23%) done
+[Fri Aug 15 16:51:57 2025]
+Finished jobid: 10 (Rule: retrieve_osm_boundaries)
+10 of 39 steps (26%) done
+INFO:__main__: - Done.
+[Fri Aug 15 16:52:01 2025]
+Finished jobid: 14 (Rule: retrieve_osm_boundaries)
+11 of 39 steps (28%) done
+[Fri Aug 15 16:52:57 2025]
+Finished jobid: 25 (Rule: retrieve_electricity_demand)
+12 of 39 steps (31%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look below for error messages
+[Fri Aug 15 16:52:57 2025]
+Error in rule retrieve_cutout:
+    message: None
+    jobid: 27
+    input: https://zenodo.org/records/15349674/files/europe-2023-sarah3-era5.nc (retrieve from storage)
+    output: cutouts/europe-2023-sarah3-era5.nc
+    log: logs/cutouts/retrieve_cutout_europe-2023-sarah3-era5.log (check log file(s) for error details)
+Complete log(s): C:\Users\mayk\PyPSA-DE-master-Na\.snakemake\log\2025-08-15T164956.113513.snakemake.log
+WorkflowError:
+At least one job did not complete successfully.
+
+⚠️  Skipping result extraction for failed Scenario A
+
+============================================================
+SCENARIO B: 5% of 1990 emissions
+============================================================
+📝 Updating config for Scenario B: 5% CO2 target
+⚡️ Overriding demand to 650.0 TWh/y (scaling factor: 1.32)
+✅ Config saved: config/de-co2-scenario-B-2035.yaml
+
+🚀 Starting Scenario B optimization...
+============================================================
+🔄 Running command: snakemake -j16 --configfile=config/de-co2-scenario-B-2035.yaml solve_elec_networks --forceall

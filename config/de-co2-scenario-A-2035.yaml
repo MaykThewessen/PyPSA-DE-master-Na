@@ -93,7 +93,7 @@ scenario:
   ll:
   - vopt
   clusters:
-  - 1
+  - 2
   opts:
   - Co2L0.15
   sector_opts:
@@ -107,12 +107,12 @@ snapshots:
   end: '2024-01-01'
   inclusive: left
 enable:
-  retrieve: auto
+  retrieve: false
   prepare_links_p_nom: false
   retrieve_databundle: false
   retrieve_cost_data: true
   build_cutout: false
-  retrieve_cutout: true
+  retrieve_cutout: false
   custom_busmap: false
   drop_leap_day: true
 co2_budget:
@@ -136,21 +136,20 @@ electricity:
     battery: 8
     vanadium: 12
     CAES: 24
-    IronAir: 100
-    H2: 100
   extendable_carriers:
     Generator:
     - solar
     - onwind
     - offwind-ac
+    - offwind-dc
     - CCGT
     - OCGT
     StorageUnit:
     - battery
-    - H2
     - PHS
     Store:
     - H2
+    - IronAir
     Link: []
   powerplants_filter: (DateOut >= 2023 or DateOut != DateOut)
   custom_powerplants: false
@@ -191,6 +190,7 @@ renewable:
       turbine: Vestas_V112_3MW
     capacity_per_sqkm: 3
     clip_p_max_pu: 0.01
+    natura: false
   offwind-ac:
     cutout: europe-2023-sarah3-era5
     resource:
@@ -198,6 +198,15 @@ renewable:
       turbine: NREL_ReferenceTurbine_2020ATB_5.5MW
     capacity_per_sqkm: 2
     clip_p_max_pu: 0.01
+    natura: false
+  offwind-dc:
+    cutout: europe-2023-sarah3-era5
+    resource:
+      method: wind
+      turbine: NREL_ReferenceTurbine_2020ATB_5.5MW
+    capacity_per_sqkm: 2
+    clip_p_max_pu: 0.01
+    natura: false
   solar:
     cutout: europe-2023-sarah3-era5
     resource:
@@ -208,6 +217,7 @@ renewable:
         azimuth: 180.0
     capacity_per_sqkm: 5.1
     clip_p_max_pu: 0.01
+    natura: false
   hydro:
     cutout: europe-2023-sarah3-era5
     carriers:
@@ -227,10 +237,22 @@ lines:
 links:
   p_max_pu: 1.0
   length_factor: 1.25
+transformers:
+  x: 0.1
+  s_nom: 2000
+  type: ''
+dlr:
+  activate: false
+  correction_factor: 1.0
+  max_voltage_difference: false
+  max_line_rating: false
 load:
-  scaling_factor: 1.3224821973550356
+  scaling_factor: 1.0
   fixed_year: false
   supplement_synthetic: true
+  distribution_key:
+    gdp: 0.6
+    pop: 0.4
 sector:
   transport: false
   heating: false
@@ -293,17 +315,22 @@ costs:
 clustering:
   mode: busmap
   focus_weights: false
+  administrative:
+    level: 0
+    countries: {}
   simplify_network:
     to_substations: false
     algorithm: kmeans
     feature: solar+onwind-time
     exclude_carriers: []
+    remove_stubs: true
+    remove_stubs_across_borders: true
   cluster_network:
     algorithm: kmeans
     feature: solar+onwind-time
     exclude_carriers: []
   temporal:
-    resolution_elec: 2
+    resolution_elec: 3
     resolution_sector: false
 adjustments:
   electricity: false

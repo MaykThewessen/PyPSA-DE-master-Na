@@ -23,6 +23,27 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 
+def check_missing_files():
+    """Check which data files are missing and need to be downloaded"""
+    missing_files = []
+    
+    # Check key data files
+    data_files = {
+        'electricity_demand': 'data/electricity_demand_raw.csv',
+        'synthetic_demand': 'data/load_synthetic_raw.csv',
+        'osm_prebuilt': 'data/osm-prebuilt/0.6/buses.csv',
+        'nuts_shapes': 'data/nuts/NUTS_RG_01M_2021_4326_LEVL_3.geojson',
+        'eez_data': 'data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg',
+        'jrc_data': 'data/jrc-ardeco/ARDECO-SUVGDP.2021.table.csv',
+        'databundle': 'data/bundle/GDP_per_capita_PPP_1990_2015_v2.nc'
+    }
+    
+    for name, filepath in data_files.items():
+        if not os.path.exists(filepath):
+            missing_files.append(name)
+    
+    return missing_files
+
 def update_config_for_scenario(config_path, co2_target, scenario_name, demand_twh=None):
     """Update configuration file for specific CO2 scenario"""
     
@@ -35,6 +56,28 @@ def update_config_for_scenario(config_path, co2_target, scenario_name, demand_tw
     # Update CO2 targets
     config['co2_budget'][2035] = co2_target
     config['electricity']['co2limit'] = co2_target
+    
+    # Check which files are missing and enable only necessary downloads
+    missing_files = check_missing_files()
+    
+    if missing_files:
+        print(f"🌐 Missing data files detected: {', '.join(missing_files)}")
+        print("📥 Enabling downloads for missing files only...")
+        
+        # Enable downloads only for missing files
+        config['enable']['retrieve'] = 'auto'
+        config['enable']['retrieve_databundle'] = 'databundle' in missing_files
+        config['enable']['retrieve_cost_data'] = True  # Always get latest costs
+    else:
+        print("✅ All required data files found locally - no downloads needed")
+        # Keep downloads disabled to use local files
+        config['enable']['retrieve'] = False
+        config['enable']['retrieve_databundle'] = False
+        config['enable']['retrieve_cost_data'] = True  # Always get latest costs
+    
+    # Never build or retrieve cutouts - we have them locally
+    config['enable']['build_cutout'] = False
+    config['enable']['retrieve_cutout'] = False
 
     if demand_twh:
         # Default average demand is 491.5 TWh / 8760 h = 56.1 GW
@@ -63,23 +106,64 @@ def run_scenario(config_path, scenario_name):
     results_dir = f"results/de-co2-scenario-{scenario_name}-2035"
     os.makedirs(results_dir, exist_ok=True)
     
+    # Auto-unlock Snakemake before starting
+    print("🔓 Auto-unlocking Snakemake directory...")
+    
+    # Try multiple unlock strategies
+    unlock_strategies = [
+        ["snakemake", "--unlock", "--nolock"],
+        ["snakemake", "--unlock"],
+        ["snakemake", "--unlock", "--rerun-incomplete"]
+    ]
+    
+    for i, unlock_cmd in enumerate(unlock_strategies, 1):
+        try:
+            print(f"🔄 Trying unlock strategy {i}/{len(unlock_strategies)}: {' '.join(unlock_cmd)}")
+            unlock_result = subprocess.run(
+                unlock_cmd,
+                capture_output=True,
+                text=True,
+                timeout=45,  # 45 second timeout for unlock
+                cwd=os.getcwd()
+            )
+            
+            if unlock_result.returncode == 0:
+                print("✅ Snakemake directory unlocked successfully")
+                break
+            else:
+                print(f"⚠️  Strategy {i} warning: {unlock_result.stderr[:200]}...")
+                
+        except subprocess.TimeoutExpired:
+            print(f"⚠️  Strategy {i} timed out")
+        except Exception as e:
+            print(f"⚠️  Strategy {i} error: {e}")
+    
+    # Force cleanup of potential lock files
     try:
-        # Run snakemake command
+        if os.path.exists(".snakemake"):
+            print("🧹 Cleaning up .snakemake directory...")
+            shutil.rmtree(".snakemake", ignore_errors=True)
+    except Exception as e:
+        print(f"⚠️  Cleanup warning: {e}")
+    
+    try:
+        # Run snakemake command with no-lock option
         cmd = [
             "snakemake", 
             "-j16",  # Use 16 cores
             f"--configfile={config_path}",
             "solve_elec_networks",
-            "--forceall"
+            "--forceall",
+            "--nolock",  # Disable locking to prevent lock issues
+            "--rerun-incomplete"  # Rerun any incomplete jobs
         ]
         
         print(f"🔄 Running command: {' '.join(cmd)}")
+        print("📊 Progress will be shown below (press Ctrl+C to cancel scenario)...\n")
         
-        # Run with timeout and capture output
+        # Run with real-time output display
         result = subprocess.run(
             cmd, 
-            capture_output=True, 
-            text=True, 
             timeout=7200,  # 2 hour timeout per scenario
             cwd=os.getcwd()
         )
@@ -131,7 +215,7 @@ def extract_results(scenario_name, co2_target):
         }
         
         # Generator capacities
-        for tech in ['solar', 'onwind', 'offwind-ac', 'CCGT', 'OCGT', 'nuclear', 'biomass']:
+        for tech in ['solar', 'onwind', 'offwind-ac', 'offwind-dcß', 'CCGT', 'OCGT', 'nuclear', 'biomass']:
             if tech in n.generators.carrier.values:
                 capacity = n.generators[n.generators.carrier == tech].p_nom_opt.sum()
                 results[f'{tech}_capacity_GW'] = capacity
@@ -139,7 +223,7 @@ def extract_results(scenario_name, co2_target):
                 results[f'{tech}_capacity_GW'] = 0.0
         
         # Storage capacities
-        for tech in ['battery', 'H2', 'PHS']:
+        for tech in ['battery', 'H2', 'PHS', 'IronAir']:
             if tech in n.storage_units.carrier.values:
                 power = n.storage_units[n.storage_units.carrier == tech].p_nom_opt.sum()
                 energy = n.storage_units[n.storage_units.carrier == tech].state_of_charge_initial.sum()
@@ -159,13 +243,15 @@ def extract_results(scenario_name, co2_target):
         results['total_storage_power_GW'] = (
             results.get('battery_power_GW', 0) + 
             results.get('H2_power_GW', 0) + 
-            results.get('PHS_power_GW', 0)
+            results.get('PHS_power_GW', 0) +
+            results.get('IronAir_power_GW', 0)
         )
         
         results['total_storage_energy_GWh'] = (
             results.get('battery_energy_GWh', 0) + 
             results.get('H2_energy_GWh', 0) + 
-            results.get('PHS_energy_GWh', 0)
+            results.get('PHS_energy_GWh', 0) +
+            results.get('IronAir_energy_GWh', 0)
         )
         
         # System costs

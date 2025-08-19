@@ -485,13 +485,13 @@ rule build_transmission_projects:
 rule add_transmission_projects_and_dlr:
     params:
         transmission_projects=config_provider("transmission_projects"),
-        dlr=config_provider("lines", "dynamic_line_rating"),
+        dlr=config_provider("dlr"),
         s_max_pu=config_provider("lines", "s_max_pu"),
     input:
         network=resources("networks/base.nc"),
         dlr=lambda w: (
             resources("dlr.nc")
-            if config_provider("lines", "dynamic_line_rating", "activate")(w)
+            if config_provider("dlr", "activate")(w)
             else []
         ),
         transmission_projects=lambda w: (
