@@ -4,6 +4,8 @@
 
 import copy
 from functools import partial, lru_cache
+import re
+import requests
 
 import os, sys, glob
 

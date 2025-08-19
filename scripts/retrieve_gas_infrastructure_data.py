@@ -36,16 +36,26 @@ if __name__ == "__main__":
     # Save locations
     zip_fn = Path(f"{rootpath}/IGGIELGN.zip")
     to_fn = Path(rootpath) / Path(snakemake.output[0]).parent.parent
+    
+    # Check if all output files already exist
+    all_outputs_exist = all(
+        Path(output_file).exists() for output_file in snakemake.output
+    )
+    
+    force_download = snakemake.config["enable"].get("force_download", False)
+    
+    if all_outputs_exist and not force_download:
+        logger.info("All gas infrastructure files already exist and force_download is False. Skipping download.")
+    else:
+        logger.info(f"Downloading databundle from '{url}'.")
+        disable_progress = snakemake.config["run"].get("disable_progressbar", False)
+        progress_retrieve(url, zip_fn, disable=disable_progress, force_download=force_download)
 
-    logger.info(f"Downloading databundle from '{url}'.")
-    disable_progress = snakemake.config["run"].get("disable_progressbar", False)
-    progress_retrieve(url, zip_fn, disable=disable_progress)
+        validate_checksum(zip_fn, url)
 
-    validate_checksum(zip_fn, url)
+        logger.info("Extracting databundle.")
+        zipfile.ZipFile(zip_fn).extractall(to_fn)
 
-    logger.info("Extracting databundle.")
-    zipfile.ZipFile(zip_fn).extractall(to_fn)
+        zip_fn.unlink()
 
-    zip_fn.unlink()
-
-    logger.info(f"Gas infrastructure data available in '{to_fn}'.")
+        logger.info(f"Gas infrastructure data available in '{to_fn}'.")

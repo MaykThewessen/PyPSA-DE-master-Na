@@ -407,17 +407,80 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
     return costs
 
 
-def progress_retrieve(url, file, disable=False):
+def file_exists_and_valid(file_path, check_size=True, min_size=1024):
+    """
+    Check if a file exists and appears to be valid.
+    
+    Parameters
+    ----------
+    file_path : str or Path
+        Path to the file to check
+    check_size : bool, default True
+        Whether to check if file has reasonable size
+    min_size : int, default 1024
+        Minimum file size in bytes to consider valid
+        
+    Returns
+    -------
+    bool
+        True if file exists and appears valid
+    """
+    from pathlib import Path
+    
+    path = Path(file_path)
+    if not path.exists():
+        return False
+        
+    if check_size and path.stat().st_size < min_size:
+        logger.warning(f"File {file_path} exists but is too small ({path.stat().st_size} bytes)")
+        return False
+        
+    return True
+
+
+def progress_retrieve(url, file, disable=False, force_download=False, check_existing=True):
+    """
+    Download a file from URL with progress bar, with optional existence checking.
+    
+    Parameters
+    ----------
+    url : str
+        URL to download from
+    file : str or Path
+        Local file path to save to
+    disable : bool, default False
+        Whether to disable progress bar
+    force_download : bool, default False
+        Whether to download even if file exists
+    check_existing : bool, default True
+        Whether to check if file already exists before downloading
+    """
+    from pathlib import Path
+    
+    file_path = Path(file)
+    
+    # Check if file already exists and is valid
+    if check_existing and not force_download and file_exists_and_valid(file_path):
+        logger.info(f"File {file_path} already exists and appears valid. Skipping download.")
+        return
+        
+    logger.info(f"Downloading {file_path.name} from {url}")
+    
+    # Ensure parent directory exists
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
     # Hotfix - Bug, tqdm not working with disable=False
     disable = True
 
     if disable:
         response = requests.get(url, headers=headers, stream=True)
-        with open(file, "wb") as f:
+        response.raise_for_status()  # Raise an exception for bad status codes
+        with open(file_path, "wb") as f:
             f.write(response.content)
     else:
         response = requests.get(url, headers=headers, stream=True)
+        response.raise_for_status()  # Raise an exception for bad status codes
         total_size = int(response.headers.get("content-length", 0))
         chunk_size = 1024
 
@@ -426,12 +489,14 @@ def progress_retrieve(url, file, disable=False):
             unit="B",
             unit_scale=True,
             unit_divisor=1024,
-            desc=str(file),
+            desc=str(file_path.name),
         ) as t:
-            with open(file, "wb") as f:
+            with open(file_path, "wb") as f:
                 for data in response.iter_content(chunk_size=chunk_size):
                     f.write(data)
                     t.update(len(data))
+                    
+    logger.info(f"Downloaded {file_path.name} successfully")
 
 
 def retry(func: Callable) -> Callable:

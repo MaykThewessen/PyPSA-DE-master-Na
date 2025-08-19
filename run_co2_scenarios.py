@@ -7,11 +7,11 @@ C) 1% of 1990 emissions
 D) 0% of 1990 emissions (net-zero)
 
 Features:
-- 4380 timesteps (2-hour resolution)
+- 2920 timesteps (3-hour resolution)
 - LP optimization only
 - 5-hour solver time limit
 - 1e-6 tolerance
-- Simplified linear transmission losses 
+- Simplified linear transmission losses
 """
 
 import os
@@ -64,33 +64,54 @@ def run_scenario(config_path, scenario_name):
     os.makedirs(results_dir, exist_ok=True)
     
     try:
-        # Run snakemake command
+        # Run snakemake command with improved network settings
         cmd = [
             "snakemake", 
-            "-j16",  # Use 16 cores
+            "-j8",  # Reduce cores to avoid overwhelming network
             f"--configfile={config_path}",
             "solve_elec_networks",
-            "--forceall"
+            "--forceall",
+            "--latency-wait", "30",  # Wait longer for file operations
+            "--retries", "5",  # Retry failed jobs more times
+            "--restart-times", "3"  # Allow more restarts
         ]
         
         print(f"🔄 Running command: {' '.join(cmd)}")
         
-        # Run with timeout and capture output
-        result = subprocess.run(
-            cmd, 
-            capture_output=True, 
-            text=True, 
-            timeout=7200,  # 2 hour timeout per scenario
+        # Run with real-time output streaming
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+            universal_newlines=True,
             cwd=os.getcwd()
         )
         
-        if result.returncode == 0:
-            print(f"✅ Scenario {scenario_name} completed successfully!")
-            return True
-        else:
-            print(f"❌ Scenario {scenario_name} failed!")
-            print(f"STDOUT: {result.stdout}")
-            print(f"STDERR: {result.stderr}")
+        print("\n📺 Real-time progress:")
+        print("=" * 60)
+        
+        # Stream output in real-time
+        try:
+            for line in process.stdout:
+                print(line.rstrip())
+                
+            # Wait for process to complete
+            return_code = process.wait(timeout=7200)  # 2 hour timeout
+            
+            if return_code == 0:
+                print("\n" + "=" * 60)
+                print(f"✅ Scenario {scenario_name} completed successfully!")
+                return True
+            else:
+                print("\n" + "=" * 60)
+                print(f"❌ Scenario {scenario_name} failed with return code {return_code}!")
+                return False
+                
+        except subprocess.TimeoutExpired:
+            process.kill()
+            print(f"\n⏰ Scenario {scenario_name} timed out after 2 hours")
             return False
             
     except subprocess.TimeoutExpired:
@@ -262,7 +283,7 @@ def main(demand_twh=None):
     print("🚀 PyPSA CO2 Scenarios Analysis")
     print("=" * 60)
     print("Running 4 scenarios with:")
-    print("  • 4380 timesteps (2-hour resolution)")
+    print("  • 2920 timesteps (3-hour resolution)")
     print("  • LP optimization only")
     print("  • 5-hour solver time limit")
     print("  • 1e-6 tolerance")

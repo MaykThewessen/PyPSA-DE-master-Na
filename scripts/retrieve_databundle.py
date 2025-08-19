@@ -45,17 +45,27 @@ if __name__ == "__main__":
 
     tarball_fn = Path(f"{rootpath}/bundle.tar.xz")
     to_fn = Path(rootpath) / Path(snakemake.output[0]).parent.parent
+    
+    # Check if all output files already exist
+    all_outputs_exist = all(
+        Path(output_file).exists() for output_file in snakemake.output
+    )
+    
+    force_download = snakemake.config["enable"].get("force_download", False)
+    
+    if all_outputs_exist and not force_download:
+        logger.info("All databundle files already exist and force_download is False. Skipping download.")
+    else:
+        logger.info(f"Downloading databundle from '{url}'.")
+        disable_progress = snakemake.config["run"].get("disable_progressbar", False)
+        progress_retrieve(url, tarball_fn, disable=disable_progress, force_download=force_download)
 
-    logger.info(f"Downloading databundle from '{url}'.")
-    disable_progress = snakemake.config["run"].get("disable_progressbar", False)
-    progress_retrieve(url, tarball_fn, disable=disable_progress)
+        validate_checksum(tarball_fn, url)
 
-    validate_checksum(tarball_fn, url)
+        logger.info("Extracting databundle.")
+        tarfile.open(tarball_fn).extractall(to_fn)
 
-    logger.info("Extracting databundle.")
-    tarfile.open(tarball_fn).extractall(to_fn)
+        logger.info("Unlinking tarball.")
+        tarball_fn.unlink()
 
-    logger.info("Unlinking tarball.")
-    tarball_fn.unlink()
-
-    logger.info(f"Databundle available in '{to_fn}'.")
+        logger.info(f"Databundle available in '{to_fn}'.")

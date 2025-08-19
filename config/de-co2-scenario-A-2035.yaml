@@ -46,7 +46,7 @@ solving:
       highs_debug_level: 0
       log_to_console: true
       mip_rel_gap: 1e-6
-  mem_mb: 60000
+  mem_mb: 16000
   constraints:
     CCL: false
     EQ: false
@@ -107,14 +107,15 @@ snapshots:
   end: '2024-01-01'
   inclusive: left
 enable:
-  retrieve: auto
+  retrieve: true
   prepare_links_p_nom: false
   retrieve_databundle: false
-  retrieve_cost_data: true
+  retrieve_cost_data: false
   build_cutout: false
   retrieve_cutout: true
   custom_busmap: false
   drop_leap_day: true
+  force_download: false
 co2_budget:
   2035: 0.15
 electricity:
@@ -134,42 +135,17 @@ electricity:
     activate: false
   max_hours:
     battery: 8
-    vanadium: 12
-    CAES: 24
-    IronAir: 100
-    H2: 100
+    iron-air: 100
   extendable_carriers:
-    Generator:
-    - solar
-    - onwind
-    - offwind-ac
-    - CCGT
-    - OCGT
-    StorageUnit:
-    - battery
-    - H2
-    - PHS
-    Store:
-    - H2
-    Link: []
-  powerplants_filter: (DateOut >= 2023 or DateOut != DateOut)
+    Generator: [solar, onwind, offwind-ac, CCGT, OCGT]
+    StorageUnit: [battery, iron-air]  # Fixed power-to-energy ratio storage
+    Store: [Hydrogen]                 # H2 Store with independent power/energy optimization
+    Link: [electrolysis, fuel cell]   # hydrogen generation, and electricity  generation, connected to hydrogen storage
+  powerplants_filter: "(DateOut >= 2023 or DateOut != DateOut)"
   custom_powerplants: false
   everywhere_powerplants: []
-  conventional_carriers:
-  - nuclear
-  - oil
-  - OCGT
-  - CCGT
-  - coal
-  - lignite
-  - geothermal
-  - biomass
-  renewable_carriers:
-  - solar
-  - onwind
-  - offwind-ac
-  - offwind-dc
-  - hydro
+  conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, biomass]
+  renewable_carriers: [solar, onwind, offwind-ac, hydro]
   estimate_renewable_capacities:
     enable: true
     from_opsd: true
@@ -190,6 +166,7 @@ renewable:
       method: wind
       turbine: Vestas_V112_3MW
     capacity_per_sqkm: 3
+    natura: false
     clip_p_max_pu: 0.01
   offwind-ac:
     cutout: europe-2023-sarah3-era5
@@ -197,7 +174,18 @@ renewable:
       method: wind
       turbine: NREL_ReferenceTurbine_2020ATB_5.5MW
     capacity_per_sqkm: 2
+    natura: false
     clip_p_max_pu: 0.01
+  offwind-dc:
+    cutout: europe-2023-sarah3-era5
+    resource:
+      method: wind
+      turbine: NREL_ReferenceTurbine_2020ATB_5.5MW
+    capacity_per_sqkm: 2
+    natura: false
+    clip_p_max_pu: 0.01
+    max_depth: 50
+    min_shore_distance: 30000
   solar:
     cutout: europe-2023-sarah3-era5
     resource:
@@ -207,6 +195,7 @@ renewable:
         slope: 19.0
         azimuth: 180.0
     capacity_per_sqkm: 5.1
+    natura: false
     clip_p_max_pu: 0.01
   hydro:
     cutout: europe-2023-sarah3-era5
@@ -224,13 +213,31 @@ lines:
     380.0: Al/St 240/40 4-bundle 380.0
   s_max_pu: 0.7
   length_factor: 1.25
+  dynamic_line_rating:
+    activate: false
+    correction_factor: 0.95
+    max_voltage_difference: false
+    max_line_rating: false
+    cutout: europe-2023-sarah3-era5
 links:
   p_max_pu: 1.0
   length_factor: 1.25
+transformers:
+  x: 0.1
+  s_nom: 2000
+  type: ''
 load:
-  scaling_factor: 1.3224821973550356
+  scaling_factor: 1.017293997965412
   fixed_year: false
   supplement_synthetic: true
+  manual_adjustments: false
+  distribution_key:
+    gdp: 0.6
+    pop: 0.4
+  fill_gaps:
+    enable: false
+    fill_offshore: true
+    normalize: true
 sector:
   transport: false
   heating: false
@@ -254,56 +261,28 @@ costs:
     lifetime: 25
     CO2 intensity: 0
     discount rate: 0.05
-  overwrites:
-    capital_cost: {}
-    marginal_cost: {}
-    efficiency: {}
-  fuel:
-    OCGT: 25
-    CCGT: 25
-    gas: 25
-    coal: 24.57
-    lignite: 22.11
-    nuclear: 1.75
-    uranium: 1.75
-  investment:
-    solar: 380
-    onwind: 1200
-    offwind-ac: 2500
-    nuclear: 10871
-    CCGT: 850
-    OCGT: 400
-    battery: 132000
-    H2: 94000
-    PHS: 2000
-  lifetime:
-    solar: 25
-    onwind: 25
-    offwind-ac: 25
-    nuclear: 50
-    CCGT: 25
-    OCGT: 25
-    battery: 16
-    H2: 30
-    PHS: 50
   emission_prices:
     enable: true
-    co2: 100
+    co2: 300
     co2_monthly_prices: false
 clustering:
   mode: busmap
   focus_weights: false
+  administrative:
+    level: 0
   simplify_network:
     to_substations: false
     algorithm: kmeans
     feature: solar+onwind-time
     exclude_carriers: []
+    remove_stubs: false
+    remove_stubs_across_borders: false
   cluster_network:
     algorithm: kmeans
     feature: solar+onwind-time
     exclude_carriers: []
   temporal:
-    resolution_elec: 2
+    resolution_elec: 3
     resolution_sector: false
 adjustments:
   electricity: false

@@ -1,0 +1,1683 @@
+🚀 PyPSA CO2 Scenarios Analysis
+============================================================
+Running 4 scenarios with:
+  • 4380 timesteps (2-hour resolution)
+  • LP optimization only
+  • 5-hour solver time limit
+  • 1e-6 tolerance
+  • No heating sector
+============================================================
+
+============================================================
+SCENARIO A: 15% of 1990 emissions
+============================================================
+📝 Updating config for Scenario A: 15% CO2 target
+✅ Config saved: config/de-co2-scenario-A-2035.yaml
+
+🚀 Starting Scenario A optimization...
+============================================================
+🔄 Running command: snakemake -j8 --configfile=config/de-co2-scenario-A-2035.yaml solve_elec_networks --forceall --latency-wait 30 --retries 5 --restart-times 3
+
+📺 Real-time progress:
+============================================================
+Assuming unrestricted shared filesystem usage.
+host: MacBook-Air-Ore-M4-15-van-Mayk.local
+Building DAG of jobs...
+Retrieving from storage: https://zenodo.org/records/14144752/files/buses.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/converters.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/lines.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/links.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/transformers.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/map.html
+Finished retrieval.
+Retrieving from storage: https://gisco-services.ec.europa.eu/distribution/v2/nuts/download/ref-nuts-2021-01m.geojson.zip
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/10820928/files/demand_hourly.csv
+Finished retrieval.
+Using shell: /bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Conda environments: ignored
+Job stats:
+job                                      count
+-------------------------------------  -------
+add_electricity                              1
+add_transmission_projects_and_dlr            1
+base_network                                 1
+build_electricity_demand                     1
+build_electricity_demand_base                1
+build_osm_boundaries                         4
+build_powerplants                            1
+build_shapes                                 1
+cluster_network                              1
+ensure_local_costs                           1
+prepare_network                              1
+retrieve_eez                                 1
+retrieve_electricity_demand                  1
+retrieve_jrc_ardeco                          1
+retrieve_nuts_2021_shapes                    1
+retrieve_osm_boundaries                      4
+retrieve_osm_prebuilt                        1
+retrieve_synthetic_electricity_demand        1
+simplify_network                             1
+solve_elec_networks                          1
+solve_network                                1
+total                                       27
+
+Select jobs to execute...
+Execute 8 jobs...
+
+[Mon Aug 18 21:08:35 2025]
+localrule retrieve_electricity_demand:
+    output: data/electricity_demand_raw.csv
+    log: logs/retrieve_electricity_demand.log
+    jobid: 23
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+[Mon Aug 18 21:08:35 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/XK_adm1.json
+    log: logs/retrieve_osm_boundaries_XK_adm1.log
+    jobid: 14
+    reason: Forced execution
+    wildcards: country=XK
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:08:35 2025]
+localrule retrieve_jrc_ardeco:
+    output: data/jrc-ardeco/ARDECO-SUVGDP.2021.table.csv, data/jrc-ardeco/ARDECO-SNPTD.2021.table.csv
+    jobid: 15
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:08:35 2025]
+localrule retrieve_nuts_2021_shapes:
+    input: https://gisco-services.ec.europa.eu/distribution/v2/nuts/download/ref-nuts-2021-01m.geojson.zip (retrieve from storage)
+    output: data/nuts/NUTS_RG_01M_2021_4326_LEVL_3.geojson, data/nuts/NUTS_RG_01M_2021_4326_LEVL_2.geojson, data/nuts/NUTS_RG_01M_2021_4326_LEVL_1.geojson, data/nuts/NUTS_RG_01M_2021_4326_LEVL_0.geojson
+    jobid: 6
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:08:35 2025]
+localrule retrieve_eez:
+    output: data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    jobid: 5
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:08:35 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/BA_adm1.json
+    log: logs/retrieve_osm_boundaries_BA_adm1.log
+    jobid: 8
+    reason: Forced execution
+    wildcards: country=BA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:08:35 2025]
+localrule retrieve_synthetic_electricity_demand:
+    input: https://zenodo.org/records/10820928/files/demand_hourly.csv (retrieve from storage)
+    output: data/load_synthetic_raw.csv
+    log: logs/retrieve_synthetic_electricity_demand.log
+    jobid: 24
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+[Mon Aug 18 21:08:35 2025]
+localrule retrieve_osm_prebuilt:
+    input: https://zenodo.org/records/14144752/files/buses.csv (retrieve from storage), https://zenodo.org/records/14144752/files/converters.csv (retrieve from storage), https://zenodo.org/records/14144752/files/lines.csv (retrieve from storage), https://zenodo.org/records/14144752/files/links.csv (retrieve from storage), https://zenodo.org/records/14144752/files/transformers.csv (retrieve from storage), https://zenodo.org/records/14144752/files/map.html (retrieve from storage)
+    output: data/osm-prebuilt/0.6/buses.csv, data/osm-prebuilt/0.6/converters.csv, data/osm-prebuilt/0.6/lines.csv, data/osm-prebuilt/0.6/links.csv, data/osm-prebuilt/0.6/transformers.csv, data/osm-prebuilt/0.6/map.html
+    log: logs/retrieve_osm_prebuilt.log
+    jobid: 20
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=500, mem_mib=477
+Select jobs to execute...
+INFO:__main__: - Fetching OSM administrative boundaries for BA (Attempt 1)...
+INFO:__main__: - Fetching OSM administrative boundaries for XK (Attempt 1)...
+[Mon Aug 18 21:08:40 2025]
+Finished jobid: 6 (Rule: retrieve_nuts_2021_shapes)
+1 of 27 steps (4%) done
+Execute 1 jobs...
+
+[Mon Aug 18 21:08:40 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/UA_adm1.json
+    log: logs/retrieve_osm_boundaries_UA_adm1.log
+    jobid: 12
+    reason: Forced execution
+    wildcards: country=UA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:08:40 2025]
+Finished jobid: 24 (Rule: retrieve_synthetic_electricity_demand)
+2 of 27 steps (7%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:08:40 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/MD_adm1.json
+    log: logs/retrieve_osm_boundaries_MD_adm1.log
+    jobid: 10
+    reason: Forced execution
+    wildcards: country=MD
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+INFO:__main__: - Done.
+INFO:__main__: - Done.
+[Mon Aug 18 21:08:41 2025]
+Finished jobid: 8 (Rule: retrieve_osm_boundaries)
+3 of 27 steps (11%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:08:41 2025]
+Job 25: Ensuring local costs file is available (no download from cloud)
+Reason: Forced execution
+[Mon Aug 18 21:08:41 2025]
+Finished jobid: 14 (Rule: retrieve_osm_boundaries)
+4 of 27 steps (15%) done
+[Mon Aug 18 21:08:42 2025]
+Finished jobid: 5 (Rule: retrieve_eez)
+5 of 27 steps (19%) done
+Select jobs to execute...
+Execute 2 jobs...
+
+[Mon Aug 18 21:08:42 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/XK_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/XK_adm1.geojson
+    log: logs/build_osm_boundaries_XK.log
+    jobid: 13
+    reason: Forced execution
+    wildcards: country=XK
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+[Mon Aug 18 21:08:42 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/BA_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/BA_adm1.geojson
+    log: logs/build_osm_boundaries_BA.log
+    jobid: 7
+    reason: Forced execution
+    wildcards: country=BA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+INFO:__main__: - Fetching OSM administrative boundaries for UA (Attempt 1)...
+INFO:__main__: - Fetching OSM administrative boundaries for MD (Attempt 1)...
+INFO:__main__:Building administrative boundaries from OSM data for country BA.
+INFO:__main__:Building administrative boundaries from OSM data for country XK.
+INFO:pyogrio._io:Created 3 records
+INFO:pyogrio._io:Created 7 records
+[Mon Aug 18 21:08:44 2025]
+Finished jobid: 25 (Rule: ensure_local_costs)
+6 of 27 steps (22%) done
+[Mon Aug 18 21:08:44 2025]
+Finished jobid: 7 (Rule: build_osm_boundaries)
+7 of 27 steps (26%) done
+[Mon Aug 18 21:08:44 2025]
+Finished jobid: 13 (Rule: build_osm_boundaries)
+8 of 27 steps (30%) done
+INFO:__main__: - Done.
+[Mon Aug 18 21:08:44 2025]
+Finished jobid: 10 (Rule: retrieve_osm_boundaries)
+9 of 27 steps (33%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:08:44 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/MD_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/MD_adm1.geojson
+    log: logs/build_osm_boundaries_MD.log
+    jobid: 9
+    reason: Forced execution
+    wildcards: country=MD
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+INFO:__main__:Building administrative boundaries from OSM data for country MD.
+INFO:pyogrio._io:Created 37 records
+[Mon Aug 18 21:08:46 2025]
+Finished jobid: 9 (Rule: build_osm_boundaries)
+10 of 27 steps (37%) done
+INFO:__main__: - Done.
+[Mon Aug 18 21:08:47 2025]
+Finished jobid: 20 (Rule: retrieve_osm_prebuilt)
+11 of 27 steps (41%) done
+[Mon Aug 18 21:08:47 2025]
+Finished jobid: 12 (Rule: retrieve_osm_boundaries)
+12 of 27 steps (44%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:08:47 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/UA_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/UA_adm1.geojson
+    log: logs/build_osm_boundaries_UA.log
+    jobid: 11
+    reason: Forced execution
+    wildcards: country=UA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+INFO:__main__:Building administrative boundaries from OSM data for country UA.
+INFO:pyogrio._io:Created 27 records
+[Mon Aug 18 21:08:49 2025]
+Finished jobid: 11 (Rule: build_osm_boundaries)
+13 of 27 steps (48%) done
+[Mon Aug 18 21:08:55 2025]
+Finished jobid: 15 (Rule: retrieve_jrc_ardeco)
+14 of 27 steps (52%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:08:55 2025]
+localrule build_shapes:
+    input: data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg, data/nuts/NUTS_RG_01M_2021_4326_LEVL_3.geojson, data/osm-boundaries/build/BA_adm1.geojson, data/osm-boundaries/build/MD_adm1.geojson, data/osm-boundaries/build/UA_adm1.geojson, data/osm-boundaries/build/XK_adm1.geojson, data/jrc-ardeco/ARDECO-SUVGDP.2021.table.csv, data/jrc-ardeco/ARDECO-SNPTD.2021.table.csv, data/bundle/GDP_per_capita_PPP_1990_2015_v2.nc, data/bundle/ppp_2019_1km_Aggregated.tif
+    output: resources/de-co2-scenario-A-2035/country_shapes.geojson, resources/de-co2-scenario-A-2035/offshore_shapes.geojson, resources/de-co2-scenario-A-2035/europe_shape.geojson, resources/de-co2-scenario-A-2035/nuts3_shapes.geojson
+    log: logs/de-co2-scenario-A-2035/build_shapes.log
+    jobid: 4
+    benchmark: benchmarks/de-co2-scenario-A-2035/build_shapes
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+INFO:pyogrio._io:Created 1 records
+INFO:__main__:Processing NUTS regions.
+INFO:__main__:Processing non-NUTS regions.
+INFO:__main__:Harmonising NUTS and non-NUTS regions.
+INFO:__main__:Clipping regions by offshore shapes.
+INFO:__main__:Importing JRC ARDECO GDP data for year 2019.
+INFO:__main__:Importing JRC ARDECO population data for year 2019.
+INFO:__main__:Simplifying geometries for Europe by removing small islands smaller than 500 km2 or further than 200 km away.
+[Mon Aug 18 21:09:12 2025]
+Finished jobid: 23 (Rule: retrieve_electricity_demand)
+15 of 27 steps (56%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:09:12 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-A-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-A-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-A-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpoqppamig.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpoqppamig.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:09:15 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-A-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-A-2035/build_electricity_demand.log (check log file(s) for error details)
+Trying to restart job 22.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:09:15 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-A-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-A-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-A-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmp9ilbj2l3.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmp9ilbj2l3.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:09:17 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-A-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-A-2035/build_electricity_demand.log (check log file(s) for error details)
+Trying to restart job 22.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:09:17 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-A-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-A-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-A-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmp2px2iibn.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmp2px2iibn.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:09:19 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-A-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-A-2035/build_electricity_demand.log (check log file(s) for error details)
+Trying to restart job 22.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:09:19 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-A-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-A-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-A-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpqqwuqsk9.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpqqwuqsk9.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:09:22 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-A-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-A-2035/build_electricity_demand.log (check log file(s) for error details)
+INFO:pyogrio._io:Created 1 records
+INFO:pyogrio._io:Created 1 records
+INFO:__main__:Exporting NUTS3 and ADM1 shapes with GDP and POP values to resources/de-co2-scenario-A-2035/nuts3_shapes.geojson.
+INFO:pyogrio._io:Created 401 records
+[Mon Aug 18 21:09:39 2025]
+Finished jobid: 4 (Rule: build_shapes)
+16 of 27 steps (59%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look below for error messages
+[Mon Aug 18 21:09:39 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-A-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-A-2035/build_electricity_demand.log (check log file(s) for error details)
+Complete log(s): /Users/m/PyPSA-DE-master-Na/.snakemake/log/2025-08-18T210740.996227.snakemake.log
+WorkflowError:
+At least one job did not complete successfully.
+
+============================================================
+❌ Scenario A failed with return code 1!
+⚠️  Skipping result extraction for failed Scenario A
+
+============================================================
+SCENARIO B: 5% of 1990 emissions
+============================================================
+📝 Updating config for Scenario B: 5% CO2 target
+✅ Config saved: config/de-co2-scenario-B-2035.yaml
+
+🚀 Starting Scenario B optimization...
+============================================================
+🔄 Running command: snakemake -j8 --configfile=config/de-co2-scenario-B-2035.yaml solve_elec_networks --forceall --latency-wait 30 --retries 5 --restart-times 3
+
+📺 Real-time progress:
+============================================================
+Assuming unrestricted shared filesystem usage.
+host: MacBook-Air-Ore-M4-15-van-Mayk.local
+Building DAG of jobs...
+Retrieving from storage: https://zenodo.org/records/14144752/files/buses.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/converters.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/lines.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/links.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/transformers.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/map.html
+Finished retrieval.
+Retrieving from storage: https://gisco-services.ec.europa.eu/distribution/v2/nuts/download/ref-nuts-2021-01m.geojson.zip
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/10820928/files/demand_hourly.csv
+Finished retrieval.
+Using shell: /bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Conda environments: ignored
+Job stats:
+job                                      count
+-------------------------------------  -------
+add_electricity                              1
+add_transmission_projects_and_dlr            1
+base_network                                 1
+build_electricity_demand                     1
+build_electricity_demand_base                1
+build_osm_boundaries                         4
+build_powerplants                            1
+build_shapes                                 1
+cluster_network                              1
+ensure_local_costs                           1
+prepare_network                              1
+retrieve_eez                                 1
+retrieve_electricity_demand                  1
+retrieve_jrc_ardeco                          1
+retrieve_nuts_2021_shapes                    1
+retrieve_osm_boundaries                      4
+retrieve_osm_prebuilt                        1
+retrieve_synthetic_electricity_demand        1
+simplify_network                             1
+solve_elec_networks                          1
+solve_network                                1
+total                                       27
+
+Select jobs to execute...
+Execute 8 jobs...
+
+[Mon Aug 18 21:10:32 2025]
+localrule retrieve_electricity_demand:
+    output: data/electricity_demand_raw.csv
+    log: logs/retrieve_electricity_demand.log
+    jobid: 23
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+[Mon Aug 18 21:10:32 2025]
+localrule retrieve_osm_prebuilt:
+    input: https://zenodo.org/records/14144752/files/buses.csv (retrieve from storage), https://zenodo.org/records/14144752/files/converters.csv (retrieve from storage), https://zenodo.org/records/14144752/files/lines.csv (retrieve from storage), https://zenodo.org/records/14144752/files/links.csv (retrieve from storage), https://zenodo.org/records/14144752/files/transformers.csv (retrieve from storage), https://zenodo.org/records/14144752/files/map.html (retrieve from storage)
+    output: data/osm-prebuilt/0.6/buses.csv, data/osm-prebuilt/0.6/converters.csv, data/osm-prebuilt/0.6/lines.csv, data/osm-prebuilt/0.6/links.csv, data/osm-prebuilt/0.6/transformers.csv, data/osm-prebuilt/0.6/map.html
+    log: logs/retrieve_osm_prebuilt.log
+    jobid: 20
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=500, mem_mib=477
+[Mon Aug 18 21:10:32 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/XK_adm1.json
+    log: logs/retrieve_osm_boundaries_XK_adm1.log
+    jobid: 14
+    reason: Forced execution
+    wildcards: country=XK
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:10:32 2025]
+localrule retrieve_jrc_ardeco:
+    output: data/jrc-ardeco/ARDECO-SUVGDP.2021.table.csv, data/jrc-ardeco/ARDECO-SNPTD.2021.table.csv
+    jobid: 15
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:10:32 2025]
+localrule retrieve_nuts_2021_shapes:
+    input: https://gisco-services.ec.europa.eu/distribution/v2/nuts/download/ref-nuts-2021-01m.geojson.zip (retrieve from storage)
+    output: data/nuts/NUTS_RG_01M_2021_4326_LEVL_3.geojson, data/nuts/NUTS_RG_01M_2021_4326_LEVL_2.geojson, data/nuts/NUTS_RG_01M_2021_4326_LEVL_1.geojson, data/nuts/NUTS_RG_01M_2021_4326_LEVL_0.geojson
+    jobid: 6
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:10:32 2025]
+localrule retrieve_eez:
+    output: data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    jobid: 5
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:10:32 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/BA_adm1.json
+    log: logs/retrieve_osm_boundaries_BA_adm1.log
+    jobid: 8
+    reason: Forced execution
+    wildcards: country=BA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:10:32 2025]
+localrule retrieve_synthetic_electricity_demand:
+    input: https://zenodo.org/records/10820928/files/demand_hourly.csv (retrieve from storage)
+    output: data/load_synthetic_raw.csv
+    log: logs/retrieve_synthetic_electricity_demand.log
+    jobid: 24
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+Select jobs to execute...
+INFO:__main__: - Fetching OSM administrative boundaries for BA (Attempt 1)...
+INFO:__main__: - Fetching OSM administrative boundaries for XK (Attempt 1)...
+INFO:__main__: - Done.
+INFO:__main__: - Done.
+[Mon Aug 18 21:10:37 2025]
+Finished jobid: 14 (Rule: retrieve_osm_boundaries)
+1 of 27 steps (4%) done
+Execute 1 jobs...
+
+[Mon Aug 18 21:10:37 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/UA_adm1.json
+    log: logs/retrieve_osm_boundaries_UA_adm1.log
+    jobid: 12
+    reason: Forced execution
+    wildcards: country=UA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:10:37 2025]
+Finished jobid: 8 (Rule: retrieve_osm_boundaries)
+2 of 27 steps (7%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:10:37 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/MD_adm1.json
+    log: logs/retrieve_osm_boundaries_MD_adm1.log
+    jobid: 10
+    reason: Forced execution
+    wildcards: country=MD
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:10:38 2025]
+Finished jobid: 6 (Rule: retrieve_nuts_2021_shapes)
+3 of 27 steps (11%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:10:38 2025]
+Job 25: Ensuring local costs file is available (no download from cloud)
+Reason: Forced execution
+[Mon Aug 18 21:10:38 2025]
+Finished jobid: 24 (Rule: retrieve_synthetic_electricity_demand)
+4 of 27 steps (15%) done
+[Mon Aug 18 21:10:39 2025]
+Finished jobid: 5 (Rule: retrieve_eez)
+5 of 27 steps (19%) done
+Select jobs to execute...
+Execute 2 jobs...
+
+[Mon Aug 18 21:10:39 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/XK_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/XK_adm1.geojson
+    log: logs/build_osm_boundaries_XK.log
+    jobid: 13
+    reason: Forced execution
+    wildcards: country=XK
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+[Mon Aug 18 21:10:39 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/BA_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/BA_adm1.geojson
+    log: logs/build_osm_boundaries_BA.log
+    jobid: 7
+    reason: Forced execution
+    wildcards: country=BA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+INFO:__main__: - Fetching OSM administrative boundaries for UA (Attempt 1)...
+INFO:__main__: - Fetching OSM administrative boundaries for MD (Attempt 1)...
+INFO:__main__:Building administrative boundaries from OSM data for country XK.
+INFO:__main__:Building administrative boundaries from OSM data for country BA.
+INFO:pyogrio._io:Created 7 records
+INFO:pyogrio._io:Created 3 records
+[Mon Aug 18 21:10:41 2025]
+Finished jobid: 13 (Rule: build_osm_boundaries)
+6 of 27 steps (22%) done
+[Mon Aug 18 21:10:41 2025]
+Finished jobid: 7 (Rule: build_osm_boundaries)
+7 of 27 steps (26%) done
+[Mon Aug 18 21:10:41 2025]
+Finished jobid: 25 (Rule: ensure_local_costs)
+8 of 27 steps (30%) done
+INFO:__main__: - Done.
+[Mon Aug 18 21:10:42 2025]
+Finished jobid: 10 (Rule: retrieve_osm_boundaries)
+9 of 27 steps (33%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:10:42 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/MD_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/MD_adm1.geojson
+    log: logs/build_osm_boundaries_MD.log
+    jobid: 9
+    reason: Forced execution
+    wildcards: country=MD
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+INFO:__main__: - Done.
+[Mon Aug 18 21:10:44 2025]
+Finished jobid: 12 (Rule: retrieve_osm_boundaries)
+10 of 27 steps (37%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:10:44 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/UA_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/UA_adm1.geojson
+    log: logs/build_osm_boundaries_UA.log
+    jobid: 11
+    reason: Forced execution
+    wildcards: country=UA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+INFO:__main__:Building administrative boundaries from OSM data for country MD.
+INFO:pyogrio._io:Created 37 records
+[Mon Aug 18 21:10:44 2025]
+Finished jobid: 9 (Rule: build_osm_boundaries)
+11 of 27 steps (41%) done
+[Mon Aug 18 21:10:45 2025]
+Finished jobid: 20 (Rule: retrieve_osm_prebuilt)
+12 of 27 steps (44%) done
+INFO:__main__:Building administrative boundaries from OSM data for country UA.
+INFO:pyogrio._io:Created 27 records
+[Mon Aug 18 21:10:46 2025]
+Finished jobid: 11 (Rule: build_osm_boundaries)
+13 of 27 steps (48%) done
+[Mon Aug 18 21:10:47 2025]
+Finished jobid: 15 (Rule: retrieve_jrc_ardeco)
+14 of 27 steps (52%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:10:47 2025]
+localrule build_shapes:
+    input: data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg, data/nuts/NUTS_RG_01M_2021_4326_LEVL_3.geojson, data/osm-boundaries/build/BA_adm1.geojson, data/osm-boundaries/build/MD_adm1.geojson, data/osm-boundaries/build/UA_adm1.geojson, data/osm-boundaries/build/XK_adm1.geojson, data/jrc-ardeco/ARDECO-SUVGDP.2021.table.csv, data/jrc-ardeco/ARDECO-SNPTD.2021.table.csv, data/bundle/GDP_per_capita_PPP_1990_2015_v2.nc, data/bundle/ppp_2019_1km_Aggregated.tif
+    output: resources/de-co2-scenario-B-2035/country_shapes.geojson, resources/de-co2-scenario-B-2035/offshore_shapes.geojson, resources/de-co2-scenario-B-2035/europe_shape.geojson, resources/de-co2-scenario-B-2035/nuts3_shapes.geojson
+    log: logs/de-co2-scenario-B-2035/build_shapes.log
+    jobid: 4
+    benchmark: benchmarks/de-co2-scenario-B-2035/build_shapes
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+INFO:pyogrio._io:Created 1 records
+INFO:__main__:Processing NUTS regions.
+INFO:__main__:Processing non-NUTS regions.
+INFO:__main__:Harmonising NUTS and non-NUTS regions.
+INFO:__main__:Clipping regions by offshore shapes.
+INFO:__main__:Importing JRC ARDECO GDP data for year 2019.
+INFO:__main__:Importing JRC ARDECO population data for year 2019.
+INFO:__main__:Simplifying geometries for Europe by removing small islands smaller than 500 km2 or further than 200 km away.
+[Mon Aug 18 21:11:20 2025]
+Finished jobid: 23 (Rule: retrieve_electricity_demand)
+15 of 27 steps (56%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:11:20 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-B-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-B-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-B-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmparg0mo6h.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmparg0mo6h.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:11:22 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-B-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-B-2035/build_electricity_demand.log (check log file(s) for error details)
+Trying to restart job 22.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:11:22 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-B-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-B-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-B-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmp3xawyl_4.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmp3xawyl_4.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:11:25 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-B-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-B-2035/build_electricity_demand.log (check log file(s) for error details)
+Trying to restart job 22.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:11:25 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-B-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-B-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-B-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpp3sdeey4.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpp3sdeey4.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:11:27 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-B-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-B-2035/build_electricity_demand.log (check log file(s) for error details)
+Trying to restart job 22.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:11:27 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-B-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-B-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-B-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpy_27mbrt.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpy_27mbrt.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:11:29 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-B-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-B-2035/build_electricity_demand.log (check log file(s) for error details)
+INFO:pyogrio._io:Created 1 records
+INFO:pyogrio._io:Created 1 records
+INFO:__main__:Exporting NUTS3 and ADM1 shapes with GDP and POP values to resources/de-co2-scenario-B-2035/nuts3_shapes.geojson.
+INFO:pyogrio._io:Created 401 records
+[Mon Aug 18 21:11:30 2025]
+Finished jobid: 4 (Rule: build_shapes)
+16 of 27 steps (59%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look below for error messages
+[Mon Aug 18 21:11:30 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-B-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-B-2035/build_electricity_demand.log (check log file(s) for error details)
+Complete log(s): /Users/m/PyPSA-DE-master-Na/.snakemake/log/2025-08-18T210941.920437.snakemake.log
+WorkflowError:
+At least one job did not complete successfully.
+
+============================================================
+❌ Scenario B failed with return code 1!
+⚠️  Skipping result extraction for failed Scenario B
+
+============================================================
+SCENARIO C: 1% of 1990 emissions
+============================================================
+📝 Updating config for Scenario C: 1% CO2 target
+✅ Config saved: config/de-co2-scenario-C-2035.yaml
+
+🚀 Starting Scenario C optimization...
+============================================================
+🔄 Running command: snakemake -j8 --configfile=config/de-co2-scenario-C-2035.yaml solve_elec_networks --forceall --latency-wait 30 --retries 5 --restart-times 3
+
+📺 Real-time progress:
+============================================================
+Assuming unrestricted shared filesystem usage.
+host: MacBook-Air-Ore-M4-15-van-Mayk.local
+Building DAG of jobs...
+Retrieving from storage: https://zenodo.org/records/14144752/files/buses.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/converters.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/lines.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/links.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/transformers.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/map.html
+Finished retrieval.
+Retrieving from storage: https://gisco-services.ec.europa.eu/distribution/v2/nuts/download/ref-nuts-2021-01m.geojson.zip
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/10820928/files/demand_hourly.csv
+Finished retrieval.
+Using shell: /bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Conda environments: ignored
+Job stats:
+job                                      count
+-------------------------------------  -------
+add_electricity                              1
+add_transmission_projects_and_dlr            1
+base_network                                 1
+build_electricity_demand                     1
+build_electricity_demand_base                1
+build_osm_boundaries                         4
+build_powerplants                            1
+build_shapes                                 1
+cluster_network                              1
+ensure_local_costs                           1
+prepare_network                              1
+retrieve_eez                                 1
+retrieve_electricity_demand                  1
+retrieve_jrc_ardeco                          1
+retrieve_nuts_2021_shapes                    1
+retrieve_osm_boundaries                      4
+retrieve_osm_prebuilt                        1
+retrieve_synthetic_electricity_demand        1
+simplify_network                             1
+solve_elec_networks                          1
+solve_network                                1
+total                                       27
+
+Select jobs to execute...
+Execute 8 jobs...
+
+[Mon Aug 18 21:12:24 2025]
+localrule retrieve_electricity_demand:
+    output: data/electricity_demand_raw.csv
+    log: logs/retrieve_electricity_demand.log
+    jobid: 23
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+[Mon Aug 18 21:12:24 2025]
+localrule retrieve_osm_prebuilt:
+    input: https://zenodo.org/records/14144752/files/buses.csv (retrieve from storage), https://zenodo.org/records/14144752/files/converters.csv (retrieve from storage), https://zenodo.org/records/14144752/files/lines.csv (retrieve from storage), https://zenodo.org/records/14144752/files/links.csv (retrieve from storage), https://zenodo.org/records/14144752/files/transformers.csv (retrieve from storage), https://zenodo.org/records/14144752/files/map.html (retrieve from storage)
+    output: data/osm-prebuilt/0.6/buses.csv, data/osm-prebuilt/0.6/converters.csv, data/osm-prebuilt/0.6/lines.csv, data/osm-prebuilt/0.6/links.csv, data/osm-prebuilt/0.6/transformers.csv, data/osm-prebuilt/0.6/map.html
+    log: logs/retrieve_osm_prebuilt.log
+    jobid: 20
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=500, mem_mib=477
+[Mon Aug 18 21:12:24 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/XK_adm1.json
+    log: logs/retrieve_osm_boundaries_XK_adm1.log
+    jobid: 14
+    reason: Forced execution
+    wildcards: country=XK
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:12:24 2025]
+localrule retrieve_jrc_ardeco:
+    output: data/jrc-ardeco/ARDECO-SUVGDP.2021.table.csv, data/jrc-ardeco/ARDECO-SNPTD.2021.table.csv
+    jobid: 15
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:12:24 2025]
+localrule retrieve_nuts_2021_shapes:
+    input: https://gisco-services.ec.europa.eu/distribution/v2/nuts/download/ref-nuts-2021-01m.geojson.zip (retrieve from storage)
+    output: data/nuts/NUTS_RG_01M_2021_4326_LEVL_3.geojson, data/nuts/NUTS_RG_01M_2021_4326_LEVL_2.geojson, data/nuts/NUTS_RG_01M_2021_4326_LEVL_1.geojson, data/nuts/NUTS_RG_01M_2021_4326_LEVL_0.geojson
+    jobid: 6
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:12:24 2025]
+localrule retrieve_eez:
+    output: data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    jobid: 5
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:12:24 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/BA_adm1.json
+    log: logs/retrieve_osm_boundaries_BA_adm1.log
+    jobid: 8
+    reason: Forced execution
+    wildcards: country=BA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:12:24 2025]
+localrule retrieve_synthetic_electricity_demand:
+    input: https://zenodo.org/records/10820928/files/demand_hourly.csv (retrieve from storage)
+    output: data/load_synthetic_raw.csv
+    log: logs/retrieve_synthetic_electricity_demand.log
+    jobid: 24
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+Select jobs to execute...
+INFO:__main__: - Fetching OSM administrative boundaries for XK (Attempt 1)...
+INFO:__main__: - Fetching OSM administrative boundaries for BA (Attempt 1)...
+INFO:__main__: - Done.
+INFO:__main__: - Done.
+[Mon Aug 18 21:12:29 2025]
+Finished jobid: 14 (Rule: retrieve_osm_boundaries)
+1 of 27 steps (4%) done
+Execute 1 jobs...
+
+[Mon Aug 18 21:12:29 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/UA_adm1.json
+    log: logs/retrieve_osm_boundaries_UA_adm1.log
+    jobid: 12
+    reason: Forced execution
+    wildcards: country=UA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:12:29 2025]
+Finished jobid: 8 (Rule: retrieve_osm_boundaries)
+2 of 27 steps (7%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:12:29 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/MD_adm1.json
+    log: logs/retrieve_osm_boundaries_MD_adm1.log
+    jobid: 10
+    reason: Forced execution
+    wildcards: country=MD
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:12:29 2025]
+Finished jobid: 5 (Rule: retrieve_eez)
+3 of 27 steps (11%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:12:29 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/XK_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/XK_adm1.geojson
+    log: logs/build_osm_boundaries_XK.log
+    jobid: 13
+    reason: Forced execution
+    wildcards: country=XK
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+[Mon Aug 18 21:12:29 2025]
+Finished jobid: 6 (Rule: retrieve_nuts_2021_shapes)
+4 of 27 steps (15%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:12:29 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/BA_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/BA_adm1.geojson
+    log: logs/build_osm_boundaries_BA.log
+    jobid: 7
+    reason: Forced execution
+    wildcards: country=BA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+[Mon Aug 18 21:12:29 2025]
+Finished jobid: 24 (Rule: retrieve_synthetic_electricity_demand)
+5 of 27 steps (19%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:12:29 2025]
+Job 25: Ensuring local costs file is available (no download from cloud)
+Reason: Forced execution
+INFO:__main__: - Fetching OSM administrative boundaries for UA (Attempt 1)...
+INFO:__main__: - Fetching OSM administrative boundaries for MD (Attempt 1)...
+INFO:__main__:Building administrative boundaries from OSM data for country XK.
+INFO:__main__:Building administrative boundaries from OSM data for country BA.
+INFO:pyogrio._io:Created 7 records
+INFO:pyogrio._io:Created 3 records
+[Mon Aug 18 21:12:32 2025]
+Finished jobid: 13 (Rule: build_osm_boundaries)
+6 of 27 steps (22%) done
+[Mon Aug 18 21:12:32 2025]
+Finished jobid: 7 (Rule: build_osm_boundaries)
+7 of 27 steps (26%) done
+[Mon Aug 18 21:12:33 2025]
+Finished jobid: 25 (Rule: ensure_local_costs)
+8 of 27 steps (30%) done
+INFO:__main__: - Done.
+[Mon Aug 18 21:12:33 2025]
+Finished jobid: 10 (Rule: retrieve_osm_boundaries)
+9 of 27 steps (33%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:12:33 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/MD_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/MD_adm1.geojson
+    log: logs/build_osm_boundaries_MD.log
+    jobid: 9
+    reason: Forced execution
+    wildcards: country=MD
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+[Mon Aug 18 21:12:34 2025]
+Finished jobid: 20 (Rule: retrieve_osm_prebuilt)
+10 of 27 steps (37%) done
+INFO:__main__:Building administrative boundaries from OSM data for country MD.
+INFO:pyogrio._io:Created 37 records
+[Mon Aug 18 21:12:35 2025]
+Finished jobid: 9 (Rule: build_osm_boundaries)
+11 of 27 steps (41%) done
+INFO:__main__: - Done.
+[Mon Aug 18 21:12:36 2025]
+Finished jobid: 12 (Rule: retrieve_osm_boundaries)
+12 of 27 steps (44%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:12:36 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/UA_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/UA_adm1.geojson
+    log: logs/build_osm_boundaries_UA.log
+    jobid: 11
+    reason: Forced execution
+    wildcards: country=UA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+[Mon Aug 18 21:12:37 2025]
+Finished jobid: 15 (Rule: retrieve_jrc_ardeco)
+13 of 27 steps (48%) done
+INFO:__main__:Building administrative boundaries from OSM data for country UA.
+INFO:pyogrio._io:Created 27 records
+[Mon Aug 18 21:12:38 2025]
+Finished jobid: 11 (Rule: build_osm_boundaries)
+14 of 27 steps (52%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:12:38 2025]
+localrule build_shapes:
+    input: data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg, data/nuts/NUTS_RG_01M_2021_4326_LEVL_3.geojson, data/osm-boundaries/build/BA_adm1.geojson, data/osm-boundaries/build/MD_adm1.geojson, data/osm-boundaries/build/UA_adm1.geojson, data/osm-boundaries/build/XK_adm1.geojson, data/jrc-ardeco/ARDECO-SUVGDP.2021.table.csv, data/jrc-ardeco/ARDECO-SNPTD.2021.table.csv, data/bundle/GDP_per_capita_PPP_1990_2015_v2.nc, data/bundle/ppp_2019_1km_Aggregated.tif
+    output: resources/de-co2-scenario-C-2035/country_shapes.geojson, resources/de-co2-scenario-C-2035/offshore_shapes.geojson, resources/de-co2-scenario-C-2035/europe_shape.geojson, resources/de-co2-scenario-C-2035/nuts3_shapes.geojson
+    log: logs/de-co2-scenario-C-2035/build_shapes.log
+    jobid: 4
+    benchmark: benchmarks/de-co2-scenario-C-2035/build_shapes
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+INFO:pyogrio._io:Created 1 records
+INFO:__main__:Processing NUTS regions.
+INFO:__main__:Processing non-NUTS regions.
+INFO:__main__:Harmonising NUTS and non-NUTS regions.
+INFO:__main__:Clipping regions by offshore shapes.
+INFO:__main__:Importing JRC ARDECO GDP data for year 2019.
+INFO:__main__:Importing JRC ARDECO population data for year 2019.
+INFO:__main__:Simplifying geometries for Europe by removing small islands smaller than 500 km2 or further than 200 km away.
+[Mon Aug 18 21:13:00 2025]
+Finished jobid: 23 (Rule: retrieve_electricity_demand)
+15 of 27 steps (56%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:13:00 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-C-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-C-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-C-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpetrcoky8.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpetrcoky8.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:13:02 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-C-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-C-2035/build_electricity_demand.log (check log file(s) for error details)
+Trying to restart job 22.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:13:02 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-C-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-C-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-C-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpbzxymn0g.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpbzxymn0g.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:13:04 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-C-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-C-2035/build_electricity_demand.log (check log file(s) for error details)
+Trying to restart job 22.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:13:04 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-C-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-C-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-C-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpq_3yy39x.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpq_3yy39x.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:13:07 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-C-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-C-2035/build_electricity_demand.log (check log file(s) for error details)
+Trying to restart job 22.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:13:07 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-C-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-C-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-C-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpl8eq_ve7.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpl8eq_ve7.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:13:09 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-C-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-C-2035/build_electricity_demand.log (check log file(s) for error details)
+INFO:pyogrio._io:Created 1 records
+INFO:pyogrio._io:Created 1 records
+INFO:__main__:Exporting NUTS3 and ADM1 shapes with GDP and POP values to resources/de-co2-scenario-C-2035/nuts3_shapes.geojson.
+INFO:pyogrio._io:Created 401 records
+[Mon Aug 18 21:13:23 2025]
+Finished jobid: 4 (Rule: build_shapes)
+16 of 27 steps (59%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look below for error messages
+[Mon Aug 18 21:13:23 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-C-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-C-2035/build_electricity_demand.log (check log file(s) for error details)
+Complete log(s): /Users/m/PyPSA-DE-master-Na/.snakemake/log/2025-08-18T211132.811783.snakemake.log
+WorkflowError:
+At least one job did not complete successfully.
+
+============================================================
+❌ Scenario C failed with return code 1!
+⚠️  Skipping result extraction for failed Scenario C
+
+============================================================
+SCENARIO D: 0% of 1990 emissions (net-zero)
+============================================================
+📝 Updating config for Scenario D: 0% CO2 target
+✅ Config saved: config/de-co2-scenario-D-2035.yaml
+
+🚀 Starting Scenario D optimization...
+============================================================
+🔄 Running command: snakemake -j8 --configfile=config/de-co2-scenario-D-2035.yaml solve_elec_networks --forceall --latency-wait 30 --retries 5 --restart-times 3
+
+📺 Real-time progress:
+============================================================
+Assuming unrestricted shared filesystem usage.
+host: MacBook-Air-Ore-M4-15-van-Mayk.local
+Building DAG of jobs...
+Retrieving from storage: https://zenodo.org/records/14144752/files/buses.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/converters.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/lines.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/links.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/transformers.csv
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/14144752/files/map.html
+Finished retrieval.
+Retrieving from storage: https://gisco-services.ec.europa.eu/distribution/v2/nuts/download/ref-nuts-2021-01m.geojson.zip
+Finished retrieval.
+Retrieving from storage: https://zenodo.org/records/10820928/files/demand_hourly.csv
+Finished retrieval.
+Using shell: /bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Conda environments: ignored
+Job stats:
+job                                      count
+-------------------------------------  -------
+add_electricity                              1
+add_transmission_projects_and_dlr            1
+base_network                                 1
+build_electricity_demand                     1
+build_electricity_demand_base                1
+build_osm_boundaries                         4
+build_powerplants                            1
+build_shapes                                 1
+cluster_network                              1
+ensure_local_costs                           1
+prepare_network                              1
+retrieve_eez                                 1
+retrieve_electricity_demand                  1
+retrieve_jrc_ardeco                          1
+retrieve_nuts_2021_shapes                    1
+retrieve_osm_boundaries                      4
+retrieve_osm_prebuilt                        1
+retrieve_synthetic_electricity_demand        1
+simplify_network                             1
+solve_elec_networks                          1
+solve_network                                1
+total                                       27
+
+Select jobs to execute...
+Execute 8 jobs...
+
+[Mon Aug 18 21:14:17 2025]
+localrule retrieve_electricity_demand:
+    output: data/electricity_demand_raw.csv
+    log: logs/retrieve_electricity_demand.log
+    jobid: 23
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+[Mon Aug 18 21:14:17 2025]
+localrule retrieve_osm_prebuilt:
+    input: https://zenodo.org/records/14144752/files/buses.csv (retrieve from storage), https://zenodo.org/records/14144752/files/converters.csv (retrieve from storage), https://zenodo.org/records/14144752/files/lines.csv (retrieve from storage), https://zenodo.org/records/14144752/files/links.csv (retrieve from storage), https://zenodo.org/records/14144752/files/transformers.csv (retrieve from storage), https://zenodo.org/records/14144752/files/map.html (retrieve from storage)
+    output: data/osm-prebuilt/0.6/buses.csv, data/osm-prebuilt/0.6/converters.csv, data/osm-prebuilt/0.6/lines.csv, data/osm-prebuilt/0.6/links.csv, data/osm-prebuilt/0.6/transformers.csv, data/osm-prebuilt/0.6/map.html
+    log: logs/retrieve_osm_prebuilt.log
+    jobid: 20
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=500, mem_mib=477
+[Mon Aug 18 21:14:17 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/XK_adm1.json
+    log: logs/retrieve_osm_boundaries_XK_adm1.log
+    jobid: 14
+    reason: Forced execution
+    wildcards: country=XK
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:14:17 2025]
+localrule retrieve_jrc_ardeco:
+    output: data/jrc-ardeco/ARDECO-SUVGDP.2021.table.csv, data/jrc-ardeco/ARDECO-SNPTD.2021.table.csv
+    jobid: 15
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:14:17 2025]
+localrule retrieve_nuts_2021_shapes:
+    input: https://gisco-services.ec.europa.eu/distribution/v2/nuts/download/ref-nuts-2021-01m.geojson.zip (retrieve from storage)
+    output: data/nuts/NUTS_RG_01M_2021_4326_LEVL_3.geojson, data/nuts/NUTS_RG_01M_2021_4326_LEVL_2.geojson, data/nuts/NUTS_RG_01M_2021_4326_LEVL_1.geojson, data/nuts/NUTS_RG_01M_2021_4326_LEVL_0.geojson
+    jobid: 6
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:14:17 2025]
+localrule retrieve_eez:
+    output: data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    jobid: 5
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:14:17 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/BA_adm1.json
+    log: logs/retrieve_osm_boundaries_BA_adm1.log
+    jobid: 8
+    reason: Forced execution
+    wildcards: country=BA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:14:17 2025]
+localrule retrieve_synthetic_electricity_demand:
+    input: https://zenodo.org/records/10820928/files/demand_hourly.csv (retrieve from storage)
+    output: data/load_synthetic_raw.csv
+    log: logs/retrieve_synthetic_electricity_demand.log
+    jobid: 24
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+Select jobs to execute...
+INFO:__main__: - Fetching OSM administrative boundaries for XK (Attempt 1)...
+INFO:__main__: - Fetching OSM administrative boundaries for BA (Attempt 1)...
+[Mon Aug 18 21:14:23 2025]
+Finished jobid: 24 (Rule: retrieve_synthetic_electricity_demand)
+1 of 27 steps (4%) done
+Execute 1 jobs...
+
+[Mon Aug 18 21:14:23 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/UA_adm1.json
+    log: logs/retrieve_osm_boundaries_UA_adm1.log
+    jobid: 12
+    reason: Forced execution
+    wildcards: country=UA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+Select jobs to execute...
+INFO:__main__: - Done.
+[Mon Aug 18 21:14:24 2025]
+Finished jobid: 14 (Rule: retrieve_osm_boundaries)
+2 of 27 steps (7%) done
+Execute 1 jobs...
+
+[Mon Aug 18 21:14:24 2025]
+localrule retrieve_osm_boundaries:
+    output: data/osm-boundaries/json/MD_adm1.json
+    log: logs/retrieve_osm_boundaries_MD_adm1.log
+    jobid: 10
+    reason: Forced execution
+    wildcards: country=MD
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T
+[Mon Aug 18 21:14:24 2025]
+Finished jobid: 6 (Rule: retrieve_nuts_2021_shapes)
+3 of 27 steps (11%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:14:24 2025]
+Job 25: Ensuring local costs file is available (no download from cloud)
+Reason: Forced execution
+INFO:__main__: - Fetching OSM administrative boundaries for UA (Attempt 1)...
+INFO:__main__: - Done.
+[Mon Aug 18 21:14:25 2025]
+Finished jobid: 5 (Rule: retrieve_eez)
+4 of 27 steps (15%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:14:25 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/XK_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/XK_adm1.geojson
+    log: logs/build_osm_boundaries_XK.log
+    jobid: 13
+    reason: Forced execution
+    wildcards: country=XK
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+[Mon Aug 18 21:14:25 2025]
+Finished jobid: 8 (Rule: retrieve_osm_boundaries)
+5 of 27 steps (19%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:14:25 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/BA_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/BA_adm1.geojson
+    log: logs/build_osm_boundaries_BA.log
+    jobid: 7
+    reason: Forced execution
+    wildcards: country=BA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+INFO:__main__: - Fetching OSM administrative boundaries for MD (Attempt 1)...
+INFO:__main__:Building administrative boundaries from OSM data for country XK.
+INFO:__main__:Building administrative boundaries from OSM data for country BA.
+INFO:pyogrio._io:Created 7 records
+INFO:pyogrio._io:Created 3 records
+[Mon Aug 18 21:14:27 2025]
+Finished jobid: 13 (Rule: build_osm_boundaries)
+6 of 27 steps (22%) done
+[Mon Aug 18 21:14:27 2025]
+Finished jobid: 7 (Rule: build_osm_boundaries)
+7 of 27 steps (26%) done
+[Mon Aug 18 21:14:27 2025]
+Finished jobid: 25 (Rule: ensure_local_costs)
+8 of 27 steps (30%) done
+ERROR:__main__:Error for retrieving administrative boundaries in country UA: 504 Server Error: Gateway Timeout for url: https://overpass-api.de/api/interpreter
+INFO:__main__:Waiting 20 seconds before retrying...
+ERROR:__main__:Error for retrieving administrative boundaries in country MD: 504 Server Error: Gateway Timeout for url: https://overpass-api.de/api/interpreter
+INFO:__main__:Waiting 20 seconds before retrying...
+[Mon Aug 18 21:14:32 2025]
+Finished jobid: 20 (Rule: retrieve_osm_prebuilt)
+9 of 27 steps (33%) done
+[Mon Aug 18 21:14:35 2025]
+Finished jobid: 15 (Rule: retrieve_jrc_ardeco)
+10 of 27 steps (37%) done
+INFO:__main__: - Fetching OSM administrative boundaries for UA (Attempt 2)...
+INFO:__main__: - Fetching OSM administrative boundaries for MD (Attempt 2)...
+INFO:__main__: - Done.
+[Mon Aug 18 21:14:54 2025]
+Finished jobid: 10 (Rule: retrieve_osm_boundaries)
+11 of 27 steps (41%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:14:54 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/MD_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/MD_adm1.geojson
+    log: logs/build_osm_boundaries_MD.log
+    jobid: 9
+    reason: Forced execution
+    wildcards: country=MD
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+INFO:__main__: - Done.
+[Mon Aug 18 21:14:56 2025]
+Finished jobid: 12 (Rule: retrieve_osm_boundaries)
+12 of 27 steps (44%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:14:56 2025]
+localrule build_osm_boundaries:
+    input: data/osm-boundaries/json/UA_adm1.json, data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg
+    output: data/osm-boundaries/build/UA_adm1.geojson
+    log: logs/build_osm_boundaries_UA.log
+    jobid: 11
+    reason: Forced execution
+    wildcards: country=UA
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+INFO:__main__:Building administrative boundaries from OSM data for country MD.
+INFO:pyogrio._io:Created 37 records
+[Mon Aug 18 21:14:56 2025]
+Finished jobid: 9 (Rule: build_osm_boundaries)
+13 of 27 steps (48%) done
+INFO:__main__:Building administrative boundaries from OSM data for country UA.
+INFO:pyogrio._io:Created 27 records
+[Mon Aug 18 21:14:58 2025]
+Finished jobid: 11 (Rule: build_osm_boundaries)
+14 of 27 steps (52%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:14:58 2025]
+localrule build_shapes:
+    input: data/eez/World_EEZ_v12_20231025_LR/eez_v12_lowres.gpkg, data/nuts/NUTS_RG_01M_2021_4326_LEVL_3.geojson, data/osm-boundaries/build/BA_adm1.geojson, data/osm-boundaries/build/MD_adm1.geojson, data/osm-boundaries/build/UA_adm1.geojson, data/osm-boundaries/build/XK_adm1.geojson, data/jrc-ardeco/ARDECO-SUVGDP.2021.table.csv, data/jrc-ardeco/ARDECO-SNPTD.2021.table.csv, data/bundle/GDP_per_capita_PPP_1990_2015_v2.nc, data/bundle/ppp_2019_1km_Aggregated.tif
+    output: resources/de-co2-scenario-D-2035/country_shapes.geojson, resources/de-co2-scenario-D-2035/offshore_shapes.geojson, resources/de-co2-scenario-D-2035/europe_shape.geojson, resources/de-co2-scenario-D-2035/nuts3_shapes.geojson
+    log: logs/de-co2-scenario-D-2035/build_shapes.log
+    jobid: 4
+    benchmark: benchmarks/de-co2-scenario-D-2035/build_shapes
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=1500, mem_mib=1431
+INFO:pyogrio._io:Created 1 records
+INFO:__main__:Processing NUTS regions.
+INFO:__main__:Processing non-NUTS regions.
+INFO:__main__:Harmonising NUTS and non-NUTS regions.
+INFO:__main__:Clipping regions by offshore shapes.
+INFO:__main__:Importing JRC ARDECO GDP data for year 2019.
+INFO:__main__:Importing JRC ARDECO population data for year 2019.
+INFO:__main__:Simplifying geometries for Europe by removing small islands smaller than 500 km2 or further than 200 km away.
+[Mon Aug 18 21:15:12 2025]
+Finished jobid: 23 (Rule: retrieve_electricity_demand)
+15 of 27 steps (56%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:15:12 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-D-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-D-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-D-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpgcmn4rxq.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpgcmn4rxq.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:15:14 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-D-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-D-2035/build_electricity_demand.log (check log file(s) for error details)
+Trying to restart job 22.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:15:14 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-D-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-D-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-D-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmp3j__ymez.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmp3j__ymez.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:15:17 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-D-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-D-2035/build_electricity_demand.log (check log file(s) for error details)
+Trying to restart job 22.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:15:17 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-D-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-D-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-D-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmp2s9m7j6j.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmp2s9m7j6j.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:15:19 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-D-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-D-2035/build_electricity_demand.log (check log file(s) for error details)
+Trying to restart job 22.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Mon Aug 18 21:15:19 2025]
+localrule build_electricity_demand:
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-D-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-D-2035/build_electricity_demand.log
+    jobid: 22
+    benchmark: benchmarks/de-co2-scenario-D-2035/build_electricity_demand
+    reason: Forced execution
+    resources: tmpdir=/var/folders/rq/khh8vd4s3qd69ky_0p7f3vc00000gn/T, mem_mb=5000, mem_mib=4769
+ERROR:root:Uncaught exception
+Traceback (most recent call last):
+  File "/Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpmgdzugel.build_electricity_demand.py", line 276, in <module>
+    if snakemake.params.load["manual_adjustments"]:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'manual_adjustments'
+RuleException:
+CalledProcessError in file "/Users/m/PyPSA-DE-master-Na/rules/build_electricity.smk", line 30:
+Command 'set -euo pipefail;  /opt/homebrew/Caskroom/miniconda/base/bin/python3.13 /Users/m/PyPSA-DE-master-Na/.snakemake/scripts/tmpmgdzugel.build_electricity_demand.py' returned non-zero exit status 1.
+[Mon Aug 18 21:15:21 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-D-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-D-2035/build_electricity_demand.log (check log file(s) for error details)
+INFO:pyogrio._io:Created 1 records
+INFO:pyogrio._io:Created 1 records
+INFO:__main__:Exporting NUTS3 and ADM1 shapes with GDP and POP values to resources/de-co2-scenario-D-2035/nuts3_shapes.geojson.
+INFO:pyogrio._io:Created 401 records
+[Mon Aug 18 21:15:42 2025]
+Finished jobid: 4 (Rule: build_shapes)
+16 of 27 steps (59%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look below for error messages
+[Mon Aug 18 21:15:42 2025]
+Error in rule build_electricity_demand:
+    message: None
+    jobid: 22
+    input: data/electricity_demand_raw.csv, data/load_synthetic_raw.csv
+    output: resources/de-co2-scenario-D-2035/electricity_demand.csv
+    log: logs/de-co2-scenario-D-2035/build_electricity_demand.log (check log file(s) for error details)
+Complete log(s): /Users/m/PyPSA-DE-master-Na/.snakemake/log/2025-08-18T211325.497455.snakemake.log
+WorkflowError:
+At least one job did not complete successfully.
+
+============================================================
+❌ Scenario D failed with return code 1!
+⚠️  Skipping result extraction for failed Scenario D
+
+❌ No successful scenarios to compare

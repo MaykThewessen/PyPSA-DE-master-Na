@@ -63,6 +63,13 @@ CDIR = Path(cutout_dir).joinpath("" if run["shared_cutouts"] else RDIR)
 RESULTS = "results/" + RDIR
 
 # =============================================================================
+# RULE ORDER AND PRECEDENCE
+# =============================================================================
+# Define rule execution priority to resolve ambiguities
+# ensure_local_costs takes precedence over retrieve_cost_data
+# ruleorder: ensure_local_costs > retrieve_cost_data  # Commented out since retrieve_cost_data is disabled
+
+# =============================================================================
 # LOCAL RULES AND CONSTRAINTS
 # =============================================================================
 # Define rules that should not be executed on remote clusters

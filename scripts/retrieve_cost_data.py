@@ -31,14 +31,12 @@ if __name__ == "__main__":
     filepath = Path(snakemake.output[0])
     url = baseurl + filepath.name
 
-    print(url)
-
     to_fn = Path(rootpath) / filepath
-
-    print(to_fn)
+    
+    force_download = snakemake.config["enable"].get("force_download", False)
 
     logger.info(f"Downloading technology data from '{url}'.")
     disable_progress = snakemake.config["run"].get("disable_progressbar", False)
-    progress_retrieve(url, to_fn, disable=disable_progress)
+    progress_retrieve(url, to_fn, disable=disable_progress, force_download=force_download)
 
-    logger.info(f"Technology data available at at {to_fn}")
+    logger.info(f"Technology data available at {to_fn}")

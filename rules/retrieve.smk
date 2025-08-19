@@ -165,8 +165,15 @@ if config["enable"]["retrieve"] and config["enable"].get("retrieve_cutout", True
             mem_mb=5000,
         retries: 2
         run:
-            move(input[0], output[0])
-            validate_checksum(output[0], input[0])
+            from pathlib import Path
+            output_path = Path(output[0])
+            force_download = config["enable"].get("force_download", False)
+            
+            if output_path.exists() and not force_download:
+                logger.info(f"Cutout file {output_path} already exists and force_download is False. Skipping download.")
+            else:
+                move(input[0], output[0])
+                validate_checksum(output[0], input[0])
 
 
 if config["enable"]["retrieve"]:
@@ -180,6 +187,84 @@ if config["enable"]["retrieve"]:
         retries: 2
         script:
             "../scripts/retrieve_tyndp_bundle.py"
+
+
+# Local costs rule - always use local costs files instead of downloading
+rule ensure_local_costs:
+    message: "Ensuring local costs file is available (no download from cloud)"
+    output:
+        resources("costs_{year}.csv"),
+    log:
+        logs("ensure_local_costs_{year}.log"),
+    run:
+        from pathlib import Path
+        import logging
+        import shutil
+        
+        logger = logging.getLogger()
+        output_path = Path(output[0])
+        year = wildcards.year
+        
+        # List of potential local cost file locations to check
+        potential_sources = [
+            # Main resources directory
+            Path(f"resources/costs_{year}.csv"),
+            # Scenario-specific directories  
+            Path(f"resources/{config['run']['name']}/costs_{year}.csv") if config['run']['name'] else None,
+            # Other scenario directories (fallback)
+            Path(f"resources/de-co2-scenario-A-{year}/costs_{year}.csv"),
+            Path(f"resources/de-co2-scenario-B-{year}/costs_{year}.csv"),
+            Path(f"resources/de-co2-scenario-C-{year}/costs_{year}.csv"),
+            Path(f"resources/de-co2-scenario-D-{year}/costs_{year}.csv"),
+        ]
+        
+        # Filter out None values and find existing files
+        potential_sources = [p for p in potential_sources if p is not None]
+        existing_sources = [p for p in potential_sources if p.exists()]
+        
+        if existing_sources:
+            # Use the first existing local costs file
+            source_file = existing_sources[0]
+            logger.info(f"Using local costs file: {source_file}")
+            
+            # Ensure output directory exists
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Copy the local file to the expected output location
+            shutil.copy2(source_file, output_path)
+            logger.info(f"Copied local costs from {source_file} to {output_path}")
+        else:
+            # Create a basic costs file if none exist (fallback)
+            logger.warning(f"No local costs file found for year {year}. Creating basic template.")
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Create a basic CSV with essential technologies and costs
+            basic_costs = '''technology,parameter,value,unit,source
+solar,investment,380,EUR/kW,local_default
+onwind,investment,1200,EUR/kW,local_default
+offwind-ac,investment,2500,EUR/kW,local_default
+offwind-dc,investment,2800,EUR/kW,local_default
+nuclear,investment,10871,EUR/kW,local_default
+CCGT,investment,850,EUR/kW,local_default
+OCGT,investment,400,EUR/kW,local_default
+battery,investment,132000,EUR/kW,local_default
+H2,investment,94000,EUR/kW,local_default
+PHS,investment,2000,EUR/kW,local_default
+solar,lifetime,25,years,local_default
+onwind,lifetime,25,years,local_default
+offwind-ac,lifetime,25,years,local_default
+offwind-dc,lifetime,25,years,local_default
+nuclear,lifetime,50,years,local_default
+CCGT,lifetime,25,years,local_default
+OCGT,lifetime,25,years,local_default
+battery,lifetime,16,years,local_default
+H2,lifetime,30,years,local_default
+PHS,lifetime,50,years,local_default
+'''
+            
+            with open(output_path, 'w') as f:
+                f.write(basic_costs)
+            logger.info(f"Created basic costs template at {output_path}")
 
 
 if config["enable"]["retrieve"] and config["enable"].get("retrieve_cost_data", True):
@@ -254,7 +339,14 @@ if config["enable"]["retrieve"]:
             mem_mb=5000,
         retries: 2
         run:
-            move(input[0], output[0])
+            from pathlib import Path
+            output_path = Path(output[0])
+            force_download = config["enable"].get("force_download", False)
+            
+            if output_path.exists() and not force_download:
+                logger.info(f"Synthetic electricity demand file {output_path} already exists and force_download is False. Skipping download.")
+            else:
+                move(input[0], output[0])
 
 
 if config["enable"]["retrieve"]:
