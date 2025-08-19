@@ -248,7 +248,7 @@ transformers:
   s_nom: 2000
   type: ''
 load:
-  scaling_factor: 1.0
+  scaling_factor: 1.3224821973550356
   fixed_year: false
   supplement_synthetic: true
   manual_adjustments: false

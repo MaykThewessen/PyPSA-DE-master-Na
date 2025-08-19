@@ -463,6 +463,22 @@ def attach_load(
 
     logger.info(f"Load data scaled by factor {scaling}.")
     load *= scaling
+    
+    # Align load data time index with network snapshots
+    if not load.index.equals(n.snapshots):
+        logger.info(
+            f"Resampling load data from {len(load.index)} timesteps to {len(n.snapshots)} network snapshots"
+        )
+        # Determine if we need to downsample (from hourly to 3-hourly)
+        if len(load.index) > len(n.snapshots):
+            # Resample the load data to 3-hour frequency using mean aggregation
+            # to preserve total energy when downsampling
+            load = load.resample('3H').mean()
+        
+        # Reindex to exact network snapshots to handle any minor differences
+        # Use nearest neighbor interpolation to handle small time differences
+        load = load.reindex(n.snapshots, method='nearest')
+        logger.info(f"Successfully aligned load data to network snapshots")
 
     n.add("Load", load.columns, bus=load.columns, p_set=load)  # carrier="electricity"
 
@@ -607,6 +623,20 @@ def attach_wind_and_solar(
 
             p_max_pu = ds["profile"].to_pandas()
             p_max_pu.columns = p_max_pu.columns.map(flatten)
+            
+            # Align renewable profile time index with network snapshots
+            if not p_max_pu.index.equals(n.snapshots):
+                logger.info(
+                    f"Resampling {car} profile data from {len(p_max_pu.index)} timesteps to {len(n.snapshots)} network snapshots"
+                )
+                # Determine if we need to downsample (from hourly to 3-hourly)
+                if len(p_max_pu.index) > len(n.snapshots):
+                    # Resample the profile data to 3-hour frequency using mean aggregation
+                    p_max_pu = p_max_pu.resample('3H').mean()
+                
+                # Reindex to exact network snapshots to handle any minor differences
+                p_max_pu = p_max_pu.reindex(n.snapshots, method='nearest')
+                logger.info(f"Successfully aligned {car} profile data to network snapshots")
 
             n.add(
                 "Generator",
@@ -792,6 +822,20 @@ def attach_hydro(
                 .to_pandas()
                 .multiply(dist_key, axis=1)
             )
+            
+            # Align hydro profile time index with network snapshots
+            if not inflow_t.index.equals(n.snapshots):
+                logger.info(
+                    f"Resampling hydro inflow data from {len(inflow_t.index)} timesteps to {len(n.snapshots)} network snapshots"
+                )
+                # Determine if we need to downsample (from hourly to 3-hourly)
+                if len(inflow_t.index) > len(n.snapshots):
+                    # Resample the hydro profile data to 3-hour frequency using mean aggregation
+                    inflow_t = inflow_t.resample('3H').mean()
+                
+                # Reindex to exact network snapshots to handle any minor differences
+                inflow_t = inflow_t.reindex(n.snapshots, method='nearest')
+                logger.info(f"Successfully aligned hydro inflow data to network snapshots")
 
     if "ror" in carriers and not ror.empty:
         n.add(
@@ -1033,7 +1077,8 @@ def attach_storageunits(
     lookup_store = {
         "Hydrogen": "electrolysis", 
         "battery": "battery inverter", 
-        "Iron-Air": "Iron-Air-charge",
+        "iron-air": "iron-air battery charge",
+        "Iron-Air": "iron-air battery charge",
         "Li-Ion": "Li-Ion",
         "Vanadium-Redox-Flow": "vanadium",
         "Compressed-Air-Adiabatic": "CAES"
@@ -1041,7 +1086,8 @@ def attach_storageunits(
     lookup_dispatch = {
         "Hydrogen": "fuel cell", 
         "battery": "battery inverter", 
-        "Iron-Air": "Iron-Air-discharge",
+        "iron-air": "iron-air battery discharge",
+        "Iron-Air": "iron-air battery discharge",
         "Li-Ion": "Li-Ion",
         "Vanadium-Redox-Flow": "vanadium",
         "Compressed-Air-Adiabatic": "CAES"
@@ -1198,7 +1244,11 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.base_network)
 
-    time = get_snapshots(snakemake.params.snapshots, snakemake.params.drop_leap_day)
+    time = get_snapshots(
+        snakemake.params.snapshots, 
+        snakemake.params.drop_leap_day,
+        freq="3H"  # 3-hour frequency to get 2920 timesteps
+    )
     n.set_snapshots(time)
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0

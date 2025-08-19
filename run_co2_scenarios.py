@@ -23,6 +23,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 
+
 def update_config_for_scenario(config_path, co2_target, scenario_name, demand_twh=None):
     """Update configuration file for specific CO2 scenario"""
     
@@ -98,7 +99,7 @@ def run_scenario(config_path, scenario_name, co2_target):
         # Remove --forceall to avoid unnecessary re-downloads of existing data
         cmd = [
             "snakemake", 
-            "-j8",  # Reduce cores to avoid overwhelming network
+            "-j10",  # Reduce cores to avoid overwhelming network
             f"--configfile={config_path}",
             "solve_elec_networks",
             "--latency-wait", "30",  # Wait longer for file operations
@@ -250,9 +251,12 @@ def create_comparison_csv(all_results):
     
     # Convert to DataFrame
     df = pd.DataFrame(all_results)
+    df = df.round(2)
     
     # Save to CSV
-    comparison_file = "co2_scenarios_comparison.csv"
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    comparison_file = f"co2_scenarios_comparison_{timestamp}.csv"
     df.to_csv(comparison_file, index=False)
     
     print(f"✅ Comparison saved: {comparison_file}")

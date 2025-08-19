@@ -1255,7 +1255,7 @@ def extra_functionality(
     if config["sector"]["enhanced_geothermal"]["enable"]:
         add_flexible_egs_constraint(n)
 
-    if config["sector"]["imports"]["enable"]:
+    if config.get("sector", {}).get("imports", {}).get("enable", False):
         add_import_limit_constraint(n, snapshots)
 
     if n.params.custom_extra_functionality:

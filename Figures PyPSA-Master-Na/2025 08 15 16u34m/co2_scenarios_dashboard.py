@@ -606,7 +606,8 @@ def main():
             'displayModeBar': True,
             'modeBarButtonsToRemove': ['pan2d', 'lasso2d'],
             'displaylogo': False
-        }
+        },
+        auto_open=True
     )
     
     print(f"✅ Dashboard saved as '{output_file}'")
