@@ -192,7 +192,7 @@ def extract_results(scenario_name, co2_target):
                 results[f'{tech}_capacity_GW'] = 0.0
         
         # Storage capacities
-        for tech in ['battery', 'H2', 'PHS']:
+        for tech in ['battery', 'Hydrogen', 'iron-air', 'PHS']:
             if tech in n.storage_units.carrier.values:
                 power = n.storage_units[n.storage_units.carrier == tech].p_nom_opt.sum()
                 energy = n.storage_units[n.storage_units.carrier == tech].state_of_charge_initial.sum()
@@ -211,14 +211,16 @@ def extract_results(scenario_name, co2_target):
         
         results['total_storage_power_GW'] = (
             results.get('battery_power_GW', 0) + 
-            results.get('H2_power_GW', 0) + 
-            results.get('PHS_power_GW', 0)
+            results.get('Hydrogen_power_GW', 0) + 
+            results.get('PHS_power_GW', 0) +
+            results.get('ironair_power_GW', 0)
         )
         
         results['total_storage_energy_GWh'] = (
             results.get('battery_energy_GWh', 0) + 
-            results.get('H2_energy_GWh', 0) + 
-            results.get('PHS_energy_GWh', 0)
+            results.get('Hydrogen_energy_GWh', 0) + 
+            results.get('PHS_energy_GWh', 0) +
+            results.get('ironair_energy_GWh', 0)
         )
         
         # System costs

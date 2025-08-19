@@ -53,7 +53,7 @@ def extract_results_fixed(scenario_name, co2_target):
                 results[f'{tech}_capacity_GW'] = 0.0
         
         # Storage capacities - check both storage_units and stores
-        storage_techs = ['battery', 'H2', 'PHS', 'iron-air']
+        storage_techs = ['battery', 'Hydrogen', 'PHS', 'iron-air']
         
         for tech in storage_techs:
             power_gw = 0.0
@@ -70,9 +70,9 @@ def extract_results_fixed(scenario_name, co2_target):
                                     n.storage_units[storage_mask].max_hours).sum() / 1000  # MWh to GWh
                     else:
                         # Fallback: estimate energy capacity
-                        energy_gwh = power_gw * {'battery': 4, 'PHS': 6, 'iron-air': 100, 'H2': 720}.get(tech, 4)
+                        energy_gwh = power_gw * {'battery': 4, 'PHS': 6, 'iron-air': 100, 'Hydrogen': 720}.get(tech, 4)
             
-            # Check stores (especially for H2)
+            # Check stores (especially for Hydrogen)
             if hasattr(n, 'stores') and not n.stores.empty:
                 store_mask = n.stores.carrier == tech
                 if store_mask.any():
@@ -113,14 +113,14 @@ def extract_results_fixed(scenario_name, co2_target):
         
         results['total_storage_power_GW'] = (
             results.get('battery_power_GW', 0) + 
-            results.get('H2_power_GW', 0) + 
+            results.get('Hydrogen_power_GW', 0) + 
             results.get('PHS_power_GW', 0) +
             results.get('ironair_power_GW', 0)
         )
         
         results['total_storage_energy_GWh'] = (
             results.get('battery_energy_GWh', 0) + 
-            results.get('H2_energy_GWh', 0) + 
+            results.get('Hydrogen_energy_GWh', 0) + 
             results.get('PHS_energy_GWh', 0) +
             results.get('ironair_energy_GWh', 0)
         )

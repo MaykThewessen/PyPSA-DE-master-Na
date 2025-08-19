@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 
-def update_config_for_demand(config_path, co2_target, scenario_name, demand_twh=650):
+def update_config_for_demand(config_path, co2_target, scenario_name, demand_twh):
     """Update configuration file for specific CO2 scenario with proper demand"""
     
     print(f"📝 Updating config for Scenario {scenario_name}: {co2_target*100:.0f}% CO2 target")
