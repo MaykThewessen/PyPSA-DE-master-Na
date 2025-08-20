@@ -13,8 +13,8 @@ import os
 
 def load_data():
     """Load the latest scenario results."""
-    # Use the latest readable summary
-    df = pd.read_csv('co2_scenarios_readable_summary_20250819_203903.csv')
+    # Use the latest readable summary with corrected storage data
+    df = pd.read_csv('co2_scenarios_readable_summary_20250820_170004.csv')
     return df
 
 def create_styled_dashboard():
@@ -36,13 +36,19 @@ def create_styled_dashboard():
             [{"secondary_y": False}, {"secondary_y": False}],
             [{"secondary_y": False}, {"type": "table"}]
         ],
-        vertical_spacing=0.12,
+        vertical_spacing=0.15,
         horizontal_spacing=0.08
     )
     
     # Scenario data
     scenarios = ['A', 'B', 'C', 'D']
-    scenario_labels = [f"Scenario {s} ({df.iloc[i]['CO2 Limit']})" for i, s in enumerate(scenarios)]
+    # Extract just the percentage from CO2 Limit (remove 'of 1990' part)
+    scenario_labels = []
+    for i, s in enumerate(scenarios):
+        co2_limit = df.iloc[i]['CO2 Limit']
+        # Extract just the percentage part before 'of 1990'
+        percentage = co2_limit.split(' of ')[0] if ' of ' in co2_limit else co2_limit
+        scenario_labels.append(f"{s}: {percentage}")
     
     # Define exact colors matching the image
     colors = {
@@ -164,9 +170,15 @@ def create_styled_dashboard():
             legendgroup='storage_energy'
         ), row=2, col=2)
     
-    # 5. Bottom Left: Storage Duration (grouped bars by technology)
+    # 5. Bottom Left: Storage Duration (non-stacked bars by technology)
     # Calculate durations for each scenario and technology
     storage_techs = ['Battery LFP', 'PHS', 'Iron-Air', 'Hydrogen']
+    storage_tech_colors = {
+        'Battery LFP': colors['battery'],
+        'PHS': colors['PHS'],
+        'Iron-Air': colors['ironair'],
+        'Hydrogen': colors['hydrogen']
+    }
     
     # Calculate actual durations from data for each scenario
     tech_durations = {tech: [] for tech in storage_techs}
@@ -206,28 +218,24 @@ def create_styled_dashboard():
         else:
             tech_durations['Hydrogen'].append(0)
     
-    # Create grouped bar chart - each scenario gets its own trace for each technology
-    scenario_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']  # Blue, Orange, Green, Red
-    
-    for i, scenario in enumerate(scenarios):
-        x_labels = [f'{tech}' for tech in storage_techs]
-        scenario_values = [tech_durations[tech][i] for tech in storage_techs]
+    # Create non-stacked bar chart - each technology gets its own trace across all scenarios
+    for tech in storage_techs:
+        # Round values to 1 decimal place
+        rounded_values = [round(val, 1) if val > 0 else 0 for val in tech_durations[tech]]
         
         fig.add_trace(go.Bar(
-            name=f'Scenario {scenario}',
-            x=x_labels,
-            y=scenario_values,
-            marker_color=scenario_colors[i],
-            text=[f'{dur:.0f}h' if dur > 0 else '0h' for dur in scenario_values],
-            textposition='outside',
+            name=tech,
+            x=scenario_labels,
+            y=rounded_values,
+            marker_color=storage_tech_colors[tech],
             showlegend=True,
             legendgroup='duration'
         ), row=3, col=1)
     
     # Add 50-hour reference line for iron-air minimum requirement
     fig.add_trace(go.Scatter(
-        x=storage_techs,
-        y=[50] * len(storage_techs),
+        x=scenario_labels,
+        y=[50] * len(scenario_labels),
         mode='lines',
         name='Iron-Air 50h Min',
         line=dict(color='red', width=2, dash='dash'),
@@ -274,7 +282,7 @@ def create_styled_dashboard():
         title=dict(
             text='<b>PyPSA Germany 2035 - Analysis Dashboard</b><br>' +
                  '<sub>Decarbonization Pathways for Germany 2035</sub><br>' +
-                 '<sub style="font-size: 10px;">Model Configuration: 138.2 TWh/yr consumption • 1 spatial node (Germany) • 4380 timesteps/year (2-hour resolution) • PyPSA v0.30+ • Linopy v0.3+ • HiGHS solver • LP optimization</sub>',
+                 '<sub style="font-size: 10px;">Model Configuration: 182.8 TWh/yr consumption • 1 spatial node (Germany) • 2920 timesteps/year (3-hour resolution) • PyPSA v0.35+ • Linopy v0.3+ • HiGHS solver • LP optimization</sub>',
             x=0.5,
             font=dict(size=16)
         ),
@@ -299,9 +307,9 @@ def create_styled_dashboard():
     fig.update_yaxes(title_text="Storage Power (GW)", row=2, col=1)
     fig.update_yaxes(title_text="Storage Energy (GWh)", row=2, col=2)
     fig.update_yaxes(title_text="Duration (Hours)", row=3, col=1)
-    fig.update_xaxes(title_text="Storage Technology", row=3, col=1, tickangle=45)
+    fig.update_xaxes(title_text="Scenarios", row=3, col=1, tickangle=0)
     
-    # Set grouped bars for the duration subplot specifically
+    # Set non-stacked bars for the duration subplot specifically
     fig.update_layout(xaxis5=dict(type='category'), bargap=0.2, bargroupgap=0.1)
     
     # Remove x-axis labels for top and middle rows to match the image
