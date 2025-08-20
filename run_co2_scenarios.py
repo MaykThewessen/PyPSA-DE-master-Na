@@ -33,9 +33,14 @@ def update_config_for_scenario(config_path, co2_target, scenario_name, demand_tw
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
     
-    # Update CO2 targets
+    # Update CO2 targets - convert to absolute values based on 1990 baseline
+    co2_base_1990_Mt = 1487  # Mt CO2 in 1990
+    co2_limit_absolute_tonnes = co2_target * co2_base_1990_Mt * 1e6  # Convert Mt to tonnes
+    
     config['co2_budget'][2035] = co2_target
-    config['electricity']['co2limit'] = co2_target
+    config['electricity']['co2limit'] = co2_limit_absolute_tonnes
+    
+    print(f"🌍 CO2 limit set to {co2_limit_absolute_tonnes/1e6:.1f} Mt/year ({co2_target*100:.0f}% of 1990)")
 
     # Enable shared resources to avoid rebuilding common files
     config['run']['shared_resources'] = {
@@ -187,7 +192,7 @@ def extract_results(scenario_name, co2_target):
         for tech in ['solar', 'onwind', 'offwind-ac', 'CCGT', 'OCGT', 'nuclear', 'biomass']:
             if tech in n.generators.carrier.values:
                 capacity = n.generators[n.generators.carrier == tech].p_nom_opt.sum()
-                results[f'{tech}_capacity_GW'] = capacity
+                results[f'{tech}_capacity_GW'] = capacity / 1000  # Convert MW to GW
             else:
                 results[f'{tech}_capacity_GW'] = 0.0
         
@@ -196,8 +201,8 @@ def extract_results(scenario_name, co2_target):
             if tech in n.storage_units.carrier.values:
                 power = n.storage_units[n.storage_units.carrier == tech].p_nom_opt.sum()
                 energy = n.storage_units[n.storage_units.carrier == tech].state_of_charge_initial.sum()
-                results[f'{tech}_power_GW'] = power
-                results[f'{tech}_energy_GWh'] = energy
+                results[f'{tech}_power_GW'] = power / 1000  # Convert MW to GW
+                results[f'{tech}_energy_GWh'] = energy / 1000  # Convert MWh to GWh
             else:
                 results[f'{tech}_power_GW'] = 0.0
                 results[f'{tech}_energy_GWh'] = 0.0
@@ -314,7 +319,7 @@ def run_dashboard_generation(comparison_file):
         print(f"❌ Error generating dashboard: {e}")
         return False
 
-def main(demand_twh=None):
+def main(demand_twh=650):
     """Main execution function"""
     
     print("🚀 PyPSA CO2 Scenarios Analysis")
@@ -346,7 +351,7 @@ def main(demand_twh=None):
         print(f"{'='*60}")
         
         # Update configuration
-        config_path = update_config_for_scenario(base_config, co2_target, scenario_name, demand_twh=demand_twh)
+        config_path = update_config_for_scenario(base_config, co2_target, scenario_name, demand_twh=650)
         
         # Run scenario
         success = run_scenario(config_path, scenario_name, co2_target)

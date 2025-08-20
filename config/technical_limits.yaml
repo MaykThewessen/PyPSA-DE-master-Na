@@ -82,6 +82,7 @@ storage:
     iron-air: 400      # MW - emerging long-duration storage technology
     Vanadium-Redox-Flow: 400  # MW - vanadium flow battery project scale
     # Source: Technology vendor specifications, demonstration projects
+    # Note: Iron-air storage has additional minimum duration constraint (≥50h) enforced in solver
 
   # Energy capacity limits (MWh) for different storage technologies  
   e_nom_max:
@@ -100,6 +101,7 @@ storage:
     iron-air: 2000     # MWh - 100-hour duration iron-air systems
     Vanadium-Redox-Flow: 1000  # MWh - 10-hour duration flow battery systems
     # Source: Technology specifications, long-duration storage requirements
+    # Note: Iron-air deployment enforces minimum 50-hour duration via solver constraint
 
 # SYSTEM-LEVEL CONSTRAINTS
 system:

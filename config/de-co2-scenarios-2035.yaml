@@ -158,15 +158,14 @@ electricity:
   operational_reserve:
     activate: false
 
-  max_hours:
-    battery: 8
-    iron-air: 100
+  # max_hours removed - both battery and iron-air now use flexible Store implementation
+  # iron-air will have minimum 100h duration constraint in prepare_sector_network.py
 
   extendable_carriers:
     Generator: [solar, onwind, offwind-ac, CCGT, OCGT]
-    StorageUnit: [battery, iron-air]  # Fixed power-to-energy ratio storage
-    Store: [Hydrogen]                 # H2 Store with independent power/energy optimization
-    Link: [electrolysis, fuel cell] 
+    StorageUnit: []                   # No fixed duration storage
+    Store: [Hydrogen, battery, iron-air]  # Flexible duration storage with independent power/energy optimization
+    Link: [electrolysis, fuel cell]
 
   powerplants_filter: "(DateOut >= 2023 or DateOut != DateOut)"
   custom_powerplants: false
@@ -331,7 +330,7 @@ costs:
 
   emission_prices:
     enable: true
-    co2: 200  # €/tCO2
+    co2: 110  # €/tCO2
     co2_monthly_prices: false
 
 # Simplified clustering

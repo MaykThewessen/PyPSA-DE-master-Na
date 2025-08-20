@@ -129,13 +129,10 @@ electricity:
   gaslimit_enable: false
   gaslimit: false
   co2limit_enable: true
-  co2limit: 0.01
-  co2base: 1487000000.0
+  co2limit: 44610000.00000001
+  co2base: 4461000000.000001
   operational_reserve:
     activate: false
-  max_hours:
-    battery: 8
-    iron-air: 100
   extendable_carriers:
     Generator:
     - solar
@@ -143,11 +140,11 @@ electricity:
     - offwind-ac
     - CCGT
     - OCGT
-    StorageUnit:
-    - battery
-    - iron-air
+    StorageUnit: []
     Store:
     - Hydrogen
+    - battery
+    - iron-air
     Link:
     - electrolysis
     - fuel cell
@@ -248,7 +245,7 @@ transformers:
   s_nom: 2000
   type: ''
 load:
-  scaling_factor: 1.0
+  scaling_factor: 1.3224821973550356
   fixed_year: false
   supplement_synthetic: true
   manual_adjustments: false
@@ -300,7 +297,7 @@ costs:
   lifetime: null
   emission_prices:
     enable: true
-    co2: 200
+    co2: 110
     co2_monthly_prices: false
 clustering:
   mode: busmap

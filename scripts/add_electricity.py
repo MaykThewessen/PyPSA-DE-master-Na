@@ -1069,6 +1069,12 @@ def attach_storageunits(
         Dictionary of maximum hours for storage units.
     """
     carriers = extendable_carriers["StorageUnit"]
+    
+    # Filter out iron-air since it's now handled by attach_stores
+    carriers = [c for c in carriers if c not in ['iron-air', 'Iron-Air']]
+    
+    if not carriers:
+        return  # No StorageUnit carriers to process
 
     n.add("Carrier", carriers)
 
@@ -1223,6 +1229,47 @@ def attach_stores(
             efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
             p_nom_extendable=True,
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
+        )
+
+    if "iron-air" in carriers:
+        ia_buses_i = n.add(
+            "Bus", buses_i + " iron-air", carrier="iron-air", location=buses_i
+        )
+
+        n.add(
+            "Store",
+            ia_buses_i,
+            bus=ia_buses_i,
+            carrier="iron-air",
+            e_cyclic=True,
+            e_nom_extendable=True,
+            capital_cost=costs.at["iron-air", "capital_cost"],
+            marginal_cost=costs.at["iron-air", "marginal_cost"],
+        )
+
+        n.add("Carrier", ["iron-air charger", "iron-air discharger"])
+
+        n.add(
+            "Link",
+            ia_buses_i + " charger",
+            bus0=buses_i,
+            bus1=ia_buses_i,
+            carrier="iron-air charger",
+            efficiency=costs.at["iron-air charger", "efficiency"],
+            capital_cost=costs.at["iron-air charger", "capital_cost"],
+            p_nom_extendable=True,
+            marginal_cost=costs.at["iron-air charger", "marginal_cost"],
+        )
+
+        n.add(
+            "Link",
+            ia_buses_i + " discharger",
+            bus0=ia_buses_i,
+            bus1=buses_i,
+            carrier="iron-air discharger",
+            efficiency=costs.at["iron-air discharger", "efficiency"],
+            p_nom_extendable=True,
+            marginal_cost=costs.at["iron-air discharger", "marginal_cost"],
         )
 
 

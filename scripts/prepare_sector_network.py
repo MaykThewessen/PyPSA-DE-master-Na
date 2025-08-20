@@ -2101,6 +2101,44 @@ def add_storage_and_grids(
         lifetime=costs.at["battery inverter", "lifetime"],
     )
 
+    n.add("Carrier", "iron-air")
+
+    n.add("Bus", nodes + " iron-air", location=nodes, carrier="iron-air", unit="MWh_el")
+
+    n.add(
+        "Store",
+        nodes + " iron-air",
+        bus=nodes + " iron-air",
+        e_cyclic=True,
+        e_nom_extendable=True,
+        carrier="iron-air",
+        capital_cost=costs.at["iron-air", "capital_cost"],
+        lifetime=costs.at["iron-air", "lifetime"],
+    )
+
+    n.add(
+        "Link",
+        nodes + " iron-air charger",
+        bus0=nodes,
+        bus1=nodes + " iron-air",
+        carrier="iron-air charger",
+        efficiency=costs.at["iron-air charger", "efficiency"],
+        capital_cost=costs.at["iron-air charger", "capital_cost"],
+        p_nom_extendable=True,
+        lifetime=costs.at["iron-air charger", "lifetime"],
+    )
+
+    n.add(
+        "Link",
+        nodes + " iron-air discharger",
+        bus0=nodes + " iron-air",
+        bus1=nodes,
+        carrier="iron-air discharger",
+        efficiency=costs.at["iron-air discharger", "efficiency"],
+        p_nom_extendable=True,
+        lifetime=costs.at["iron-air discharger", "lifetime"],
+    )
+
     if options["methanation"]:
         n.add(
             "Link",

@@ -96,6 +96,7 @@ def add_co2limit(n, co2limit, Nyears=1.0):
         "CO2Limit",
         carrier_attribute="co2_emissions",
         sense="<=",
+        type="co2_atmosphere",
         constant=co2limit * Nyears,
     )
 

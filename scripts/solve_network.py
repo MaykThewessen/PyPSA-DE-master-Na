@@ -1019,6 +1019,59 @@ def add_battery_constraints(n):
     n.model.add_constraints(lhs == 0, name="Link-charger_ratio")
 
 
+def add_iron_air_constraints(n):
+    """
+    Add constraints for iron-air storage:
+    1. Iron-air discharger capacity is 50% of charger capacity, i.e.
+       0.5 * charger_size - efficiency * discharger_size = 0
+    2. Minimum duration constraint: energy capacity >= 50 * charger power (50-hour minimum)
+    """
+    if not n.links.p_nom_extendable.any():
+        return
+
+    discharger_bool = n.links.index.str.contains("iron-air discharger")
+    charger_bool = n.links.index.str.contains("iron-air charger")
+
+    dischargers_ext = n.links[discharger_bool].query("p_nom_extendable").index
+    chargers_ext = n.links[charger_bool].query("p_nom_extendable").index
+
+    if dischargers_ext.empty or chargers_ext.empty:
+        return
+
+    # Constraint 1: Discharger capacity is 50% of charger capacity
+    eff = n.links.efficiency[dischargers_ext].values
+    lhs_ratio = (
+        0.5 * n.model["Link-p_nom"].loc[chargers_ext]
+        - n.model["Link-p_nom"].loc[dischargers_ext] * eff
+    )
+    n.model.add_constraints(lhs_ratio == 0, name="Link-iron_air_charger_ratio")
+    
+    # Constraint 2: Minimum duration constraint (50 hours)
+    # Find corresponding iron-air stores for the charger links
+    store_bool = n.stores.index.str.contains("iron-air")
+    stores_ext = n.stores[store_bool].query("e_nom_extendable").index
+    
+    if not stores_ext.empty:
+        # Match charger links to their corresponding stores
+        # Charger link: "bus_name iron-air charger" -> Store: "bus_name iron-air"
+        min_duration_hours = 50.0
+        
+        for charger_idx in chargers_ext:
+            # Extract the bus name from charger link index
+            store_name = charger_idx.replace(" charger", "")
+            
+            if store_name in stores_ext:
+                # Add constraint: e_nom >= min_duration_hours * p_nom_charger
+                lhs_duration = (
+                    n.model["Store-e_nom"].loc[store_name]
+                    - min_duration_hours * n.model["Link-p_nom"].loc[charger_idx]
+                )
+                n.model.add_constraints(
+                    lhs_duration >= 0, 
+                    name=f"IronAir-min_duration-{store_name.replace(' ', '_')}"
+                )
+
+
 def add_lossy_bidirectional_link_constraints(n):
     if not n.links.p_nom_extendable.any() or not any(n.links.get("reversed", [])):
         return
@@ -1243,6 +1296,7 @@ def extra_functionality(
             add_TES_charger_ratio_constraints(n)
 
     add_battery_constraints(n)
+    add_iron_air_constraints(n)
     add_lossy_bidirectional_link_constraints(n)
     add_pipe_retrofit_constraint(n)
     if n._multi_invest:
@@ -1252,7 +1306,7 @@ def extra_functionality(
     else:
         add_co2_atmosphere_constraint(n, snapshots)
 
-    if config["sector"]["enhanced_geothermal"]["enable"]:
+    if config.get("sector", {}).get("enhanced_geothermal", {}).get("enable", False):
         add_flexible_egs_constraint(n)
 
     if config.get("sector", {}).get("imports", {}).get("enable", False):

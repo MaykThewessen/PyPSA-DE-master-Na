@@ -129,10 +129,14 @@ electricity:
   gaslimit_enable: false
   gaslimit: false
   co2limit_enable: true
-  co2limit: 669149999.9999999
-  co2base: 4460999999.999999
+  co2limit: 0.15
+  co2base: 1487000000.0
   operational_reserve:
     activate: false
+  # max_hours removed - both battery and iron-air now use flexible Store implementation
+  # iron-air will have minimum 100h duration constraint in prepare_sector_network.py
+  max_hours: {}  # Empty dict for backward compatibility
+  
   extendable_carriers:
     Generator:
     - solar
@@ -245,7 +249,7 @@ transformers:
   s_nom: 2000
   type: ''
 load:
-  scaling_factor: 1.3224821973550356
+  scaling_factor: 1.0
   fixed_year: false
   supplement_synthetic: true
   manual_adjustments: false
@@ -268,6 +272,9 @@ sector:
   district_heating:
     enable: false
     potential: 0.0
+  tes: false
+  imports:
+    enable: false
 costs:
   year: 2035
   version: v0.13.3
