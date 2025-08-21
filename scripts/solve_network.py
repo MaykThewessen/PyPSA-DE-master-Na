@@ -1230,14 +1230,54 @@ def add_co2_atmosphere_constraint(n, snapshots):
         if emissions.empty:
             continue
 
-        # stores
+        lhs_terms = []
+        
+        # generators with CO2 emissions - this was missing before!
+        # Find generators with CO2-emitting carriers
+        co2_generators = n.generators[n.generators.carrier.isin(emissions.index)]
+        
+        if not co2_generators.empty:
+            # Get generator operation variables
+            weightings = n.snapshot_weightings.loc[snapshots, "generators"]
+            p_generators = n.model["Generator-p"].loc[snapshots, co2_generators.index]
+            
+            # Calculate total emissions: sum_g sum_t (p_gen[g,t] * co2_emission_factor[g] * weighting[t])
+            for gen_i in co2_generators.index:
+                carrier = co2_generators.loc[gen_i, "carrier"]
+                emission_factor = emissions.loc[carrier]  # tCO2/MWh
+                if emission_factor > 0:  # Only generators that actually emit CO2
+                    gen_emissions = (p_generators.loc[:, gen_i] * emission_factor * weightings).sum()
+                    lhs_terms.append(gen_emissions)
+        
+        # links with CO2 emissions (for sector-coupled models)
+        # Find links that connect to co2 atmosphere bus (efficiency2 parameter)
+        if "bus2" in n.links.columns:
+            co2_links = n.links[n.links.bus2 == "co2 atmosphere"]
+            
+            if not co2_links.empty:
+                # Get link operation variables
+                weightings = n.snapshot_weightings.loc[snapshots, "generators"]
+                p_links = n.model["Link-p"].loc[snapshots, co2_links.index]
+                
+                # efficiency2 represents CO2 emissions per unit of link operation
+                # Sum over all timesteps: sum_t (p_link[t] * efficiency2 * weighting[t])
+                for link_i in co2_links.index:
+                    efficiency2 = co2_links.loc[link_i, "efficiency2"]
+                    if efficiency2 > 0:  # Only links that actually emit CO2
+                        link_emissions = (p_links.loc[:, link_i] * efficiency2 * weightings).sum()
+                        lhs_terms.append(link_emissions)
+
+        # stores - keep existing functionality
         bus_carrier = n.stores.bus.map(n.buses.carrier)
         stores = n.stores[bus_carrier.isin(emissions.index) & ~n.stores.e_cyclic]
         if not stores.empty:
             last_i = snapshots[-1]
-            lhs = n.model["Store-e"].loc[last_i, stores.index]
+            store_emissions = n.model["Store-e"].loc[last_i, stores.index]
+            lhs_terms.extend([store_emissions.loc[store_i] for store_i in stores.index])
+        
+        if lhs_terms:
+            lhs = sum(lhs_terms)
             rhs = glc.constant
-
             n.model.add_constraints(lhs <= rhs, name=f"GlobalConstraint-{name}")
 
 

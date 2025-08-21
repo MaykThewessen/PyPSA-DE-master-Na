@@ -95,6 +95,7 @@ include: "rules/build_sector.smk"     # Multi-sector energy system building
 include: "rules/solve_electricity.smk" # Electricity system optimization
 include: "rules/postprocess.smk"      # Results analysis and visualization
 include: "rules/development.smk"      # Development and testing utilities
+include: "rules/dashboard.smk"        # Dashboard generation and browser opening
 
 # Conditionally include foresight-specific solving rules based on configuration
 if config["foresight"] == "overnight":

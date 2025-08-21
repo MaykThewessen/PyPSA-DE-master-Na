@@ -196,16 +196,69 @@ def extract_results(scenario_name, co2_target):
             else:
                 results[f'{tech}_capacity_GW'] = 0.0
         
-        # Storage capacities
-        for tech in ['battery', 'Hydrogen', 'iron-air', 'PHS']:
-            if tech in n.storage_units.carrier.values:
-                power = n.storage_units[n.storage_units.carrier == tech].p_nom_opt.sum()
-                energy = n.storage_units[n.storage_units.carrier == tech].state_of_charge_initial.sum()
-                results[f'{tech}_power_GW'] = power / 1000  # Convert MW to GW
-                results[f'{tech}_energy_GWh'] = energy / 1000  # Convert MWh to GWh
-            else:
-                results[f'{tech}_power_GW'] = 0.0
-                results[f'{tech}_energy_GWh'] = 0.0
+        # Storage capacities - handle both storage_units and store+link combinations
+        # PHS (implemented as storage_unit)
+        if 'PHS' in n.storage_units.carrier.values:
+            phs_power = n.storage_units[n.storage_units.carrier == 'PHS'].p_nom_opt.sum()
+            phs_energy = n.storage_units[n.storage_units.carrier == 'PHS'].max_hours.sum() * phs_power
+            results['PHS_power_GW'] = phs_power / 1000  # Convert MW to GW
+            results['PHS_energy_GWh'] = phs_energy / 1000  # Convert MWh to GWh
+        else:
+            results['PHS_power_GW'] = 0.0
+            results['PHS_energy_GWh'] = 0.0
+        
+        # Battery (implemented as store + links)
+        battery_store_mask = n.stores.index.str.contains('battery', case=False, na=False)
+        battery_charger_mask = n.links.index.str.contains('battery.*charger', case=False, na=False)
+        
+        if battery_store_mask.any():
+            battery_energy = n.stores.loc[battery_store_mask, 'e_nom_opt'].sum()
+            results['battery_energy_GWh'] = battery_energy / 1000  # Convert MWh to GWh
+        else:
+            results['battery_energy_GWh'] = 0.0
+            
+        if battery_charger_mask.any():
+            battery_power = n.links.loc[battery_charger_mask, 'p_nom_opt'].sum()
+            results['battery_power_GW'] = battery_power / 1000  # Convert MW to GW
+        else:
+            results['battery_power_GW'] = 0.0
+        
+        # Iron-air (implemented as store + links)
+        ironair_store_mask = n.stores.index.str.contains('iron-air', case=False, na=False)
+        ironair_charger_mask = n.links.index.str.contains('iron-air.*charger', case=False, na=False)
+        
+        if ironair_store_mask.any():
+            ironair_energy = n.stores.loc[ironair_store_mask, 'e_nom_opt'].sum()
+            results['iron-air_energy_GWh'] = ironair_energy / 1000  # Convert MWh to GWh
+        else:
+            results['iron-air_energy_GWh'] = 0.0
+            
+        if ironair_charger_mask.any():
+            ironair_power = n.links.loc[ironair_charger_mask, 'p_nom_opt'].sum()
+            results['iron-air_power_GW'] = ironair_power / 1000  # Convert MW to GW
+        else:
+            results['iron-air_power_GW'] = 0.0
+        
+        # Hydrogen (implemented as store + links)
+        hydrogen_store_mask = n.stores.index.str.contains('Hydrogen', case=False, na=False)
+        hydrogen_charger_mask = n.links.index.str.contains('H2.*electrolysis', case=False, na=False)
+        
+        # Alternative: look for any hydrogen-related links if electrolysis pattern doesn't match
+        if not hydrogen_charger_mask.any():
+            hydrogen_charger_mask = n.links.index.str.contains('hydrogen', case=False, na=False) & \
+                                  n.links.index.str.contains('charger', case=False, na=False)
+        
+        if hydrogen_store_mask.any():
+            hydrogen_energy = n.stores.loc[hydrogen_store_mask, 'e_nom_opt'].sum()
+            results['Hydrogen_energy_GWh'] = hydrogen_energy / 1000  # Convert MWh to GWh
+        else:
+            results['Hydrogen_energy_GWh'] = 0.0
+            
+        if hydrogen_charger_mask.any():
+            hydrogen_power = n.links.loc[hydrogen_charger_mask, 'p_nom_opt'].sum()
+            results['Hydrogen_power_GW'] = hydrogen_power / 1000  # Convert MW to GW
+        else:
+            results['Hydrogen_power_GW'] = 0.0
         
         # System totals
         results['total_renewable_GW'] = (
@@ -218,14 +271,14 @@ def extract_results(scenario_name, co2_target):
             results.get('battery_power_GW', 0) + 
             results.get('Hydrogen_power_GW', 0) + 
             results.get('PHS_power_GW', 0) +
-            results.get('ironair_power_GW', 0)
+            results.get('iron-air_power_GW', 0)
         )
         
         results['total_storage_energy_GWh'] = (
             results.get('battery_energy_GWh', 0) + 
             results.get('Hydrogen_energy_GWh', 0) + 
             results.get('PHS_energy_GWh', 0) +
-            results.get('ironair_energy_GWh', 0)
+            results.get('iron-air_energy_GWh', 0)
         )
         
         # System costs

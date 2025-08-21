@@ -1,5 +1,0 @@
-scenario,co2_target_pct,annual_consumption_TWh,solar_capacity_GW,onwind_capacity_GW,offwind-ac_capacity_GW,CCGT_capacity_GW,OCGT_capacity_GW,nuclear_capacity_GW,biomass_capacity_GW,battery_power_GW,battery_energy_GWh,Hydrogen_power_GW,Hydrogen_energy_GWh,iron-air_power_GW,iron-air_energy_GWh,PHS_power_GW,PHS_energy_GWh,total_renewable_GW,total_storage_power_GW,total_storage_energy_GWh,total_system_cost_billion_EUR,co2_emissions_MtCO2
-A,15.0,138.19,141.55,61.05,15.66,27.63,0.02,4.06,2.61,0.0,0.0,0.0,0.0,63.46,0.0,7.24,0.0,218.26,7.24,0.0,1.39,0.0
-B,5.0,138.19,141.55,61.05,15.66,27.63,0.02,4.06,2.61,0.0,0.0,0.0,0.0,63.46,0.0,7.24,0.0,218.26,7.24,0.0,1.39,0.0
-C,1.0,138.19,141.55,61.05,15.66,27.63,0.02,4.06,2.61,0.0,0.0,0.0,0.0,63.46,0.0,7.24,0.0,218.26,7.24,0.0,1.39,0.0
-D,0.0,138.19,141.55,61.05,15.66,27.63,0.02,4.06,2.61,0.0,0.0,0.0,0.0,63.46,0.0,7.24,0.0,218.26,7.24,0.0,1.39,0.0

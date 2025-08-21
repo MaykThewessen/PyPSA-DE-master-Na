@@ -47,18 +47,47 @@ rule auto_dashboard_post_solve:
 
 rule open_dashboard:
     """
-    Open the latest dashboard in browser.
+    Open the latest dashboard in Chrome browser.
     Usage: snakemake open_dashboard
     """
     input:
         flag="results/dashboard/.dashboard_generated"
     shell:
         """
-        latest_html=$(ls -t co2_scenarios_dashboard_*.html 2>/dev/null | head -1)
+        latest_html=$(ls -t pypsa_germany_dashboard_*.html 2>/dev/null | head -1)
         if [ -n "$latest_html" ]; then
-            echo "Opening dashboard: $latest_html"
-            open "$latest_html" 2>/dev/null || echo "Please open $latest_html manually"
+            echo "Opening dashboard in Chrome: $latest_html"
+            open -a "Google Chrome" "$latest_html" 2>/dev/null || echo "Please open $latest_html manually in Chrome"
         else
-            echo "No dashboard files found. Run 'snakemake generate_dashboard' first."
+            echo "No dashboard files found. Run dashboard generation first."
+        fi
+        """
+
+rule dashboard_and_open:
+    """
+    Generate dashboard from CO2 scenarios and open in Chrome.
+    Usage: snakemake dashboard_and_open
+    """
+    input:
+        networks=[
+            "results/de-co2-scenario-A-2035/networks/base_s_1_elec_Co2L0.15.nc",
+            "results/de-co2-scenario-B-2035/networks/base_s_1_elec_Co2L0.05.nc",
+            "results/de-co2-scenario-C-2035/networks/base_s_1_elec_Co2L0.01.nc",
+            "results/de-co2-scenario-D-2035/networks/base_s_1_elec_Co2L0.00.nc"
+        ]
+    output:
+        flag=touch("results/.dashboard_opened")
+    shell:
+        """
+        echo "Generating dashboard..."
+        python create_styled_dashboard-nice-mayk.py
+        
+        echo "Opening dashboard in Chrome..."
+        latest_html=$(ls -t pypsa_germany_dashboard_*.html 2>/dev/null | head -1)
+        if [ -n "$latest_html" ]; then
+            echo "Opening: $latest_html"
+            open -a "Google Chrome" "$latest_html"
+        else
+            echo "Dashboard file not found"
         fi
         """

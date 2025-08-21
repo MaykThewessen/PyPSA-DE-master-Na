@@ -129,8 +129,8 @@ electricity:
   gaslimit_enable: false
   gaslimit: false
   co2limit_enable: true
-  co2limit: 44610000.00000001
-  co2base: 4461000000.000001
+  co2limit: 14870000.000000002
+  co2base: 1487000000.0
   operational_reserve:
     activate: false
   extendable_carriers:
